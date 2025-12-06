@@ -1,21 +1,58 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Fuel, MapPin, Navigation, Search, Loader2, AlertCircle } from 'lucide-react';
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
+import { Fuel, MapPin, Navigation, Search, Loader2, AlertCircle, X, ChevronRight, Clock, Star } from 'lucide-react';
+import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { Badge } from '@/components/ui/badge';
-import { ScrollArea } from '@/components/ui/scroll-area';
+import { ScrollArea, ScrollBar } from '@/components/ui/scroll-area';
+import { MapContainer, TileLayer, Marker, Popup, Circle, useMap } from 'react-leaflet';
+import L from 'leaflet';
+
+// Fix for default leaflet markers in React
+import markerIcon2x from 'leaflet/dist/images/marker-icon-2x.png';
+import markerIcon from 'leaflet/dist/images/marker-icon.png';
+import markerShadow from 'leaflet/dist/images/marker-shadow.png';
+
+// @ts-ignore
+delete L.Icon.Default.prototype._getIconUrl;
+L.Icon.Default.mergeOptions({
+  iconUrl: markerIcon,
+  iconRetinaUrl: markerIcon2x,
+  shadowUrl: markerShadow,
+});
+
+// Custom Fuel Icon
+const fuelIcon = new L.DivIcon({
+  className: 'custom-div-icon',
+  html: `<div style="background-color: #ef4444; width: 32px; height: 32px; border-radius: 50%; display: flex; align-items: center; justify-content: center; border: 2px solid white; box-shadow: 0 2px 4px rgba(0,0,0,0.3);">
+    <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 22v-8a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v8"/><path d="M12 13V2"/><path d="M12 2a2 2 0 0 0-2 2v7"/><path d="M12 2a2 2 0 0 1 2 2v7"/><path d="M10 22v-5a2 2 0 0 1 2-2h.01"/><path d="M4 9h16"/></svg>
+  </div>`,
+  iconSize: [32, 32],
+  iconAnchor: [16, 32],
+  popupAnchor: [0, -32]
+});
+
+const selectedFuelIcon = new L.DivIcon({
+  className: 'custom-div-icon',
+  html: `<div style="background-color: #3b82f6; width: 40px; height: 40px; border-radius: 50%; display: flex; align-items: center; justify-content: center; border: 3px solid white; box-shadow: 0 4px 8px rgba(0,0,0,0.4); z-index: 1000;">
+    <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 22v-8a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v8"/><path d="M12 13V2"/><path d="M12 2a2 2 0 0 0-2 2v7"/><path d="M12 2a2 2 0 0 1 2 2v7"/><path d="M10 22v-5a2 2 0 0 1 2-2h.01"/><path d="M4 9h16"/></svg>
+  </div>`,
+  iconSize: [40, 40],
+  iconAnchor: [20, 40],
+  popupAnchor: [0, -40]
+});
+
 
 const OVERPASS_URL = 'https://overpass-api.de/api/interpreter';
 const NOMINATIM_URL = 'https://nominatim.openstreetmap.org/search';
 
 function haversineDistanceKm(lat1: number, lon1: number, lat2: number, lon2: number) {
   const toRad = (d: number) => (d * Math.PI) / 180;
-  const R = 6371; // Earth radius in km
+  const R = 6371;
   const dLat = toRad(lat2 - lat1);
   const dLon = toRad(lon2 - lon1);
   const a =
@@ -35,19 +72,35 @@ interface Station {
   lat: number;
   lon: number;
   distanceKm: number;
+  rating?: number; // Mock rating
+  isOpen?: boolean; // Mock status
+}
+
+// Helper to update map view when center changes
+function MapUpdater({ center, zoom }: { center: [number, number], zoom: number }) {
+  const map = useMap();
+  useEffect(() => {
+    map.flyTo(center, zoom, { duration: 1.5 });
+  }, [center, zoom, map]);
+  return null;
 }
 
 export default function Home() {
+  const [view, setView] = useState<'search' | 'results'>('search');
+  
+  // Search State
   const [zipCode, setZipCode] = useState('');
-  const [lat, setLat] = useState('');
-  const [lon, setLon] = useState('');
-  const [radiusKm, setRadiusKm] = useState('20');
+  const [lat, setLat] = useState<number | null>(null);
+  const [lon, setLon] = useState<number | null>(null);
+  const [radiusKm, setRadiusKm] = useState('10');
   const [brandFilter, setBrandFilter] = useState('all');
   const [loading, setLoading] = useState(false);
-  const [stations, setStations] = useState<Station[]>([]);
   const [error, setError] = useState('');
-  const [hasSearched, setHasSearched] = useState(false);
   const [usingLocation, setUsingLocation] = useState(false);
+  
+  // Results State
+  const [stations, setStations] = useState<Station[]>([]);
+  const [selectedStation, setSelectedStation] = useState<Station | null>(null);
 
   const handleUseMyLocation = () => {
     if (!navigator.geolocation) {
@@ -58,11 +111,9 @@ export default function Home() {
     setLoading(true);
     navigator.geolocation.getCurrentPosition(
       (pos) => {
-        const latVal = pos.coords.latitude.toFixed(6);
-        const lonVal = pos.coords.longitude.toFixed(6);
-        setLat(latVal);
-        setLon(lonVal);
-        setZipCode(''); // Clear ZIP when using geolocation
+        setLat(pos.coords.latitude);
+        setLon(pos.coords.longitude);
+        setZipCode('');
         setUsingLocation(true);
         setLoading(false);
       },
@@ -74,13 +125,13 @@ export default function Home() {
     );
   };
 
-  const geocodeZip = async (zip: string): Promise<{ lat: string, lon: string } | null> => {
+  const geocodeZip = async (zip: string): Promise<{ lat: number, lon: number } | null> => {
     try {
       const res = await fetch(`${NOMINATIM_URL}?postalcode=${zip}&format=json&limit=1`);
       if (!res.ok) throw new Error('Geocoding failed');
       const data = await res.json();
       if (data && data.length > 0) {
-        return { lat: data[0].lat, lon: data[0].lon };
+        return { lat: parseFloat(data[0].lat), lon: parseFloat(data[0].lon) };
       }
       return null;
     } catch (e) {
@@ -89,7 +140,7 @@ export default function Home() {
     }
   };
 
-  const buildOverpassQuery = (latValue: string, lonValue: string, radiusMeters: number) => {
+  const buildOverpassQuery = (latValue: number, lonValue: number, radiusMeters: number) => {
     return `
       [out:json];
       (
@@ -104,7 +155,7 @@ export default function Home() {
   const fetchStations = async () => {
     setError('');
     setStations([]);
-    setHasSearched(true);
+    setSelectedStation(null);
     
     let searchLat = lat;
     let searchLon = lon;
@@ -112,26 +163,23 @@ export default function Home() {
     setLoading(true);
 
     try {
-      // If ZIP code is entered and we are not explicitly using "My Location" (or even if we are, prefer user input if they typed something new)
-      // Logic: If user typed in ZIP input, try to geocode it.
       if (zipCode.trim()) {
         const coords = await geocodeZip(zipCode);
         if (coords) {
           searchLat = coords.lat;
           searchLon = coords.lon;
-          // Update state to reflect the found coordinates
           setLat(searchLat);
           setLon(searchLon);
           setUsingLocation(false);
         } else {
           throw new Error('Could not find location for this ZIP code.');
         }
-      } else if (!searchLat || !searchLon) {
+      } else if (searchLat === null || searchLon === null) {
         throw new Error('Please enter a ZIP code or use "My Location".');
       }
 
       const radiusMeters = parseInt(radiusKm) * 1000;
-      const query = buildOverpassQuery(searchLat, searchLon, radiusMeters);
+      const query = buildOverpassQuery(searchLat!, searchLon!, radiusMeters);
       
       const res = await fetch(OVERPASS_URL, {
         method: 'POST',
@@ -154,8 +202,8 @@ export default function Home() {
           const name = el.tags?.name || 'Unnamed fuel station';
           const brand = el.tags?.brand || 'Unknown brand';
           const distanceKm = haversineDistanceKm(
-            parseFloat(searchLat),
-            parseFloat(searchLon),
+            searchLat!,
+            searchLon!,
             el.lat,
             el.lon
           );
@@ -165,7 +213,9 @@ export default function Home() {
             brand,
             lat: el.lat,
             lon: el.lon,
-            distanceKm
+            distanceKm,
+            rating: (Math.random() * 2 + 3).toFixed(1), // Mock rating 3.0-5.0
+            isOpen: Math.random() > 0.2 // Mock open status
           };
         })
         .sort((a: Station, b: Station) => a.distanceKm - b.distanceKm);
@@ -179,6 +229,7 @@ export default function Home() {
             );
 
       setStations(filtered);
+      setView('results');
     } catch (e: any) {
       setError(e.message || 'An error occurred while fetching data.');
     } finally {
@@ -186,10 +237,15 @@ export default function Home() {
     }
   };
 
+  const handleNewSearch = () => {
+    setView('search');
+    setStations([]);
+    setSelectedStation(null);
+  };
+
   const directionsUrl = (station: Station) =>
     `https://www.openstreetmap.org/directions?engine=fossgis_osrm_car&route=${lat},${lon};${station.lat},${station.lon}`;
 
-  // Clear "Using Location" state if user types in ZIP
   const handleZipChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setZipCode(e.target.value);
     if (e.target.value) {
@@ -198,207 +254,285 @@ export default function Home() {
   };
 
   return (
-    <div className="min-h-screen bg-background bg-grid-pattern text-foreground flex flex-col items-center py-10 px-4">
-      <motion.div 
-        initial={{ opacity: 0, y: -20 }}
-        animate={{ opacity: 1, y: 0 }}
-        className="w-full max-w-4xl space-y-8"
-      >
-        <div className="text-center space-y-2">
-          <div className="inline-flex items-center justify-center p-3 bg-primary/10 rounded-full mb-4">
-            <Fuel className="w-8 h-8 text-primary" />
-          </div>
-          <h1 className="text-4xl font-bold tracking-tight">Fuel Finder</h1>
-          <p className="text-muted-foreground text-lg max-w-2xl mx-auto">
-            Locate the nearest fuel stations instantly using real-time OpenStreetMap data.
-          </p>
+    <div className="h-screen w-screen bg-background text-foreground flex flex-col overflow-hidden">
+      {/* Header */}
+      <header className="h-16 border-b bg-card/80 backdrop-blur-md flex items-center justify-between px-6 z-50 absolute top-0 left-0 right-0 shadow-sm">
+        <div className="flex items-center gap-2 text-primary">
+          <Fuel className="w-6 h-6" />
+          <span className="font-bold text-xl tracking-tight">Fuel Finder</span>
+        </div>
+        {view === 'results' && (
+          <Button variant="ghost" size="sm" onClick={handleNewSearch} className="gap-2">
+            <Search className="w-4 h-4" /> New Search
+          </Button>
+        )}
+      </header>
+
+      {/* Main Content Area */}
+      <main className="flex-1 relative">
+        
+        {/* Map Background (Always rendered if we have location, or hidden behind search if not) */}
+        <div className="absolute inset-0 z-0">
+           {/* Default center if no location: Center of US or neutral */}
+           <MapContainer 
+              center={[39.8283, -98.5795]} 
+              zoom={4} 
+              style={{ height: '100%', width: '100%' }}
+              zoomControl={false}
+            >
+              <TileLayer
+                attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+                url="https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png"
+              />
+              
+              {view === 'results' && lat && lon && (
+                <>
+                  <MapUpdater center={[lat, lon]} zoom={13} />
+                  {/* Search Radius Circle */}
+                  <Circle 
+                    center={[lat, lon]} 
+                    radius={parseInt(radiusKm) * 1000}
+                    pathOptions={{ color: '#3b82f6', fillColor: '#3b82f6', fillOpacity: 0.05, weight: 1 }} 
+                  />
+                  
+                  {/* Current Location Marker */}
+                  <Marker position={[lat, lon]}>
+                    <Popup>You are here</Popup>
+                  </Marker>
+
+                  {/* Station Markers */}
+                  {stations.map((station) => (
+                    <Marker 
+                      key={station.id} 
+                      position={[station.lat, station.lon]}
+                      icon={selectedStation?.id === station.id ? selectedFuelIcon : fuelIcon}
+                      eventHandlers={{
+                        click: () => setSelectedStation(station),
+                      }}
+                    />
+                  ))}
+                </>
+              )}
+            </MapContainer>
         </div>
 
-        <div className="grid md:grid-cols-12 gap-6">
-          {/* Search Panel */}
-          <Card className="md:col-span-5 h-fit border-border/50 shadow-xl bg-card/50 backdrop-blur-sm">
-            <CardHeader>
-              <CardTitle>Search Parameters</CardTitle>
-              <CardDescription>Enter a ZIP code or use your current location.</CardDescription>
-            </CardHeader>
-            <CardContent className="space-y-4">
-              <div className="space-y-2">
-                <Label>Location</Label>
-                <div className="flex flex-col gap-3">
-                  <div className="relative">
-                    <Input 
-                      placeholder="Enter ZIP Code (e.g. 90210)" 
-                      value={zipCode} 
-                      onChange={handleZipChange}
-                      className="pr-10 font-mono"
-                    />
-                    {usingLocation && (
-                      <div className="absolute right-3 top-1/2 -translate-y-1/2 text-xs text-primary flex items-center gap-1 font-medium bg-background/80 px-1.5 py-0.5 rounded">
-                        <MapPin className="w-3 h-3" />
-                        Current
+        {/* Search Overlay */}
+        <AnimatePresence>
+          {view === 'search' && (
+            <motion.div 
+              initial={{ opacity: 0, scale: 0.95 }}
+              animate={{ opacity: 1, scale: 1 }}
+              exit={{ opacity: 0, scale: 0.95 }}
+              className="absolute inset-0 z-10 flex items-center justify-center bg-background/60 backdrop-blur-sm p-4"
+            >
+              <Card className="w-full max-w-md shadow-2xl border-border/50">
+                <CardContent className="p-6 space-y-6">
+                  <div className="text-center space-y-2">
+                    <h2 className="text-2xl font-bold">Find Fuel Nearby</h2>
+                    <p className="text-muted-foreground">Enter your location to see stations on the map</p>
+                  </div>
+
+                  <div className="space-y-4">
+                    <div className="space-y-2">
+                      <Label>Location</Label>
+                      <div className="relative">
+                        <Input 
+                          placeholder="Enter ZIP Code" 
+                          value={zipCode} 
+                          onChange={handleZipChange}
+                          className="pr-24"
+                        />
+                        {usingLocation && (
+                          <div className="absolute right-3 top-1/2 -translate-y-1/2 text-xs text-primary flex items-center gap-1 font-medium bg-background px-2 py-1 rounded border">
+                            <MapPin className="w-3 h-3" />
+                            Current
+                          </div>
+                        )}
                       </div>
+                      <Button 
+                        variant="outline" 
+                        className="w-full"
+                        onClick={handleUseMyLocation}
+                        disabled={loading}
+                      >
+                        {loading && !zipCode ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <MapPin className="mr-2 h-4 w-4" />}
+                        Use My Current Location
+                      </Button>
+                    </div>
+
+                    <div className="grid grid-cols-2 gap-4">
+                      <div className="space-y-2">
+                        <Label>Radius</Label>
+                        <Select value={radiusKm} onValueChange={setRadiusKm}>
+                          <SelectTrigger>
+                            <SelectValue placeholder="Radius" />
+                          </SelectTrigger>
+                          <SelectContent>
+                            <SelectItem value="5">5 km</SelectItem>
+                            <SelectItem value="10">10 km</SelectItem>
+                            <SelectItem value="20">20 km</SelectItem>
+                            <SelectItem value="50">50 km</SelectItem>
+                          </SelectContent>
+                        </Select>
+                      </div>
+                      <div className="space-y-2">
+                        <Label>Brand</Label>
+                        <Select value={brandFilter} onValueChange={setBrandFilter}>
+                          <SelectTrigger>
+                            <SelectValue placeholder="Brand" />
+                          </SelectTrigger>
+                          <SelectContent>
+                            <SelectItem value="all">All</SelectItem>
+                            <SelectItem value="shell">Shell</SelectItem>
+                            <SelectItem value="bp">BP</SelectItem>
+                            <SelectItem value="total">Total</SelectItem>
+                            <SelectItem value="esso">Esso</SelectItem>
+                            <SelectItem value="texaco">Texaco</SelectItem>
+                          </SelectContent>
+                        </Select>
+                      </div>
+                    </div>
+
+                    <Button 
+                      className="w-full h-12 text-lg" 
+                      onClick={fetchStations}
+                      disabled={loading}
+                    >
+                      {loading ? <Loader2 className="mr-2 h-5 w-5 animate-spin" /> : 'Search Map'}
+                    </Button>
+                    
+                    {error && (
+                      <Alert variant="destructive">
+                        <AlertCircle className="h-4 w-4" />
+                        <AlertDescription>{error}</AlertDescription>
+                      </Alert>
                     )}
                   </div>
-                  
-                  <div className="relative flex items-center py-1">
-                    <div className="flex-grow border-t border-border"></div>
-                    <span className="flex-shrink-0 mx-2 text-muted-foreground text-xs">OR</span>
-                    <div className="flex-grow border-t border-border"></div>
+                </CardContent>
+              </Card>
+            </motion.div>
+          )}
+        </AnimatePresence>
+
+        {/* Results Overlay - Bottom Panel */}
+        <AnimatePresence>
+          {view === 'results' && (
+            <div className="absolute bottom-0 left-0 right-0 z-20 p-4 md:p-6 pointer-events-none">
+              {/* Horizontal List (Only if no station selected) */}
+              {!selectedStation && stations.length > 0 && (
+                <motion.div
+                  initial={{ y: 100, opacity: 0 }}
+                  animate={{ y: 0, opacity: 1 }}
+                  exit={{ y: 100, opacity: 0 }}
+                  className="pointer-events-auto"
+                >
+                  <div className="mb-2 flex items-center justify-between">
+                     <Badge variant="secondary" className="shadow-sm bg-background/90 backdrop-blur text-foreground border-none px-3 py-1">
+                        {stations.length} stations found
+                     </Badge>
                   </div>
-
-                  <Button 
-                    variant={usingLocation ? "default" : "secondary"}
-                    className="w-full" 
-                    onClick={handleUseMyLocation}
-                    disabled={loading}
-                  >
-                    {loading && !zipCode ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <MapPin className="mr-2 h-4 w-4" />}
-                    Use My Current Location
-                  </Button>
-                </div>
-              </div>
-
-              <div className="space-y-2">
-                <Label>Radius (km)</Label>
-                <Select value={radiusKm} onValueChange={setRadiusKm}>
-                  <SelectTrigger>
-                    <SelectValue placeholder="Select radius" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="5">5 km</SelectItem>
-                    <SelectItem value="10">10 km</SelectItem>
-                    <SelectItem value="20">20 km</SelectItem>
-                    <SelectItem value="50">50 km</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
-
-              <div className="space-y-2">
-                <Label>Brand Filter</Label>
-                <Select value={brandFilter} onValueChange={setBrandFilter}>
-                  <SelectTrigger>
-                    <SelectValue placeholder="Filter by brand" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="all">All Brands</SelectItem>
-                    <SelectItem value="shell">Shell</SelectItem>
-                    <SelectItem value="bp">BP</SelectItem>
-                    <SelectItem value="total">Total</SelectItem>
-                    <SelectItem value="esso">Esso</SelectItem>
-                    <SelectItem value="texaco">Texaco</SelectItem>
-                    <SelectItem value="chevron">Chevron</SelectItem>
-                    <SelectItem value="mobil">Mobil</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
-
-              <Button 
-                className="w-full mt-4" 
-                size="lg" 
-                onClick={fetchStations}
-                disabled={loading}
-              >
-                {loading ? (
-                  <>
-                    <Loader2 className="mr-2 h-4 w-4 animate-spin" /> Searching...
-                  </>
-                ) : (
-                  <>
-                    <Search className="mr-2 h-4 w-4" /> Find Stations
-                  </>
-                )}
-              </Button>
-
-              {error && (
-                <Alert variant="destructive">
-                  <AlertCircle className="h-4 w-4" />
-                  <AlertTitle>Error</AlertTitle>
-                  <AlertDescription>{error}</AlertDescription>
-                </Alert>
-              )}
-            </CardContent>
-          </Card>
-
-          {/* Results Panel */}
-          <Card className="md:col-span-7 border-border/50 shadow-xl bg-card/50 backdrop-blur-sm flex flex-col min-h-[500px]">
-            <CardHeader className="pb-3">
-              <div className="flex items-center justify-between">
-                <div>
-                  <CardTitle>Results</CardTitle>
-                  <CardDescription>
-                    {stations.length > 0 
-                      ? `Found ${stations.length} stations nearby` 
-                      : hasSearched && !loading 
-                        ? 'No stations found' 
-                        : 'Ready to search'}
-                  </CardDescription>
-                </div>
-                {stations.length > 0 && (
-                  <Badge variant="outline" className="font-mono">
-                    {stations.length} results
-                  </Badge>
-                )}
-              </div>
-            </CardHeader>
-            <CardContent className="flex-1 p-0">
-              <ScrollArea className="h-[500px] px-6 pb-6">
-                {stations.length === 0 && !loading ? (
-                  <div className="h-full flex flex-col items-center justify-center text-muted-foreground space-y-4 opacity-50 py-20">
-                    <Fuel className="h-16 w-16" />
-                    <p>Enter a ZIP code or use your location to start</p>
-                  </div>
-                ) : (
-                  <ul className="space-y-4 pt-2">
-                    <AnimatePresence>
-                      {stations.map((station, index) => (
-                        <motion.li
-                          key={station.id}
-                          initial={{ opacity: 0, x: 20 }}
-                          animate={{ opacity: 1, x: 0 }}
-                          transition={{ delay: index * 0.05 }}
+                  <ScrollArea className="w-full whitespace-nowrap pb-4">
+                    <div className="flex space-x-4">
+                      {stations.map((station) => (
+                        <Card 
+                          key={station.id} 
+                          className="w-[280px] shrink-0 cursor-pointer hover:shadow-lg transition-shadow border-none shadow-md bg-card/95 backdrop-blur-sm"
+                          onClick={() => setSelectedStation(station)}
                         >
-                          <Card className="border border-border/40 hover:bg-accent/5 transition-colors overflow-hidden">
-                            <div className="p-4 flex items-start justify-between gap-4">
-                              <div className="space-y-1">
-                                <h3 className="font-semibold text-base leading-none">
-                                  {station.name}
-                                </h3>
-                                <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                                  <Badge variant="secondary" className="text-xs font-normal">
-                                    {station.brand}
-                                  </Badge>
-                                  <span className="font-mono text-xs">
-                                    {station.distanceKm.toFixed(2)} km
-                                  </span>
-                                </div>
+                          <CardContent className="p-4">
+                            <div className="flex items-start justify-between mb-2">
+                              <div className="p-2 bg-blue-100 dark:bg-blue-900/30 rounded-full text-blue-600 dark:text-blue-400">
+                                <Fuel className="w-5 h-5" />
                               </div>
-                              <Button 
-                                variant="outline" 
-                                size="sm" 
-                                className="shrink-0 gap-2"
-                                asChild
-                              >
-                                <a 
-                                  href={directionsUrl(station)} 
-                                  target="_blank" 
-                                  rel="noreferrer"
-                                >
-                                  <Navigation className="h-3.5 w-3.5" />
-                                  Directions
-                                </a>
-                              </Button>
+                              <span className="text-xs font-mono text-muted-foreground">
+                                {station.distanceKm.toFixed(1)} km
+                              </span>
                             </div>
-                          </Card>
-                        </motion.li>
+                            <h3 className="font-semibold truncate">{station.name}</h3>
+                            <p className="text-sm text-muted-foreground truncate">{station.brand}</p>
+                            <div className="mt-3 flex items-center gap-2 text-xs">
+                               <span className="flex items-center text-amber-500 font-medium">
+                                 <Star className="w-3 h-3 mr-1 fill-current" /> {station.rating}
+                               </span>
+                            </div>
+                          </CardContent>
+                        </Card>
                       ))}
-                    </AnimatePresence>
-                  </ul>
-                )}
-              </ScrollArea>
-            </CardContent>
-          </Card>
-        </div>
-      </motion.div>
+                    </div>
+                    <ScrollBar orientation="horizontal" />
+                  </ScrollArea>
+                </motion.div>
+              )}
+
+              {/* Selected Station Detail (Bottom Sheet Style) */}
+              {selectedStation && (
+                <motion.div
+                  initial={{ y: "100%" }}
+                  animate={{ y: 0 }}
+                  exit={{ y: "100%" }}
+                  className="pointer-events-auto w-full max-w-3xl mx-auto"
+                >
+                  <Card className="shadow-2xl border-none bg-card/95 backdrop-blur-md overflow-hidden">
+                    <div className="relative">
+                       <Button 
+                          variant="ghost" 
+                          size="icon" 
+                          className="absolute right-2 top-2 rounded-full h-8 w-8 bg-background/50 hover:bg-background"
+                          onClick={() => setSelectedStation(null)}
+                       >
+                          <X className="w-4 h-4" />
+                       </Button>
+                       
+                       <CardContent className="p-6">
+                          <div className="flex flex-col md:flex-row gap-6">
+                             {/* Icon/Image placeholder */}
+                             <div className="shrink-0">
+                                <div className="h-24 w-24 rounded-xl bg-blue-600 flex items-center justify-center text-white shadow-lg mx-auto md:mx-0">
+                                   <Fuel className="w-10 h-10" />
+                                </div>
+                             </div>
+                             
+                             {/* Info */}
+                             <div className="flex-1 space-y-2 text-center md:text-left">
+                                <h2 className="text-2xl font-bold">{selectedStation.name}</h2>
+                                <div className="flex items-center justify-center md:justify-start gap-2 text-blue-600 dark:text-blue-400 font-medium">
+                                   <Star className="w-4 h-4 fill-current" />
+                                   <span>{selectedStation.rating}</span>
+                                   <span className="text-muted-foreground">•</span>
+                                   <span>{selectedStation.distanceKm.toFixed(1)} km away</span>
+                                </div>
+                                <p className="text-muted-foreground flex items-center justify-center md:justify-start gap-1">
+                                   <MapPin className="w-4 h-4" />
+                                   {selectedStation.lat.toFixed(4)}, {selectedStation.lon.toFixed(4)}
+                                </p>
+                                <div className="flex items-center justify-center md:justify-start gap-2 mt-2">
+                                   {selectedStation.isOpen ? (
+                                      <Badge variant="default" className="bg-green-500 hover:bg-green-600 border-transparent">Open Now</Badge>
+                                   ) : (
+                                      <Badge variant="destructive">Closed</Badge>
+                                   )}
+                                   <Badge variant="outline">{selectedStation.brand}</Badge>
+                                </div>
+                             </div>
+                          </div>
+                          
+                          <div className="mt-6">
+                             <Button className="w-full h-12 text-base bg-blue-600 hover:bg-blue-700 text-white shadow-lg shadow-blue-600/20" asChild>
+                                <a href={directionsUrl(selectedStation)} target="_blank" rel="noreferrer">
+                                   <Navigation className="w-5 h-5 mr-2" />
+                                   Get Directions
+                                </a>
+                             </Button>
+                          </div>
+                       </CardContent>
+                    </div>
+                  </Card>
+                </motion.div>
+              )}
+            </div>
+          )}
+        </AnimatePresence>
+      </main>
     </div>
   );
 }
