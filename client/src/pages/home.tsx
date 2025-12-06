@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Fuel, MapPin, Navigation, Search, Loader2, AlertCircle } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
@@ -11,6 +11,7 @@ import { Badge } from '@/components/ui/badge';
 import { ScrollArea } from '@/components/ui/scroll-area';
 
 const OVERPASS_URL = 'https://overpass-api.de/api/interpreter';
+const NOMINATIM_URL = 'https://nominatim.openstreetmap.org/search';
 
 function haversineDistanceKm(lat1: number, lon1: number, lat2: number, lon2: number) {
   const toRad = (d: number) => (d * Math.PI) / 180;
@@ -37,6 +38,7 @@ interface Station {
 }
 
 export default function Home() {
+  const [zipCode, setZipCode] = useState('');
   const [lat, setLat] = useState('');
   const [lon, setLon] = useState('');
   const [radiusKm, setRadiusKm] = useState('20');
@@ -45,6 +47,7 @@ export default function Home() {
   const [stations, setStations] = useState<Station[]>([]);
   const [error, setError] = useState('');
   const [hasSearched, setHasSearched] = useState(false);
+  const [usingLocation, setUsingLocation] = useState(false);
 
   const handleUseMyLocation = () => {
     if (!navigator.geolocation) {
@@ -55,8 +58,12 @@ export default function Home() {
     setLoading(true);
     navigator.geolocation.getCurrentPosition(
       (pos) => {
-        setLat(pos.coords.latitude.toFixed(6));
-        setLon(pos.coords.longitude.toFixed(6));
+        const latVal = pos.coords.latitude.toFixed(6);
+        const lonVal = pos.coords.longitude.toFixed(6);
+        setLat(latVal);
+        setLon(lonVal);
+        setZipCode(''); // Clear ZIP when using geolocation
+        setUsingLocation(true);
         setLoading(false);
       },
       (err) => {
@@ -65,6 +72,21 @@ export default function Home() {
       },
       { enableHighAccuracy: true }
     );
+  };
+
+  const geocodeZip = async (zip: string): Promise<{ lat: string, lon: string } | null> => {
+    try {
+      const res = await fetch(`${NOMINATIM_URL}?postalcode=${zip}&format=json&limit=1`);
+      if (!res.ok) throw new Error('Geocoding failed');
+      const data = await res.json();
+      if (data && data.length > 0) {
+        return { lat: data[0].lat, lon: data[0].lon };
+      }
+      return null;
+    } catch (e) {
+      console.error('Geocoding error:', e);
+      return null;
+    }
   };
 
   const buildOverpassQuery = (latValue: string, lonValue: string, radiusMeters: number) => {
@@ -84,15 +106,32 @@ export default function Home() {
     setStations([]);
     setHasSearched(true);
     
-    if (!lat || !lon) {
-      setError('Please provide a location or use "My Location".');
-      return;
-    }
-    
+    let searchLat = lat;
+    let searchLon = lon;
+
     setLoading(true);
+
     try {
+      // If ZIP code is entered and we are not explicitly using "My Location" (or even if we are, prefer user input if they typed something new)
+      // Logic: If user typed in ZIP input, try to geocode it.
+      if (zipCode.trim()) {
+        const coords = await geocodeZip(zipCode);
+        if (coords) {
+          searchLat = coords.lat;
+          searchLon = coords.lon;
+          // Update state to reflect the found coordinates
+          setLat(searchLat);
+          setLon(searchLon);
+          setUsingLocation(false);
+        } else {
+          throw new Error('Could not find location for this ZIP code.');
+        }
+      } else if (!searchLat || !searchLon) {
+        throw new Error('Please enter a ZIP code or use "My Location".');
+      }
+
       const radiusMeters = parseInt(radiusKm) * 1000;
-      const query = buildOverpassQuery(lat, lon, radiusMeters);
+      const query = buildOverpassQuery(searchLat, searchLon, radiusMeters);
       
       const res = await fetch(OVERPASS_URL, {
         method: 'POST',
@@ -115,8 +154,8 @@ export default function Home() {
           const name = el.tags?.name || 'Unnamed fuel station';
           const brand = el.tags?.brand || 'Unknown brand';
           const distanceKm = haversineDistanceKm(
-            parseFloat(lat),
-            parseFloat(lon),
+            parseFloat(searchLat),
+            parseFloat(searchLon),
             el.lat,
             el.lon
           );
@@ -150,6 +189,14 @@ export default function Home() {
   const directionsUrl = (station: Station) =>
     `https://www.openstreetmap.org/directions?engine=fossgis_osrm_car&route=${lat},${lon};${station.lat},${station.lon}`;
 
+  // Clear "Using Location" state if user types in ZIP
+  const handleZipChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setZipCode(e.target.value);
+    if (e.target.value) {
+      setUsingLocation(false);
+    }
+  };
+
   return (
     <div className="min-h-screen bg-background bg-grid-pattern text-foreground flex flex-col items-center py-10 px-4">
       <motion.div 
@@ -172,34 +219,43 @@ export default function Home() {
           <Card className="md:col-span-5 h-fit border-border/50 shadow-xl bg-card/50 backdrop-blur-sm">
             <CardHeader>
               <CardTitle>Search Parameters</CardTitle>
-              <CardDescription>Configure your search radius and location.</CardDescription>
+              <CardDescription>Enter a ZIP code or use your current location.</CardDescription>
             </CardHeader>
             <CardContent className="space-y-4">
               <div className="space-y-2">
-                <Label>Your Location</Label>
-                <div className="flex gap-2">
-                  <Input 
-                    placeholder="Lat" 
-                    value={lat} 
-                    onChange={(e) => setLat(e.target.value)}
-                    className="font-mono text-xs"
-                  />
-                  <Input 
-                    placeholder="Lon" 
-                    value={lon} 
-                    onChange={(e) => setLon(e.target.value)}
-                    className="font-mono text-xs"
-                  />
+                <Label>Location</Label>
+                <div className="flex flex-col gap-3">
+                  <div className="relative">
+                    <Input 
+                      placeholder="Enter ZIP Code (e.g. 90210)" 
+                      value={zipCode} 
+                      onChange={handleZipChange}
+                      className="pr-10 font-mono"
+                    />
+                    {usingLocation && (
+                      <div className="absolute right-3 top-1/2 -translate-y-1/2 text-xs text-primary flex items-center gap-1 font-medium bg-background/80 px-1.5 py-0.5 rounded">
+                        <MapPin className="w-3 h-3" />
+                        Current
+                      </div>
+                    )}
+                  </div>
+                  
+                  <div className="relative flex items-center py-1">
+                    <div className="flex-grow border-t border-border"></div>
+                    <span className="flex-shrink-0 mx-2 text-muted-foreground text-xs">OR</span>
+                    <div className="flex-grow border-t border-border"></div>
+                  </div>
+
+                  <Button 
+                    variant={usingLocation ? "default" : "secondary"}
+                    className="w-full" 
+                    onClick={handleUseMyLocation}
+                    disabled={loading}
+                  >
+                    {loading && !zipCode ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <MapPin className="mr-2 h-4 w-4" />}
+                    Use My Current Location
+                  </Button>
                 </div>
-                <Button 
-                  variant="secondary" 
-                  className="w-full" 
-                  onClick={handleUseMyLocation}
-                  disabled={loading}
-                >
-                  {loading ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <MapPin className="mr-2 h-4 w-4" />}
-                  Use My Location
-                </Button>
               </div>
 
               <div className="space-y-2">
@@ -230,6 +286,8 @@ export default function Home() {
                     <SelectItem value="total">Total</SelectItem>
                     <SelectItem value="esso">Esso</SelectItem>
                     <SelectItem value="texaco">Texaco</SelectItem>
+                    <SelectItem value="chevron">Chevron</SelectItem>
+                    <SelectItem value="mobil">Mobil</SelectItem>
                   </SelectContent>
                 </Select>
               </div>
@@ -287,7 +345,7 @@ export default function Home() {
                 {stations.length === 0 && !loading ? (
                   <div className="h-full flex flex-col items-center justify-center text-muted-foreground space-y-4 opacity-50 py-20">
                     <Fuel className="h-16 w-16" />
-                    <p>Enter your location to find fuel stations</p>
+                    <p>Enter a ZIP code or use your location to start</p>
                   </div>
                 ) : (
                   <ul className="space-y-4 pt-2">
