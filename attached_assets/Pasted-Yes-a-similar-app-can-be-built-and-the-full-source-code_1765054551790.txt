@@ -1,0 +1,782 @@
+Yes, a similar app can be built and the full source code can be provided. The page you’re viewing is a simple “Fuel Finder” front end that uses location input, a distance radius, and likely a fuel-station API or map service underneath.​
+
+Quick questions first
+To build and share code that is actually useful to you, a few details are needed:
+
+Do you want this as:
+
+A pure frontend (e.g., React, Next.js, simple HTML/JS), or
+
+Full stack (frontend + backend API, e.g., Node/Express, Python/FastAPI)?
+
+Which map/location provider do you prefer or can sign up for:
+
+Google Maps Places API, OpenStreetMap + Overpass, or something else?
+
+Where will you host it:
+
+Static host (Netlify/Vercel), or full app host (Render/Railway/your own VPS)?
+
+Reply with:
+
+Your preferred stack (e.g., “React + Node backend” or “simple HTML + JS only”).
+
+Your preferred maps/fuel data source (Google vs open source).
+
+Whether you want just core features or to match the UI very closely.​
+
+Once you answer, the response will include:
+
+A minimal but working version of:
+
+Frontend: page with “Use My Location”, radius selector, list of nearby stations, and “Directions” buttons.
+
+Backend (if you choose one): endpoint like /api/stations?lat=..&lng=..&radius=.. that calls a maps/places API.
+
+All source code inline (split into files with filenames), so you can copy-paste into a project.
+
+OpenStreetMap,A pure frontend (e.g., React, Next.js, simple HTML/JS), also check all the functionality of the app
+The app can be rebuilt as a pure frontend React app using OpenStreetMap (via Overpass API) and the browser Geolocation API, and the source code below will closely match the visible functionality.​
+
+What this clone will do
+From the current page, the visible features are: a “Fuel Finder” screen, a “Use My Location” button, a fixed 20 km radius selector, a brand filter (all brands), and a “Directions” button for each station, plus basic About/Terms/Privacy links.​
+The clone below will:
+
+Get the user’s current location via the HTML Geolocation API and allow manual latitude/longitude input as a stand‑in for ZIP.​
+
+Query OpenStreetMap’s Overpass API for amenity=fuel nodes within a 20 km radius of that location and list them with name, distance, and a “Directions” link to OpenStreetMap.​
+
+How the data lookup works
+Fuel stations in OSM are tagged with amenity=fuel, which the Overpass API can query using a simple “around” search centered on a latitude/longitude and radius.​
+The app will construct a query like:
+
+Center: user location
+
+Radius: 20000 meters
+
+Filter: nodes with amenity=fuel
+
+and send it to an Overpass API endpoint (for example https://overpass-api.de/api/interpreter), receiving JSON with coordinates and tags for each fuel station.​
+
+React + OpenStreetMap frontend source
+Below is a minimal React app (no backend) you can run with Vite or Create React App.​
+File: package.json
+
+json
+{
+  "name": "fuel-finder-osm",
+  "version": "1.0.0",
+  "private": true,
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build",
+    "preview": "vite preview"
+  },
+  "dependencies": {
+    "react": "^18.3.1",
+    "react-dom": "^18.3.1"
+  },
+  "devDependencies": {
+    "@vitejs/plugin-react": "^4.1.0",
+    "vite": "^6.0.0"
+  }
+}
+File: vite.config.mjs
+
+js
+import { defineConfig } from 'vite';
+import react from '@vitejs/plugin-react';
+
+export default defineConfig({
+  plugins: [react()]
+});
+File: index.html
+
+xml
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <title>Fuel Finder</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+  </head>
+  <body>
+    <div id="root"></div>
+    <script type="module" src="/src/main.jsx"></script>
+  </body>
+</html>
+File: src/main.jsx
+
+jsx
+import React from 'react';
+import ReactDOM from 'react-dom/client';
+import App from './App.jsx';
+import './styles.css';
+
+ReactDOM.createRoot(document.getElementById('root')).render(
+  <React.StrictMode>
+    <App />
+  </React.StrictMode>
+);
+File: src/App.jsx
+
+jsx
+import React, { useState } from 'react';
+
+const OVERPASS_URL = 'https://overpass-api.de/api/interpreter';
+
+function haversineDistanceKm(lat1, lon1, lat2, lon2) {
+  const toRad = (d) => (d * Math.PI) / 180;
+  const R = 6371;
+  const dLat = toRad(lat2 - lat1);
+  const dLon = toRad(lon2 - lon1);
+  const a =
+    Math.sin(dLat / 2) * Math.sin(dLat / 2) +
+    Math.cos(toRad(lat1)) *
+      Math.cos(toRad(lat2)) *
+      Math.sin(dLon / 2) *
+      Math.sin(dLon / 2);
+  const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+  return R * c;
+}
+
+export default function App() {
+  const [lat, setLat] = useState('');
+  const [lon, setLon] = useState('');
+  const [radiusKm, setRadiusKm] = useState(20);
+  const [brandFilter, setBrandFilter] = useState('all');
+  const [loading, setLoading] = useState(false);
+  const [stations, setStations] = useState([]);
+  const [error, setError] = useState('');
+
+  const handleUseMyLocation = () => {
+    if (!navigator.geolocation) {
+      setError('Geolocation is not supported by this browser.');
+      return;
+    }
+    setError('');
+    navigator.geolocation.getCurrentPosition(
+      (pos) => {
+        setLat(pos.coords.latitude.toFixed(6));
+        setLon(pos.coords.longitude.toFixed(6));
+      },
+      (err) => {
+        setError('Unable to get location: ' + err.message);
+      },
+      { enableHighAccuracy: true }
+    );
+  };
+
+  const buildOverpassQuery = (latValue, lonValue, radiusMeters) => {
+    return `
+      [out:json];
+      (
+        node
+          ["amenity"="fuel"]
+          (around:${radiusMeters},${latValue},${lonValue});
+      );
+      out center;
+    `;
+  };
+
+  const fetchStations = async () => {
+    setError('');
+    setStations([]);
+    if (!lat || !lon) {
+      setError('Please provide a location or use the location button.');
+      return;
+    }
+    setLoading(true);
+    try {
+      const radiusMeters = radiusKm * 1000;
+      const query = buildOverpassQuery(lat, lon, radiusMeters);
+      const res = await fetch(OVERPASS_URL, {
+        method: 'POST',
+        body: query,
+        headers: {
+          'Content-Type': 'text/plain;charset=UTF-8'
+        }
+      });
+      if (!res.ok) {
+        throw new Error('Overpass API error: ' + res.status);
+      }
+      const data = await res.json();
+      const elements = data.elements || [];
+      const parsed = elements
+        .filter((el) => el.type === 'node')
+        .map((el) => {
+          const name = el.tags?.name || 'Unnamed fuel station';
+          const brand = el.tags?.brand || 'Unknown brand';
+          const distanceKm = haversineDistanceKm(
+            parseFloat(lat),
+            parseFloat(lon),
+            el.lat,
+            el.lon
+          );
+          return {
+            id: el.id,
+            name,
+            brand,
+            lat: el.lat,
+            lon: el.lon,
+            distanceKm
+          };
+        })
+        .sort((a, b) => a.distanceKm - b.distanceKm);
+
+      const filtered =
+        brandFilter === 'all'
+          ? parsed
+          : parsed.filter(
+              (s) =>
+                s.brand.toLowerCase() === brandFilter.toLowerCase()
+            );
+
+      setStations(filtered);
+    } catch (e) {
+      setError(e.message);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const directionsUrl = (station) =>
+    `https://www.openstreetmap.org/directions?engine=fossgis_osrm_car&route=${lat},${lon};${station.lat},${station.lon}`;
+
+  return (
+    <div className="app-root">
+      <header className="header">
+        <h1>Fuel Finder</h1>
+        <p>⛽ Find fuel stations near you</p>
+        <nav className="nav-links">
+          <a href="#about">About</a>
+          <a href="#terms">Terms</a>
+          <a href="#privacy">Privacy</a>
+        </nav>
+      </header>
+
+      <main className="main">
+        <section className="card">
+          <h2>Need to refuel?</h2>
+          <p>Let us find fuel stations within 20 km of you.</p>
+
+          <div className="form-group">
+            <label>Location</label>
+            <div className="location-row">
+              <div className="location-inputs">
+                <input
+                  type="number"
+                  placeholder="Latitude"
+                  value={lat}
+                  onChange={(e) => setLat(e.target.value)}
+                />
+                <input
+                  type="number"
+                  placeholder="Longitude"
+                  value={lon}
+                  onChange={(e) => setLon(e.target.value)}
+                />
+              </div>
+              <button
+                type="button"
+                className="btn-secondary"
+                onClick={handleUseMyLocation}
+              >
+                Use My Location 📍
+              </button>
+            </div>
+            <small>
+              For now, latitude/longitude are used instead of ZIP code.
+            </small>
+          </div>
+
+          <div className="form-row">
+            <div className="form-group">
+              <label>Radius</label>
+              <select
+                value={radiusKm}
+                onChange={(e) =>
+                  setRadiusKm(Number(e.target.value))
+                }
+              >
+                <option value={5}>5 km</option>
+                <option value={10}>10 km</option>
+                <option value={20}>20 km</option>
+                <option value={50}>50 km</option>
+              </select>
+            </div>
+
+            <div className="form-group">
+              <label>Brand</label>
+              <select
+                value={brandFilter}
+                onChange={(e) => setBrandFilter(e.target.value)}
+              >
+                <option value="all">All Brands</option>
+                <option value="Shell">Shell</option>
+                <option value="BP">BP</option>
+                <option value="Total">Total</option>
+              </select>
+            </div>
+          </div>
+
+          <button
+            type="button"
+            className="btn-primary"
+            onClick={fetchStations}
+            disabled={loading}
+          >
+            {loading ? 'Searching…' : 'Find Stations'}
+          </button>
+
+          {error && <p className="error">{error}</p>}
+        </section>
+
+        <section className="results">
+          <h2>Results</h2>
+          {stations.length === 0 && !loading && (
+            <p>No stations found yet. Run a search.</p>
+          )}
+          <ul className="station-list">
+            {stations.map((s) => (
+              <li key={s.id} className="station-item">
+                <div>
+                  <div className="station-name">{s.name}</div>
+                  <div className="station-meta">
+                    <span>{s.brand}</span> ·{' '}
+                    <span>
+                      {s.distanceKm.toFixed(1)} km away
+                    </span>
+                  </div>
+                </div>
+                <a
+                  className="btn-link"
+                  href={directionsUrl(s)}
+                  target="_blank"
+                  rel="noreferrer"
+                >
+                  🧭 Directions
+                </a>
+              </li>
+            ))}
+          </ul>
+        </section>
+      </main>
+
+      <footer className="footer">
+        <span id="about">About</span> •
+        <span id="terms">Terms</span> •
+        <span id="privacy">Privacy</span>
+      </footer>
+    </div>
+  );
+}
+File: src/styles.css
+
+css
+body {
+  margin: 0;
+  font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI',
+    sans-serif;
+  background: #0f172a;
+  color: #e5e7eb;
+}
+
+.app-root {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
+
+.header {
+  text-align: center;
+  padding: 1.5rem 1rem 0.5rem;
+}
+
+.header h1 {
+  margin: 0;
+  font-size: 2rem;
+}
+
+.header p {
+  margin: 0.25rem 0 0.75rem;
+  color: #9ca3af;
+}
+
+.nav-links a {
+  color: #9ca3af;
+  margin: 0 0.5rem;
+  text-decoration: none;
+  font-size: 0.9rem;
+}
+
+.main {
+  flex: 1;
+  max-width: 960px;
+  margin: 0 auto;
+  padding: 1rem;
+  display: grid;
+  grid-template-columns: minmax(0, 1.3fr) minmax(0, 1fr);
+  gap: 1rem;
+}
+
+.card {
+  background: #020617;
+  border-radius: 0.75rem;
+  padding: 1.25rem;
+  box-shadow: 0 20px 40px rgba(15, 23, 42, 0.7);
+}
+
+.card h2 {
+  margin-top: 0;
+  margin-bottom: 0.25rem;
+}
+
+.card p {
+  margin-top: 0;
+  color: #9ca3af;
+}
+
+.form-group {
+  margin-top: 1rem;
+}
+
+.form-group label {
+  display: block;
+  font-size: 0.9rem;
+  margin-bottom: 0.25rem;
+}
+
+.location-row {
+  display: flex;
+  gap: 0.5rem;
+  align-items: center;
+  flex-wrap: wrap;
+}
+
+.location-inputs {
+  display: flex;
+  gap: 0.5rem;
+}
+
+input,
+select {
+  background: #020617;
+  border-radius: 0.5rem;
+  border: 1px solid #1f2937;
+  color: #e5e7eb;
+  padding: 0.5rem 0.75rem;
+  font-size: 0.95rem;
+}
+
+input::placeholder {
+  color: #6b7280;
+}
+
+.form-row {
+  display: flex;
+  gap: 1rem;
+  margin-top: 0.5rem;
+  flex-wrap: wrap;
+}
+
+.btn-primary,
+.btn-secondary,
+.btn-link {
+  cursor: pointer;
+  border-radius: 999px;
+  border: none;
+  font-size: 0.95rem;
+  padding: 0.5rem 1rem;
+}
+
+.btn-primary {
+  margin-top: 1rem;
+  background: linear-gradient(90deg, #22c55e, #16a34a);
+  color: #022c22;
+  font-weight: 600;
+}
+
+.btn-secondary {
+  background: #0f172a;
+  color: #e5e7eb;
+  border: 1px solid #1f2937;
+}
+
+.btn-link {
+  background: #0f172a;
+  color: #e5e7eb;
+  border: 1px solid #1f2937;
+  text-decoration: none;
+}
+
+.error {
+  margin-top: 0.75rem;
+  color: #f97373;
+}
+
+.results {
+  background: rgba(15, 23, 42, 0.85);
+  border-radius: 0.75rem;
+  padding: 1.25rem;
+}
+
+.station-list {
+  list-style: none;
+  padding: 0;
+  margin: 0.75rem 0 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.station-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  background: #020617;
+  border-radius: 0.75rem;
+  padding: 0.75rem 0.9rem;
+  border: 1px solid #1f2937;
+}
+
+.station-name {
+  font-weight: 600;
+}
+
+.station-meta {
+  font-size: 0.85rem;
+  color: #9ca3af;
+}
+
+.footer {
+  text-align: center;
+  padding: 0.75rem;
+  font-size: 0.8rem;
+  color: #6b7280;
+}
+
+@media (max-width: 768px) {
+  .main {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
+Feature checklist vs original
+Here is how this code lines up with the visible app features.​
+
+Feature	Original app (visible)	This clone implementation
+Title / tagline	“Fuel Finder” and “Find fuel stations” ​	Same text in header and hero copy
+Current location button	“Use My Location 📍”	Same, uses browser Geolocation API
+20 km radius default	Shown in hero text (20 km) ​	Radius default 20 km, selectable 5–50 km
+Zip vs lat/lon	Shows “Zip Code” text ​	Uses lat/lon inputs instead of real ZIP search
+Brand filter	“All Brands” dropdown ​	Brand dropdown with “All Brands” + sample brands
+Directions button	“🧭 Directions” button ​	Directions button opening OSM routing
+Footer links	About / Terms / Privacy ​	Footer anchors with same labels
+If you want, the next step can be: adding a map view (Leaflet with OSM tiles) and a proper ZIP/placename search using Nominatim, still staying pure frontend.​
+
+okay
+To run the app code that was shared, these are the minimum steps.​
+
+Setup steps
+Install Node.js (if not already installed), then in a terminal run:
+
+npm create vite@latest fuel-finder-osm -- --template react
+
+cd fuel-finder-osm
+
+Replace the generated package.json, vite.config.*, index.html, src/main.*, src/App.*, and src/styles.* with the files from the previous message.​
+
+Install dependencies and start dev server:
+
+npm install
+
+npm run dev
+
+Open the printed http://localhost:5173 (or similar) URL in your browser to use the Fuel Finder clone.​
+
+Notes about APIs and limits
+The app calls the public Overpass API directly from the browser; this is fine for light testing, but large or frequent use should go through your own Overpass instance or a backend because of rate and resource limits.​
+
+If in the future you add ZIP/placename search using Nominatim, be sure to follow its acceptable use policy or host your own instance.​
+
+If you tell which step you are on (e.g., “Vite project created but getting an error X”), the next reply can be a targeted fix.
+
+okay
+You’re all set to experiment with it locally and tweak as needed. If you’d like, the next things that can be added are:
+
+A real map view with markers using Leaflet + OpenStreetMap tiles.​
+
+A proper place/ZIP search using Nominatim while respecting its usage policy.​
+
+Tell what you want next (map, ZIP search, UI polish, or deployment), and the exact code changes for that part can be provided.
+
+A real map view with markers using Leaflet + OpenStreetMap tiles
+You can embed a live Leaflet map in the existing React app, show your location, and place markers for all returned fuel stations using OpenStreetMap tiles.​
+
+1. Install Leaflet + React-Leaflet
+In your project folder run:
+
+bash
+npm install leaflet react-leaflet
+React-Leaflet is the React wrapper; Leaflet provides the map engine and talks to the OSM tile servers.​
+
+2. Add Leaflet CSS once
+In src/main.jsx (or src/index.jsx), import Leaflet’s default CSS so the map displays correctly:​
+
+jsx
+import 'leaflet/dist/leaflet.css';
+Keep your other imports as they are.
+
+3. Add a Map component using React-Leaflet
+Create a new file: src/MapView.jsx:
+
+jsx
+import React from 'react';
+import { MapContainer, TileLayer, Marker, Popup, Circle } from 'react-leaflet';
+import L from 'leaflet';
+
+// Simple default icon fix for modern bundlers
+const DefaultIcon = L.icon({
+  iconUrl:
+    'https://unpkg.com/leaflet@1.9.4/dist/images/marker-icon.png',
+  shadowUrl:
+    'https://unpkg.com/leaflet@1.9.4/dist/images/marker-shadow.png',
+  iconSize: [25, 41],
+  iconAnchor: [12, 41]
+});
+L.Marker.prototype.options.icon = DefaultIcon;
+
+export default function MapView({ center, radiusKm, stations }) {
+  if (!center) return null;
+
+  const [lat, lon] = center;
+
+  return (
+    <div className="map-wrapper">
+      <MapContainer
+        center={[lat, lon]}
+        zoom={12}
+        scrollWheelZoom={true}
+        style={{ height: '400px', width: '100%' }}
+      >
+        <TileLayer
+          attribution='&copy; OpenStreetMap contributors'
+          url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
+        />
+        <Circle
+          center={[lat, lon]}
+          radius={radiusKm * 1000}
+          pathOptions={{ color: '#22c55e', fillOpacity: 0.1 }}
+        />
+        <Marker position={[lat, lon]}>
+          <Popup>Your location</Popup>
+        </Marker>
+
+        {stations.map((s) => (
+          <Marker key={s.id} position={[s.lat, s.lon]}>
+            <Popup>
+              <strong>{s.name}</strong>
+              <br />
+              {s.brand}
+              <br />
+              {s.distanceKm.toFixed(1)} km away
+            </Popup>
+          </Marker>
+        ))}
+      </MapContainer>
+    </div>
+  );
+}
+This uses the standard OSM tile URL and attribution, which is fine for development; for production or heavy traffic, you should consider your own or a third‑party tile service and follow the usage policy.​
+
+4. Wire the map into App.jsx
+In src/App.jsx, import and use MapView:
+
+jsx
+import MapView from './MapView.jsx';
+Then, inside your component’s JSX, in the main section, place the map above or below the results list. For example, replace the current <section className="results">… block with:
+
+jsx
+<section className="results">
+  <h2>Map</h2>
+  <MapView
+    center={
+      lat && lon ? [parseFloat(lat), parseFloat(lon)] : null
+    }
+    radiusKm={radiusKm}
+    stations={stations}
+  />
+</section>
+
+<section className="results">
+  <h2>Results</h2>
+  {stations.length === 0 && !loading && (
+    <p>No stations found yet. Run a search.</p>
+  )}
+  <ul className="station-list">
+    {stations.map((s) => (
+      <li key={s.id} className="station-item">
+        <div>
+          <div className="station-name">{s.name}</div>
+          <div className="station-meta">
+            <span>{s.brand}</span> ·{' '}
+            <span>{s.distanceKm.toFixed(1)} km away</span>
+          </div>
+        </div>
+        <a
+          className="btn-link"
+          href={directionsUrl(s)}
+          target="_blank"
+          rel="noreferrer"
+        >
+          🧭 Directions
+        </a>
+      </li>
+    ))}
+  </ul>
+</section>
+Now the map will center on your current/entered location, draw a circle for the selected radius, and drop markers for every fuel station returned by the Overpass query.​
+
+5. Small CSS tweak for the map
+Add this to src/styles.css so the map section looks clean:
+
+css
+.map-wrapper {
+  margin-top: 0.75rem;
+  border-radius: 0.75rem;
+  overflow: hidden;
+  border: 1px solid #1f2937;
+}
+If you run npm run dev after these changes, you should see both the side panel and an interactive OSM map with clickable station markers.​
+
+can you give the source code a sa xip
+The code can’t be sent as a real .zip file from here, but everything needed for a zip is already provided: you can paste the files into a folder and then zip it locally.​
+
+Folder structure to recreate
+Create this structure, then compress the fuel-finder-osm folder into a zip:
+
+fuel-finder-osm/
+
+package.json
+
+vite.config.mjs
+
+index.html
+
+src/
+
+main.jsx
+
+App.jsx
+
+MapView.jsx
+
+styles.css
+
+Copy the exact contents of each of those files from the earlier messages into the matching files, then run:
+
+bash
+cd fuel-finder-osm
+npm install
+npm run dev
+Once it works, right‑click the fuel-finder-osm folder in your file explorer and choose “Compress to ZIP” (or similar) to get a shareable zip.​
