@@ -244,7 +244,7 @@ export default function Home() {
   };
 
   const directionsUrl = (station: Station) =>
-    `https://www.openstreetmap.org/directions?engine=fossgis_osrm_car&route=${lat},${lon};${station.lat},${station.lon}`;
+    `https://www.google.com/maps/dir/?api=1&origin=${lat},${lon}&destination=${station.lat},${station.lon}`;
 
   const handleZipChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setZipCode(e.target.value);
