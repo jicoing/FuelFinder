@@ -1,18 +1,18 @@
-import { useState, useEffect, useRef } from 'react';
+
+import { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Fuel, MapPin, Navigation, Search, Loader2, AlertCircle, X, ChevronRight, Clock, Star } from 'lucide-react';
+import { Fuel, MapPin, Navigation, Search, Loader2, AlertCircle, X, Star } from 'lucide-react';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
+import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Badge } from '@/components/ui/badge';
 import { ScrollArea, ScrollBar } from '@/components/ui/scroll-area';
 import { MapContainer, TileLayer, Marker, Popup, Circle, useMap } from 'react-leaflet';
 import L from 'leaflet';
 
-// Fix for default leaflet markers in React
 import markerIcon2x from 'leaflet/dist/images/marker-icon-2x.png';
 import markerIcon from 'leaflet/dist/images/marker-icon.png';
 import markerShadow from 'leaflet/dist/images/marker-shadow.png';
@@ -25,12 +25,9 @@ L.Icon.Default.mergeOptions({
   shadowUrl: markerShadow,
 });
 
-// Custom Fuel Icon
 const fuelIcon = new L.DivIcon({
   className: 'custom-div-icon',
-  html: `<div style="background-color: #ef4444; width: 32px; height: 32px; border-radius: 50%; display: flex; align-items: center; justify-content: center; border: 2px solid white; box-shadow: 0 2px 4px rgba(0,0,0,0.3);">
-    <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 22v-8a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v8"/><path d="M12 13V2"/><path d="M12 2a2 2 0 0 0-2 2v7"/><path d="M12 2a2 2 0 0 1 2 2v7"/><path d="M10 22v-5a2 2 0 0 1 2-2h.01"/><path d="M4 9h16"/></svg>
-  </div>`,
+  html: `<div style=\"background-color: #ef4444; width: 32px; height: 32px; border-radius: 50%; display: flex; align-items: center; justify-content: center; border: 2px solid white; box-shadow: 0 2px 4px rgba(0,0,0,0.3);\"><svg xmlns=\"http://www.w3.org/2000/svg\" width=\"18\" height=\"18\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"white\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\"><path d=\"M3 22v-8a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v8\"/><path d=\"M12 13V2\"/><path d=\"M12 2a2 2 0 0 0-2 2v7\"/><path d=\"M12 2a2 2 0 0 1 2 2v7\"/><path d=\"M10 22v-5a2 2 0 0 1 2-2h.01\"/><path d=\"M4 9h16\"/></svg></div>`,
   iconSize: [32, 32],
   iconAnchor: [16, 32],
   popupAnchor: [0, -32]
@@ -38,20 +35,17 @@ const fuelIcon = new L.DivIcon({
 
 const selectedFuelIcon = new L.DivIcon({
   className: 'custom-div-icon',
-  html: `<div style="background-color: #3b82f6; width: 40px; height: 40px; border-radius: 50%; display: flex; align-items: center; justify-content: center; border: 3px solid white; box-shadow: 0 4px 8px rgba(0,0,0,0.4); z-index: 1000;">
-    <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 22v-8a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v8"/><path d="M12 13V2"/><path d="M12 2a2 2 0 0 0-2 2v7"/><path d="M12 2a2 2 0 0 1 2 2v7"/><path d="M10 22v-5a2 2 0 0 1 2-2h.01"/><path d="M4 9h16"/></svg>
-  </div>`,
+  html: `<div style=\"background-color: #3b82f6; width: 40px; height: 40px; border-radius: 50%; display: flex; align-items: center; justify-content: center; border: 3px solid white; box-shadow: 0 4px 8px rgba(0,0,0,0.4); z-index: 1000;\"><svg xmlns=\"http://www.w3.org/2000/svg\" width=\"22\" height=\"22\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"white\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\"><path d=\"M3 22v-8a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v8\"/><path d=\"M12 13V2\"/><path d=\"M12 2a2 2 0 0 0-2 2v7\"/><path d=\"M12 2a2 2 0 0 1 2 2v7\"/><path d=\"M10 22v-5a2 2 0 0 1 2-2h.01\"/><path d=\"M4 9h16\"/></svg></div>`,
   iconSize: [40, 40],
   iconAnchor: [20, 40],
   popupAnchor: [0, -40]
 });
 
-
 const OVERPASS_URL = 'https://overpass-api.de/api/interpreter';
 const NOMINATIM_URL = 'https://nominatim.openstreetmap.org/search';
 
-function haversineDistanceKm(lat1: number, lon1: number, lat2: number, lon2: number) {
-  const toRad = (d: number) => (d * Math.PI) / 180;
+function haversineDistanceKm(lat1, lon1, lat2, lon2) {
+  const toRad = (d) => (d * Math.PI) / 180;
   const R = 6371;
   const dLat = toRad(lat2 - lat1);
   const dLon = toRad(lon2 - lon1);
@@ -65,19 +59,7 @@ function haversineDistanceKm(lat1: number, lon1: number, lat2: number, lon2: num
   return R * c;
 }
 
-interface Station {
-  id: number;
-  name: string;
-  brand: string;
-  lat: number;
-  lon: number;
-  distanceKm: number;
-  rating?: number; // Mock rating
-  isOpen?: boolean; // Mock status
-}
-
-// Helper to update map view when center changes
-function MapUpdater({ center, zoom }: { center: [number, number], zoom: number }) {
+function MapUpdater({ center, zoom }) {
   const map = useMap();
   useEffect(() => {
     map.flyTo(center, zoom, { duration: 1.5 });
@@ -86,21 +68,19 @@ function MapUpdater({ center, zoom }: { center: [number, number], zoom: number }
 }
 
 export default function Home() {
-  const [view, setView] = useState<'search' | 'results'>('search');
+  const [view, setView] = useState('search');
   
-  // Search State
   const [zipCode, setZipCode] = useState('');
-  const [lat, setLat] = useState<number | null>(null);
-  const [lon, setLon] = useState<number | null>(null);
+  const [lat, setLat] = useState(null);
+  const [lon, setLon] = useState(null);
   const [radiusKm, setRadiusKm] = useState('10');
   const [brandFilter, setBrandFilter] = useState('all');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
   const [usingLocation, setUsingLocation] = useState(false);
   
-  // Results State
-  const [stations, setStations] = useState<Station[]>([]);
-  const [selectedStation, setSelectedStation] = useState<Station | null>(null);
+  const [stations, setStations] = useState([]);
+  const [selectedStation, setSelectedStation] = useState(null);
 
   const handleUseMyLocation = () => {
     if (!navigator.geolocation) {
@@ -125,7 +105,7 @@ export default function Home() {
     );
   };
 
-  const geocodeZip = async (zip: string): Promise<{ lat: number, lon: number } | null> => {
+  const geocodeZip = async (zip) => {
     try {
       const res = await fetch(`${NOMINATIM_URL}?postalcode=${zip}&format=json&limit=1`);
       if (!res.ok) throw new Error('Geocoding failed');
@@ -140,12 +120,12 @@ export default function Home() {
     }
   };
 
-  const buildOverpassQuery = (latValue: number, lonValue: number, radiusMeters: number) => {
+  const buildOverpassQuery = (latValue, lonValue, radiusMeters) => {
     return `
       [out:json];
       (
         node
-          ["amenity"="fuel"]
+          [\"amenity\"=\"fuel\"]
           (around:${radiusMeters},${latValue},${lonValue});
       );
       out center;
@@ -175,11 +155,11 @@ export default function Home() {
           throw new Error('Could not find location for this ZIP code.');
         }
       } else if (searchLat === null || searchLon === null) {
-        throw new Error('Please enter a ZIP code or use "My Location".');
+        throw new Error('Please enter a ZIP code or use \"My Location\".');
       }
 
       const radiusMeters = parseInt(radiusKm) * 1000;
-      const query = buildOverpassQuery(searchLat!, searchLon!, radiusMeters);
+      const query = buildOverpassQuery(searchLat, searchLon, radiusMeters);
       
       const res = await fetch(OVERPASS_URL, {
         method: 'POST',
@@ -196,14 +176,14 @@ export default function Home() {
       const data = await res.json();
       const elements = data.elements || [];
       
-      const parsed: Station[] = elements
-        .filter((el: any) => el.type === 'node')
-        .map((el: any) => {
+      const parsed = elements
+        .filter((el) => el.type === 'node')
+        .map((el) => {
           const name = el.tags?.name || 'Unnamed fuel station';
           const brand = el.tags?.brand || 'Unknown brand';
           const distanceKm = haversineDistanceKm(
-            searchLat!,
-            searchLon!,
+            searchLat,
+            searchLon,
             el.lat,
             el.lon
           );
@@ -214,11 +194,11 @@ export default function Home() {
             lat: el.lat,
             lon: el.lon,
             distanceKm,
-            rating: (Math.random() * 2 + 3).toFixed(1), // Mock rating 3.0-5.0
-            isOpen: Math.random() > 0.2 // Mock open status
+            rating: (Math.random() * 2 + 3).toFixed(1), 
+            isOpen: Math.random() > 0.2 
           };
         })
-        .sort((a: Station, b: Station) => a.distanceKm - b.distanceKm);
+        .sort((a, b) => a.distanceKm - b.distanceKm);
 
       const filtered =
         brandFilter === 'all'
@@ -230,7 +210,7 @@ export default function Home() {
 
       setStations(filtered);
       setView('results');
-    } catch (e: any) {
+    } catch (e) {
       setError(e.message || 'An error occurred while fetching data.');
     } finally {
       setLoading(false);
@@ -243,10 +223,10 @@ export default function Home() {
     setSelectedStation(null);
   };
 
-  const directionsUrl = (station: Station) =>
+  const directionsUrl = (station) =>
     `https://www.google.com/maps/dir/?api=1&origin=${lat},${lon}&destination=${station.lat},${station.lon}`;
 
-  const handleZipChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleZipChange = (e) => {
     setZipCode(e.target.value);
     if (e.target.value) {
       setUsingLocation(false);
@@ -254,26 +234,10 @@ export default function Home() {
   };
 
   return (
-    <div className="h-screen w-screen bg-background text-foreground flex flex-col overflow-hidden">
-      {/* Header */}
-      <header className="h-16 border-b bg-card/80 backdrop-blur-md flex items-center justify-between px-6 z-50 absolute top-0 left-0 right-0 shadow-sm">
-        <div className="flex items-center gap-2 text-primary">
-          <Fuel className="w-6 h-6" />
-          <span className="font-bold text-xl tracking-tight">Fuel Finder</span>
-        </div>
-        {view === 'results' && (
-          <Button variant="ghost" size="sm" onClick={handleNewSearch} className="gap-2">
-            <Search className="w-4 h-4" /> New Search
-          </Button>
-        )}
-      </header>
-
-      {/* Main Content Area */}
+    <div className="h-full w-full bg-background text-foreground flex flex-col overflow-hidden">
       <main className="flex-1 relative">
         
-        {/* Map Background (Always rendered if we have location, or hidden behind search if not) */}
         <div className="absolute inset-0 z-0">
-           {/* Default center if no location: Center of US or neutral */}
            <MapContainer 
               center={[39.8283, -98.5795]} 
               zoom={4} 
@@ -288,19 +252,16 @@ export default function Home() {
               {view === 'results' && lat && lon && (
                 <>
                   <MapUpdater center={[lat, lon]} zoom={13} />
-                  {/* Search Radius Circle */}
                   <Circle 
                     center={[lat, lon]} 
                     radius={parseInt(radiusKm) * 1000}
                     pathOptions={{ color: '#3b82f6', fillColor: '#3b82f6', fillOpacity: 0.05, weight: 1 }} 
                   />
                   
-                  {/* Current Location Marker */}
                   <Marker position={[lat, lon]}>
                     <Popup>You are here</Popup>
                   </Marker>
 
-                  {/* Station Markers */}
                   {stations.map((station) => (
                     <Marker 
                       key={station.id} 
@@ -316,7 +277,6 @@ export default function Home() {
             </MapContainer>
         </div>
 
-        {/* Search Overlay */}
         <AnimatePresence>
           {view === 'search' && (
             <motion.div 
@@ -361,7 +321,7 @@ export default function Home() {
                     </div>
 
                     <div className="grid grid-cols-2 gap-4">
-                      <div className="space-y-2">
+                      <div className="spacey-2">
                         <Label>Radius</Label>
                         <Select value={radiusKm} onValueChange={setRadiusKm}>
                           <SelectTrigger>
@@ -414,11 +374,9 @@ export default function Home() {
           )}
         </AnimatePresence>
 
-        {/* Results Overlay - Bottom Panel */}
         <AnimatePresence>
           {view === 'results' && (
             <div className="absolute bottom-0 left-0 right-0 z-20 p-4 md:p-6 pointer-events-none">
-              {/* Horizontal List (Only if no station selected) */}
               {!selectedStation && stations.length > 0 && (
                 <motion.div
                   initial={{ y: 100, opacity: 0 }}
@@ -427,6 +385,9 @@ export default function Home() {
                   className="pointer-events-auto"
                 >
                   <div className="mb-2 flex items-center justify-between">
+                     <Button variant="ghost" size="sm" onClick={handleNewSearch} className="gap-2 pointer-events-auto">
+                        <Search className="w-4 h-4" /> New Search
+                     </Button>
                      <Badge variant="secondary" className="shadow-sm bg-background/90 backdrop-blur text-foreground border-none px-3 py-1">
                         {stations.length} stations found
                      </Badge>
@@ -464,7 +425,6 @@ export default function Home() {
                 </motion.div>
               )}
 
-              {/* Selected Station Detail (Bottom Sheet Style) */}
               {selectedStation && (
                 <motion.div
                   initial={{ y: "100%" }}
@@ -485,14 +445,12 @@ export default function Home() {
                        
                        <CardContent className="p-6">
                           <div className="flex flex-col md:flex-row gap-6">
-                             {/* Icon/Image placeholder */}
                              <div className="shrink-0">
                                 <div className="h-24 w-24 rounded-xl bg-blue-600 flex items-center justify-center text-white shadow-lg mx-auto md:mx-0">
                                    <Fuel className="w-10 h-10" />
                                 </div>
                              </div>
                              
-                             {/* Info */}
                              <div className="flex-1 space-y-2 text-center md:text-left">
                                 <h2 className="text-2xl font-bold">{selectedStation.name}</h2>
                                 <div className="flex items-center justify-center md:justify-start gap-2 text-blue-600 dark:text-blue-400 font-medium">
