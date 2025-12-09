@@ -20,15 +20,17 @@ import {
 } from "recharts"
 
 import {
-  Card, 
-  CardContent, 
-  CardDescription, 
-  CardFooter, 
-  CardHeader, 
-  CardTitle, 
+  Card,
+  CardContent,
+  CardDescription,
+  CardFooter,
+  CardHeader,
+  CardTitle,
 } from "@/components/ui/card"
+import { useIsMobile } from "@/hooks/use-mobile";
 
 export const Chart = ({type, data}) => {
+  const isMobile = useIsMobile();
   const chartData = [
     { browser: "chrome", visitors: 275, fill: "var(--color-chrome)" },
     { browser: "safari", visitors: 200, fill: "var(--color-safari)" },
@@ -274,10 +276,10 @@ export const Chart = ({type, data}) => {
                 <ResponsiveContainer width="100%" height={300}>
                 <BarChart data={data}>
                     <CartesianGrid vertical={false} />
-                    <XAxis dataKey="day" />
+                    <XAxis dataKey="day" tick={{ fontSize: isMobile ? 10 : 12 }} />
                     <YAxis />
                     <Tooltip />
-                    <Bar dataKey="distance" fill="var(--color-chart-1)" />
+                    <Bar dataKey="distance" fill="var(--color-chart-1)" barSize={isMobile ? 20 : 30} />
                 </BarChart>
                 </ResponsiveContainer>
             </CardContent>

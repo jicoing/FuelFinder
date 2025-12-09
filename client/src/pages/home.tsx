@@ -1,7 +1,7 @@
 
 import { useState, useEffect, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Fuel, MapPin, Navigation, Search, Loader2, AlertCircle, X, Star, ChevronLeft, ChevronRight } from 'lucide-react';
+import { Fuel, MapPin, Navigation, Search, Loader2, AlertCircle, X, Star, ChevronLeft, ChevronRight, Calculator } from 'lucide-react';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -11,6 +11,7 @@ import { Badge } from '@/components/ui/badge';
 import { ScrollArea, ScrollBar } from '@/components/ui/scroll-area';
 import { MapContainer, TileLayer, Marker, Popup, Circle, useMap } from 'react-leaflet';
 import L from 'leaflet';
+import { Link } from 'wouter';
 
 import markerIcon2x from 'leaflet/dist/images/marker-icon-2x.png';
 import markerIcon from 'leaflet/dist/images/marker-icon.png';
@@ -323,9 +324,16 @@ export default function Home() {
             >
               <Card className="w-full max-w-md shadow-2xl border-border/50">
                 <CardContent className="p-6 space-y-6">
-                  <div className="text-center space-y-2">
-                    <h2 className="text-2xl font-bold">Find Fuel Nearby</h2>
-                    <p className="text-muted-foreground">Enter your location to see stations on the map</p>
+                  <div className="flex justify-between items-center">
+                    <div className="text-center space-y-2">
+                      <h2 className="text-2xl font-bold">Find Fuel Nearby</h2>
+                      <p className="text-muted-foreground">Enter your location to see stations on the map</p>
+                    </div>
+                    <Link href="/calculator">
+                      <Button variant="ghost" size="icon">
+                        <Calculator className="w-6 h-6 text-primary" />
+                      </Button>
+                    </Link>
                   </div>
 
                   <div className="space-y-4">
@@ -357,7 +365,7 @@ export default function Home() {
                     </div>
 
                     <div className="grid grid-cols-2 gap-4">
-                      <div className="spacey-2">
+                      <div className="space-y-2">
                         <p className="text-sm font-medium text-muted-foreground">Radius</p>
                         <Select value={radius} onValueChange={setRadius}>
                           <SelectTrigger>

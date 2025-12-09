@@ -142,7 +142,7 @@ const TripCalculatorPage = () => {
         </CardHeader>
         <CardContent>
           <Tabs defaultValue="distanceToCost">
-            <TabsList className="grid w-full grid-cols-4">
+            <TabsList className="grid w-full grid-cols-2 md:grid-cols-4">
               <TabsTrigger value="distanceToCost">
                 <Route className="w-4 h-4 mr-2" />
                 Distance to Cost
