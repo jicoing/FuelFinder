@@ -34,6 +34,8 @@
   --color-chart-3: hsl(var(--chart-3));
   --color-chart-4: hsl(var(--chart-4));
   --color-chart-5: hsl(var(--chart-5));
+  --color-chart-6: hsl(var(--chart-6));
+  --color-chart-7: hsl(var(--chart-7));
 
   --font-sans: 'Inter', sans-serif;
   --font-mono: 'JetBrains Mono', monospace;
@@ -45,68 +47,71 @@
   /* Dark mode by default essentially, but handling light mode vars just in case */
   --background: 222 47% 11%;
   --foreground: 210 40% 98%;
-  
+
   --card: 222 47% 11%;
   --card-foreground: 210 40% 98%;
-  
+
   --popover: 222 47% 11%;
   --popover-foreground: 210 40% 98%;
-  
+
   --primary: 217 91% 60%;
   --primary-foreground: 222 47% 11%;
-  
+
   --secondary: 217 19% 27%;
   --secondary-foreground: 210 40% 98%;
-  
+
   --muted: 217 19% 27%;
   --muted-foreground: 215 20% 65%;
-  
+
   --accent: 217 19% 27%;
   --accent-foreground: 210 40% 98%;
-  
+
   --destructive: 0 62% 30%;
   --destructive-foreground: 210 40% 98%;
-  
+
   --border: 217 19% 27%;
   --input: 217 19% 27%;
   --ring: 217 91% 60%;
-  
+
   --chart-1: 220 70% 50%;
   --chart-2: 160 60% 45%;
   --chart-3: 30 80% 55%;
   --chart-4: 280 65% 60%;
   --chart-5: 340 75% 55%;
+  --chart-6: 40 75% 55%;
+  --chart-7: 100 75% 55%;
+
 }
 
 .dark {
   --background: 222 47% 11%;
   --foreground: 210 40% 98%;
-  
+
   --card: 222 47% 11%;
   --card-foreground: 210 40% 98%;
-  
+
   --popover: 222 47% 11%;
   --popover-foreground: 210 40% 98%;
-  
+
   --primary: 217 91% 60%;
   --primary-foreground: 222 47% 11%;
-  
+
   --secondary: 217 19% 27%;
   --secondary-foreground: 210 40% 98%;
-  
+
   --muted: 217 19% 27%;
   --muted-foreground: 215 20% 65%;
-  
+
   --accent: 217 19% 27%;
   --accent-foreground: 210 40% 98%;
-  
+
   --destructive: 0 62% 30%;
   --destructive-foreground: 210 40% 98%;
-  
+
   --border: 217 19% 27%;
   --input: 217 19% 27%;
   --ring: 217 91% 60%;
-  
+
   --chart-1: 220 70% 50%;
   --chart-2: 160 60% 45%;
   --chart-3: 30 80% 55%;
@@ -114,18 +119,25 @@
   --chart-5: 340 75% 55%;
 }
 
-@layer base {
-  * {
-    @apply border-border;
-  }
-  body {
-    @apply font-sans antialiased bg-background text-foreground;
-  }
+/* Add some subtle styling to the body */
+body {
+  background-color: #0c0c0c; /* Fallback for browsers that don't support the background pattern */
+  background-image: linear-gradient(
+      rgba(255, 255, 255, 0.05) 1px,
+      transparent 1px
+    ),
+    linear-gradient(90deg, rgba(255, 255, 255, 0.05) 1px, transparent 1px);
+  background-size: 20px 20px;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
 }
 
-/* Custom Grid Background Pattern */
-.bg-grid-pattern {
-  background-size: 40px 40px;
-  background-image: linear-gradient(to right, rgba(255, 255, 255, 0.05) 1px, transparent 1px),
-    linear-gradient(to bottom, rgba(255, 255, 255, 0.05) 1px, transparent 1px);
+/* Smooth scrolling for the entire page */
+html {
+  scroll-behavior: smooth;
+}
+
+/* Remove the blue highlight on touch */
+* {
+  -webkit-tap-highlight-color: transparent;
 }

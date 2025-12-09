@@ -5,6 +5,7 @@ import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Fuel, ArrowRight, Wallet, Route, Trash2 } from "lucide-react";
+import { Chart } from "@/components/ui/chart";
 
 const TripCalculatorPage = () => {
   const [distance, setDistance] = useState("200");
@@ -44,6 +45,66 @@ const TripCalculatorPage = () => {
     return null;
   }, [budget, mileage, fuelRate]);
 
+  const weeklyDistanceData = useMemo(() => {
+    const weeklyData = [
+      { day: "Sun", distance: 0 },
+      { day: "Mon", distance: 0 },
+      { day: "Tue", distance: 0 },
+      { day: "Wed", distance: 0 },
+      { day: "Thu", distance: 0 },
+      { day: "Fri", distance: 0 },
+      { day: "Sat", distance: 0 },
+    ];
+
+    calculations.forEach(calc => {
+      const date = new Date(calc.timestamp);
+      const dayOfWeek = date.getDay(); // 0 for Sunday, 1 for Monday, etc.
+      
+      let distance = 0;
+      if (calc.type === 'distanceToCost') {
+        distance = parseFloat(calc.inputs.distance);
+      } else if (calc.type === 'budgetToDistance') {
+        distance = parseFloat(calc.outputs.distance);
+      }
+
+      if (!isNaN(distance)) {
+        weeklyData[dayOfWeek].distance += distance;
+      }
+    });
+
+    return weeklyData;
+  }, [calculations]);
+
+  const budgetChartData = useMemo(() => {
+    const dailyBudgetData = [
+      { name: "Sun", value: 0 },
+      { name: "Mon", value: 0 },
+      { name: "Tue", value: 0 },
+      { name: "Wed", value: 0 },
+      { name: "Thu", value: 0 },
+      { name: "Fri", value: 0 },
+      { name: "Sat", value: 0 },
+    ];
+
+    calculations.forEach(calc => {
+      const date = new Date(calc.timestamp);
+      const dayOfWeek = date.getDay(); // 0 for Sunday, 1 for Monday, etc.
+      
+      let budget = 0;
+      if (calc.type === 'distanceToCost') {
+        budget = parseFloat(calc.outputs.totalCost);
+      } else if (calc.type === 'budgetToDistance') {
+        budget = parseFloat(calc.inputs.budget);
+      }
+
+      if (!isNaN(budget)) {
+        dailyBudgetData[dayOfWeek].value += budget;
+      }
+    });
+
+    return dailyBudgetData.filter(day => day.value > 0);
+  }, [calculations]);
+
   const updateCalculations = (newCalculations) => {
     setCalculations(newCalculations);
     localStorage.setItem("tripCalculations", JSON.stringify(newCalculations));
@@ -69,15 +130,19 @@ const TripCalculatorPage = () => {
     updateCalculations(newCalculations);
   };
 
+  const handleDeleteAllCalculations = () => {
+    updateCalculations([]);
+  };
+
   return (
     <div className="container mx-auto p-4">
       <Card>
         <CardHeader>
-          <CardTitle>Fuel Calculator</CardTitle>
+          <CardTitle><Fuel className="w-6 h-6 mr-2" /></CardTitle>
         </CardHeader>
         <CardContent>
           <Tabs defaultValue="distanceToCost">
-            <TabsList className="grid w-full grid-cols-2">
+            <TabsList className="grid w-full grid-cols-4">
               <TabsTrigger value="distanceToCost">
                 <Route className="w-4 h-4 mr-2" />
                 Distance to Cost
@@ -85,6 +150,14 @@ const TripCalculatorPage = () => {
               <TabsTrigger value="budgetToDistance">
                 <Wallet className="w-4 h-4 mr-2" />
                 Budget to Distance
+              </TabsTrigger>
+              <TabsTrigger value="charts">
+                <Route className="w-4 h-4 mr-2" />
+                Charts
+              </TabsTrigger>
+              <TabsTrigger value="histogram">
+                <Route className="w-4 h-4 mr-2" />
+                Histogram
               </TabsTrigger>
             </TabsList>
             <TabsContent value="distanceToCost">
@@ -159,11 +232,27 @@ const TripCalculatorPage = () => {
                 </Button>
               </div>
             </TabsContent>
+            <TabsContent value="charts">
+              <div className="space-y-4 pt-4">
+                <Chart type='pie-chart' data={budgetChartData}/>
+              </div>
+            </TabsContent>
+            <TabsContent value="histogram">
+              <div className="space-y-4 pt-4">
+                <Chart type='histogram' data={weeklyDistanceData} />
+              </div>
+            </TabsContent>
           </Tabs>
 
           {calculations.length > 0 && (
             <div className="mt-8">
-              <h3 className="text-lg font-semibold mb-4">History</h3>
+              <div className="flex justify-between items-center mb-4">
+                <h3 className="text-lg font-semibold">History</h3>
+                <Button variant="destructive" size="sm" onClick={handleDeleteAllCalculations}>
+                  <Trash2 className="w-4 h-4 mr-2" />
+                  Delete All
+                </Button>
+              </div>
               <ul className="space-y-4">
                 {calculations.map((calc) => (
                   <li key={calc.timestamp} className="p-4 bg-muted rounded-lg flex justify-between items-center">

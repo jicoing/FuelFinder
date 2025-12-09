@@ -1,11 +1,10 @@
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Fuel, MapPin, Navigation, Search, Loader2, AlertCircle, X, Star } from 'lucide-react';
+import { Fuel, MapPin, Navigation, Search, Loader2, AlertCircle, X, Star, ChevronLeft, ChevronRight } from 'lucide-react';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Badge } from '@/components/ui/badge';
@@ -16,6 +15,7 @@ import L from 'leaflet';
 import markerIcon2x from 'leaflet/dist/images/marker-icon-2x.png';
 import markerIcon from 'leaflet/dist/images/marker-icon.png';
 import markerShadow from 'leaflet/dist/images/marker-shadow.png';
+import { useIsMobile } from '@/hooks/use-mobile';
 
 // @ts-ignore
 delete L.Icon.Default.prototype._getIconUrl;
@@ -44,9 +44,9 @@ const selectedFuelIcon = new L.DivIcon({
 const OVERPASS_URL = 'https://overpass-api.de/api/interpreter';
 const NOMINATIM_URL = 'https://nominatim.openstreetmap.org/search';
 
-function haversineDistanceKm(lat1, lon1, lat2, lon2) {
+function haversineDistance(lat1, lon1, lat2, lon2, unit = 'km') {
   const toRad = (d) => (d * Math.PI) / 180;
-  const R = 6371;
+  const R = unit === 'miles' ? 3959 : 6371;
   const dLat = toRad(lat2 - lat1);
   const dLon = toRad(lon2 - lon1);
   const a =
@@ -73,14 +73,57 @@ export default function Home() {
   const [zipCode, setZipCode] = useState('');
   const [lat, setLat] = useState(null);
   const [lon, setLon] = useState(null);
-  const [radiusKm, setRadiusKm] = useState('10');
-  const [brandFilter, setBrandFilter] = useState('all');
+  const [radius, setRadius] = useState('10');
+  const [country, setCountry] = useState('IN');
+  const [distanceUnit, setDistanceUnit] = useState('km');
+
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
   const [usingLocation, setUsingLocation] = useState(false);
   
   const [stations, setStations] = useState([]);
   const [selectedStation, setSelectedStation] = useState(null);
+
+  const scrollViewportRef = useRef<HTMLDivElement>(null);
+  const [canScrollLeft, setCanScrollLeft] = useState(false);
+  const [canScrollRight, setCanScrollRight] = useState(false);
+  const isMobile = useIsMobile();
+
+  useEffect(() => {
+    if (country === 'US') {
+      setDistanceUnit('miles');
+    } else {
+      setDistanceUnit('km');
+    }
+  }, [country]);
+
+  useEffect(() => {
+    checkScrollability();
+  }, [stations]);
+
+  const checkScrollability = () => {
+    const viewport = scrollViewportRef.current;
+    if (viewport) {
+      setCanScrollLeft(viewport.scrollLeft > 0);
+      setCanScrollRight(viewport.scrollLeft < viewport.scrollWidth - viewport.clientWidth);
+    }
+  };
+
+  const handleScroll = () => {
+    checkScrollability();
+  };
+
+  const scrollLeft = () => {
+    if (scrollViewportRef.current) {
+      scrollViewportRef.current.scrollBy({ left: -300, behavior: 'smooth' });
+    }
+  };
+
+  const scrollRight = () => {
+    if (scrollViewportRef.current) {
+      scrollViewportRef.current.scrollBy({ left: 300, behavior: 'smooth' });
+    }
+  };
 
   const handleUseMyLocation = () => {
     if (!navigator.geolocation) {
@@ -107,7 +150,7 @@ export default function Home() {
 
   const geocodeZip = async (zip) => {
     try {
-      const res = await fetch(`${NOMINATIM_URL}?postalcode=${zip}&format=json&limit=1`);
+      const res = await fetch(`${NOMINATIM_URL}?postalcode=${zip}&country=${country.toLowerCase()}&format=json&limit=1`);
       if (!res.ok) throw new Error('Geocoding failed');
       const data = await res.json();
       if (data && data.length > 0) {
@@ -158,7 +201,7 @@ export default function Home() {
         throw new Error('Please enter a ZIP code or use \"My Location\".');
       }
 
-      const radiusMeters = parseInt(radiusKm) * 1000;
+      const radiusMeters = parseInt(radius) * (distanceUnit === 'miles' ? 1609.34 : 1000);
       const query = buildOverpassQuery(searchLat, searchLon, radiusMeters);
       
       const res = await fetch(OVERPASS_URL, {
@@ -181,11 +224,12 @@ export default function Home() {
         .map((el) => {
           const name = el.tags?.name || 'Unnamed fuel station';
           const brand = el.tags?.brand || 'Unknown brand';
-          const distanceKm = haversineDistanceKm(
+          const distance = haversineDistance(
             searchLat,
             searchLon,
             el.lat,
-            el.lon
+            el.lon,
+            distanceUnit
           );
           return {
             id: el.id,
@@ -193,22 +237,14 @@ export default function Home() {
             brand,
             lat: el.lat,
             lon: el.lon,
-            distanceKm,
+            distance,
             rating: (Math.random() * 2 + 3).toFixed(1), 
             isOpen: Math.random() > 0.2 
           };
         })
-        .sort((a, b) => a.distanceKm - b.distanceKm);
+        .sort((a, b) => a.distance - b.distance);
 
-      const filtered =
-        brandFilter === 'all'
-          ? parsed
-          : parsed.filter(
-              (s) =>
-                s.brand.toLowerCase().includes(brandFilter.toLowerCase())
-            );
-
-      setStations(filtered);
+      setStations(parsed);
       setView('results');
     } catch (e) {
       setError(e.message || 'An error occurred while fetching data.');
@@ -239,10 +275,10 @@ export default function Home() {
         
         <div className="absolute inset-0 z-0">
            <MapContainer 
-              center={[39.8283, -98.5795]} 
+              center={[20.5937, 78.9629]} 
               zoom={4} 
               style={{ height: '100%', width: '100%' }}
-              zoomControl={false}
+              zoomControl={isMobile}
             >
               <TileLayer
                 attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
@@ -254,7 +290,7 @@ export default function Home() {
                   <MapUpdater center={[lat, lon]} zoom={13} />
                   <Circle 
                     center={[lat, lon]} 
-                    radius={parseInt(radiusKm) * 1000}
+                    radius={parseInt(radius) * (distanceUnit === 'miles' ? 1609.34 : 1000)}
                     pathOptions={{ color: '#3b82f6', fillColor: '#3b82f6', fillOpacity: 0.05, weight: 1 }} 
                   />
                   
@@ -294,7 +330,7 @@ export default function Home() {
 
                   <div className="space-y-4">
                     <div className="space-y-2">
-                      <Label>Location</Label>
+                      <p className="text-sm font-medium text-muted-foreground">Location</p>
                       <div className="relative">
                         <Input 
                           placeholder="Enter ZIP Code" 
@@ -310,8 +346,8 @@ export default function Home() {
                         )}
                       </div>
                       <Button 
-                        variant="outline" 
-                        className="w-full"
+                        variant="default" 
+                        className="w-full bg-blue-500 hover:bg-blue-600 text-white"
                         onClick={handleUseMyLocation}
                         disabled={loading}
                       >
@@ -322,32 +358,28 @@ export default function Home() {
 
                     <div className="grid grid-cols-2 gap-4">
                       <div className="spacey-2">
-                        <Label>Radius</Label>
-                        <Select value={radiusKm} onValueChange={setRadiusKm}>
+                        <p className="text-sm font-medium text-muted-foreground">Radius</p>
+                        <Select value={radius} onValueChange={setRadius}>
                           <SelectTrigger>
                             <SelectValue placeholder="Radius" />
                           </SelectTrigger>
                           <SelectContent>
-                            <SelectItem value="5">5 km</SelectItem>
-                            <SelectItem value="10">10 km</SelectItem>
-                            <SelectItem value="20">20 km</SelectItem>
-                            <SelectItem value="50">50 km</SelectItem>
+                            <SelectItem value="5">5 {distanceUnit}</SelectItem>
+                            <SelectItem value="10">10 {distanceUnit}</SelectItem>
+                            <SelectItem value="20">20 {distanceUnit}</SelectItem>
+                            <SelectItem value="50">50 {distanceUnit}</SelectItem>
                           </SelectContent>
                         </Select>
                       </div>
                       <div className="space-y-2">
-                        <Label>Brand</Label>
-                        <Select value={brandFilter} onValueChange={setBrandFilter}>
+                        <p className="text-sm font-medium text-muted-foreground">Country</p>
+                        <Select value={country} onValueChange={setCountry}>
                           <SelectTrigger>
-                            <SelectValue placeholder="Brand" />
+                            <SelectValue placeholder="Country" />
                           </SelectTrigger>
                           <SelectContent>
-                            <SelectItem value="all">All</SelectItem>
-                            <SelectItem value="shell">Shell</SelectItem>
-                            <SelectItem value="bp">BP</SelectItem>
-                            <SelectItem value="total">Total</SelectItem>
-                            <SelectItem value="esso">Esso</SelectItem>
-                            <SelectItem value="texaco">Texaco</SelectItem>
+                            <SelectItem value="IN">India</SelectItem>
+                            <SelectItem value="US">United States</SelectItem>
                           </SelectContent>
                         </Select>
                       </div>
@@ -369,6 +401,7 @@ export default function Home() {
                     )}
                   </div>
                 </CardContent>
+                <p className="text-xs text-center text-muted-foreground pb-4">Made with ❤️ for travellers</p>
               </Card>
             </motion.div>
           )}
@@ -392,36 +425,48 @@ export default function Home() {
                         {stations.length} stations found
                      </Badge>
                   </div>
-                  <ScrollArea className="w-full whitespace-nowrap pb-4">
-                    <div className="flex space-x-4">
-                      {stations.map((station) => (
-                        <Card 
-                          key={station.id} 
-                          className="w-[280px] shrink-0 cursor-pointer hover:shadow-lg transition-shadow border-none shadow-md bg-card/95 backdrop-blur-sm"
-                          onClick={() => setSelectedStation(station)}
-                        >
-                          <CardContent className="p-4">
-                            <div className="flex items-start justify-between mb-2">
-                              <div className="p-2 bg-blue-100 dark:bg-blue-900/30 rounded-full text-blue-600 dark:text-blue-400">
-                                <Fuel className="w-5 h-5" />
+                  <div className="relative">
+                    <ScrollArea className="w-full whitespace-nowrap pb-4" viewportRef={scrollViewportRef} onScroll={handleScroll}>
+                      <div className="flex space-x-4">
+                        {stations.map((station) => (
+                          <Card 
+                            key={station.id} 
+                            className="w-[280px] shrink-0 cursor-pointer hover:shadow-lg transition-shadow border-none shadow-md bg-card/95 backdrop-blur-sm"
+                            onClick={() => setSelectedStation(station)}
+                          >
+                            <CardContent className="p-4">
+                              <div className="flex items-start justify-between mb-2">
+                                <div className="p-2 bg-blue-100 dark:bg-blue-900/30 rounded-full text-blue-600 dark:text-blue-400">
+                                  <Fuel className="w-5 h-5" />
+                                </div>
+                                <span className="text-xs font-mono text-muted-foreground">
+                                  {station.distance.toFixed(1)} {distanceUnit}
+                                </span>
                               </div>
-                              <span className="text-xs font-mono text-muted-foreground">
-                                {station.distanceKm.toFixed(1)} km
-                              </span>
-                            </div>
-                            <h3 className="font-semibold truncate">{station.name}</h3>
-                            <p className="text-sm text-muted-foreground truncate">{station.brand}</p>
-                            <div className="mt-3 flex items-center gap-2 text-xs">
-                               <span className="flex items-center text-amber-500 font-medium">
-                                 <Star className="w-3 h-3 mr-1 fill-current" /> {station.rating}
-                               </span>
-                            </div>
-                          </CardContent>
-                        </Card>
-                      ))}
-                    </div>
-                    <ScrollBar orientation="horizontal" />
-                  </ScrollArea>
+                              <h3 className="font-semibold truncate">{station.name}</h3>
+                              <p className="text-sm text-muted-foreground truncate">{station.brand}</p>
+                              <div className="mt-3 flex items-center gap-2 text-xs">
+                                 <span className="flex items-center text-amber-500 font-medium">
+                                   <Star className="w-3 h-3 mr-1 fill-current" /> {station.rating}
+                                 </span>
+                              </div>
+                            </CardContent>
+                          </Card>
+                        ))}
+                      </div>
+                      <ScrollBar orientation="horizontal" />
+                    </ScrollArea>
+                    {canScrollLeft && (
+                      <Button variant="outline" size="icon" className="absolute left-0 top-1/2 -translate-y-1/2 rounded-full h-8 w-8 bg-background/80 hover:bg-background" onClick={scrollLeft}>
+                        <ChevronLeft className="h-5 w-5" />
+                      </Button>
+                    )}
+                    {canScrollRight && (
+                      <Button variant="outline" size="icon" className="absolute right-0 top-1/2 -translate-y-1/2 rounded-full h-8 w-8 bg-background/80 hover:bg-background" onClick={scrollRight}>
+                        <ChevronRight className="h-5 w-5" />
+                      </Button>
+                    )}
+                  </div>
                 </motion.div>
               )}
 
@@ -457,7 +502,7 @@ export default function Home() {
                                    <Star className="w-4 h-4 fill-current" />
                                    <span>{selectedStation.rating}</span>
                                    <span className="text-muted-foreground">•</span>
-                                   <span>{selectedStation.distanceKm.toFixed(1)} km away</span>
+                                   <span>{selectedStation.distance.toFixed(1)} {distanceUnit} away</span>
                                 </div>
                                 <p className="text-muted-foreground flex items-center justify-center md:justify-start gap-1">
                                    <MapPin className="w-4 h-4" />
@@ -474,7 +519,11 @@ export default function Home() {
                              </div>
                           </div>
                           
-                          <div className="mt-6">
+                          <div className="mt-6 grid grid-cols-2 gap-4">
+                             <Button variant="outline" className="w-full h-12 text-base" onClick={handleNewSearch}>
+                                <Search className="w-5 h-5 mr-2" />
+                                New Search
+                             </Button>
                              <Button className="w-full h-12 text-base bg-blue-600 hover:bg-blue-700 text-white shadow-lg shadow-blue-600/20" asChild>
                                 <a href={directionsUrl(selectedStation)} target="_blank" rel="noreferrer">
                                    <Navigation className="w-5 h-5 mr-2" />
