@@ -12,7 +12,7 @@ import AboutPage from "@/pages/about";
 import 'leaflet/dist/leaflet.css';
 import { Button } from "./components/ui/button";
 import { queryClient } from "./lib/queryClient";
-import { Fuel, Calculator, Menu, Search, Info, FileText, Shield } from "lucide-react";
+import { Fuel, Calculator, Menu, Search, Info, FileText, Shield, Heart } from "lucide-react";
 import { Sheet, SheetContent, SheetTrigger, SheetClose } from "@/components/ui/sheet";
 
 function Router() {
@@ -57,45 +57,55 @@ function App() {
               </Button>
             </SheetTrigger>
             <SheetContent>
-              <nav className="flex flex-col gap-4 mt-8">
-                <SheetClose asChild>
-                  <Button variant="ghost" className="w-full justify-start gap-2 text-lg font-sans text-primary" onClick={handleNewSearch}>
-                    <Search className="w-6 h-6 text-primary" />
-                    New Search
-                  </Button>
-                </SheetClose>
-                <SheetClose asChild>
-                  <Link href="/calculator">
-                    <Button variant="ghost" className="w-full justify-start gap-2 text-lg font-sans text-primary">
-                      <Calculator className="w-6 h-6 text-primary" />
-                      Calculator
+              <nav className="flex flex-col h-full mt-8">
+                <div className="flex-grow">
+                  <SheetClose asChild>
+                    <Button variant="ghost" className="w-full justify-start gap-2 text-lg font-sans text-primary" onClick={handleNewSearch}>
+                      <Search className="w-6 h-6 text-primary" />
+                      New Search
                     </Button>
-                  </Link>
-                </SheetClose>
-                <SheetClose asChild>
-                  <Link href="/privacy">
-                    <Button variant="ghost" className="w-full justify-start gap-2 text-lg font-sans text-primary">
-                      <Shield className="w-6 h-6 text-primary" />
-                      Privacy
+                  </SheetClose>
+                  <SheetClose asChild>
+                    <Link href="/calculator">
+                      <Button variant="ghost" className="w-full justify-start gap-2 text-lg font-sans text-primary">
+                        <Calculator className="w-6 h-6 text-primary" />
+                        Calculator
+                      </Button>
+                    </Link>
+                  </SheetClose>
+                  <SheetClose asChild>
+                    <Link href="/privacy">
+                      <Button variant="ghost" className="w-full justify-start gap-2 text-lg font-sans text-primary">
+                        <Shield className="w-6 h-6 text-primary" />
+                        Privacy
+                      </Button>
+                    </Link>
+                  </SheetClose>
+                  <SheetClose asChild>
+                    <Link href="/terms">
+                      <Button variant="ghost" className="w-full justify-start gap-2 text-lg font-sans text-primary">
+                        <FileText className="w-6 h-6 text-primary" />
+                        Terms
+                      </Button>
+                    </Link>
+                  </SheetClose>
+                  <SheetClose asChild>
+                    <Link href="/about">
+                      <Button variant="ghost" className="w-full justify-start gap-2 text-lg font-sans text-primary">
+                        <Info className="w-6 h-6 text-primary" />
+                        About
+                      </Button>
+                    </Link>
+                  </SheetClose>
+                </div>
+                <div className="mt-auto pb-4">
+                  <a href="https://www.paypal.com/ncp/payment/7DCFJV7N2WS9L" target="_blank" rel="noopener noreferrer">
+                    <Button className="w-full bg-blue-500 hover:bg-blue-600 text-white justify-center gap-2 text-lg font-sans">
+                      <Heart className="w-6 h-6" />
+                      Donate
                     </Button>
-                  </Link>
-                </SheetClose>
-                <SheetClose asChild>
-                  <Link href="/terms">
-                    <Button variant="ghost" className="w-full justify-start gap-2 text-lg font-sans text-primary">
-                      <FileText className="w-6 h-6 text-primary" />
-                      Terms
-                    </Button>
-                  </Link>
-                </SheetClose>
-                <SheetClose asChild>
-                  <Link href="/about">
-                    <Button variant="ghost" className="w-full justify-start gap-2 text-lg font-sans text-primary">
-                      <Info className="w-6 h-6 text-primary" />
-                      About
-                    </Button>
-                  </Link>
-                </SheetClose>
+                  </a>
+                </div>
               </nav>
             </SheetContent>
           </Sheet>

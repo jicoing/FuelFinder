@@ -6,6 +6,13 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Fuel, ArrowRight, Wallet, Route, Trash2 } from "lucide-react";
 import { Chart } from "@/components/ui/chart";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 
 const TripCalculatorPage = () => {
   const [distance, setDistance] = useState("200");
@@ -13,6 +20,7 @@ const TripCalculatorPage = () => {
   const [fuelRate, setFuelRate] = useState("107");
   const [budget, setBudget] = useState("200");
   const [calculations, setCalculations] = useState([]);
+  const [country, setCountry] = useState("India");
 
   useEffect(() => {
     const savedCalculations = localStorage.getItem("tripCalculations");
@@ -20,6 +28,23 @@ const TripCalculatorPage = () => {
       setCalculations(JSON.parse(savedCalculations));
     }
   }, []);
+
+  const units = useMemo(() => {
+    if (country === "USA") {
+      return {
+        distance: "miles",
+        volume: "gallons",
+        currency: "$",
+        mileage: "mpg",
+      };
+    }
+    return {
+      distance: "km",
+      volume: "L",
+      currency: "₹",
+      mileage: "km/L",
+    };
+  }, [country]);
 
   const distanceToCostResult = useMemo(() => {
     const d = parseFloat(distance);
@@ -31,7 +56,7 @@ const TripCalculatorPage = () => {
       return { fuelNeeded, totalCost };
     }
     return null;
-  }, [distance, mileage, fuelRate]);
+  }, [distance, mileage, fuelRate, country]);
 
   const budgetToDistanceResult = useMemo(() => {
     const b = parseFloat(budget);
@@ -43,7 +68,7 @@ const TripCalculatorPage = () => {
       return { fuelAffordable, distance };
     }
     return null;
-  }, [budget, mileage, fuelRate]);
+  }, [budget, mileage, fuelRate, country]);
 
   const weeklyDistanceData = useMemo(() => {
     const weeklyData = [
@@ -119,6 +144,7 @@ const TripCalculatorPage = () => {
         mileage,
         fuelRate,
         budget,
+        country,
       },
       outputs: type === 'distanceToCost' ? distanceToCostResult : budgetToDistanceResult,
     };
@@ -141,6 +167,17 @@ const TripCalculatorPage = () => {
           <CardTitle><Fuel className="w-6 h-6 mr-2" /></CardTitle>
         </CardHeader>
         <CardContent>
+          <div className="mb-4">
+            <Select onValueChange={setCountry} defaultValue={country}>
+              <SelectTrigger className="w-[180px]">
+                <SelectValue placeholder="Select a country" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="India">India</SelectItem>
+                <SelectItem value="USA">USA</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
           <Tabs defaultValue="distanceToCost">
             <TabsList className="grid w-full grid-cols-2 md:grid-cols-4">
               <TabsTrigger value="distanceToCost">
@@ -164,15 +201,15 @@ const TripCalculatorPage = () => {
               <div className="space-y-4 pt-4">
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                   <div>
-                    <label>Distance (km)</label>
+                    <label>Distance ({units.distance})</label>
                     <Input type="number" value={distance} onChange={(e) => setDistance(e.target.value)} />
                   </div>
                   <div>
-                    <label>Mileage (km/L)</label>
+                    <label>Mileage ({units.mileage})</label>
                     <Input type="number" value={mileage} onChange={(e) => setMileage(e.target.value)} />
                   </div>
                   <div>
-                    <label>Fuel Rate (₹/L)</label>
+                    <label>Fuel Rate ({units.currency}/{units.volume})</label>
                     <Input type="number" value={fuelRate} onChange={(e) => setFuelRate(e.target.value)} />
                   </div>
                 </div>
@@ -181,12 +218,12 @@ const TripCalculatorPage = () => {
                       <div className="flex items-center justify-center text-center">
                           <div className="text-center">
                               <p className="text-sm text-muted-foreground">Fuel Needed</p>
-                              <p className="text-2xl font-bold">{distanceToCostResult.fuelNeeded.toFixed(2)} L</p>
+                              <p className="text-2xl font-bold">{distanceToCostResult.fuelNeeded.toFixed(2)} {units.volume}</p>
                           </div>
                           <ArrowRight className="w-8 h-8 mx-6 text-muted-foreground" />
                           <div className="text-center">
                               <p className="text-sm text-muted-foreground">Total Cost</p>
-                              <p className="text-2xl font-bold">₹{distanceToCostResult.totalCost.toFixed(2)}</p>
+                              <p className="text-2xl font-bold">{units.currency}{distanceToCostResult.totalCost.toFixed(2)}</p>
                           </div>
                       </div>
                   </div>
@@ -200,15 +237,15 @@ const TripCalculatorPage = () => {
               <div className="space-y-4 pt-4">
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                   <div>
-                    <label>Budget (₹)</label>
+                    <label>Budget ({units.currency})</label>
                     <Input type="number" value={budget} onChange={(e) => setBudget(e.target.value)} />
                   </div>
                   <div>
-                    <label>Mileage (km/L)</label>
+                    <label>Mileage ({units.mileage})</label>
                     <Input type="number" value={mileage} onChange={(e) => setMileage(e.target.value)} />
                   </div>
                   <div>
-                    <label>Fuel Rate (₹/L)</label>
+                    <label>Fuel Rate ({units.currency}/{units.volume})</label>
                     <Input type="number" value={fuelRate} onChange={(e) => setFuelRate(e.target.value)} />
                   </div>
                 </div>
@@ -217,12 +254,12 @@ const TripCalculatorPage = () => {
                        <div className="flex items-center justify-center text-center">
                            <div className="text-center">
                                <p className="text-sm text-muted-foreground">Fuel Affordable</p>
-                               <p className="text-2xl font-bold">{budgetToDistanceResult.fuelAffordable.toFixed(2)} L</p>
+                               <p className="text-2xl font-bold">{budgetToDistanceResult.fuelAffordable.toFixed(2)} {units.volume}</p>
                            </div>
                            <ArrowRight className="w-8 h-8 mx-6 text-muted-foreground" />
                            <div className="text-center">
                                <p className="text-sm text-muted-foreground">Distance</p>
-                               <p className="text-2xl font-bold">{budgetToDistanceResult.distance.toFixed(2)} km</p>
+                               <p className="text-2xl font-bold">{budgetToDistanceResult.distance.toFixed(2)} {units.distance}</p>
                            </div>
                        </div>
                    </div>
@@ -254,15 +291,27 @@ const TripCalculatorPage = () => {
                 </Button>
               </div>
               <ul className="space-y-4">
-                {calculations.map((calc) => (
+                {calculations.map((calc) => {
+                  const calcUnits = calc.inputs.country === "USA" ? {
+                    distance: "miles",
+                    volume: "gallons",
+                    currency: "$",
+                    mileage: "mpg",
+                  } : {
+                    distance: "km",
+                    volume: "L",
+                    currency: "₹",
+                    mileage: "km/L",
+                  };
+                  return (
                   <li key={calc.timestamp} className="p-4 bg-muted rounded-lg flex justify-between items-center">
                       <div>
                         {calc.type === 'distanceToCost' ? (
                           <div className="flex items-center space-x-4">
                             <Route className="w-6 h-6 text-primary"/>
                             <div>
-                              <p><strong>{calc.inputs.distance} km</strong> <ArrowRight className="inline w-4 h-4"/> ₹{calc.outputs.totalCost.toFixed(2)}</p>
-                              <p className="text-sm text-muted-foreground">{calc.inputs.mileage} km/L at ₹{calc.inputs.fuelRate}/L</p>
+                              <p><strong>{calc.inputs.distance} {calcUnits.distance}</strong> <ArrowRight className="inline w-4 h-4"/> {calcUnits.currency}{calc.outputs.totalCost.toFixed(2)}</p>
+                              <p className="text-sm text-muted-foreground">{calc.inputs.mileage} {calcUnits.mileage} at {calcUnits.currency}{calc.inputs.fuelRate}/{calcUnits.volume}</p>
                               <p className="text-xs text-muted-foreground mt-1">{new Date(calc.timestamp).toLocaleString()}</p>
                             </div>
                           </div>
@@ -270,8 +319,8 @@ const TripCalculatorPage = () => {
                           <div className="flex items-center space-x-4">
                             <Wallet className="w-6 h-6 text-primary"/>
                             <div>
-                              <p><strong>₹{calc.inputs.budget}</strong> <ArrowRight className="inline w-4 h-4"/> {calc.outputs.distance.toFixed(2)} km</p>
-                              <p className="text-sm text-muted-foreground">{calc.inputs.mileage} km/L at ₹{calc.inputs.fuelRate}/L</p>
+                              <p><strong>{calcUnits.currency}{calc.inputs.budget}</strong> <ArrowRight className="inline w-4 h-4"/> {calc.outputs.distance.toFixed(2)} {calcUnits.distance}</p>
+                              <p className="text-sm text-muted-foreground">{calc.inputs.mileage} {calcUnits.mileage} at {calcUnits.currency}{calc.inputs.fuelRate}/{calcUnits.volume}</p>
                               <p className="text-xs text-muted-foreground mt-1">{new Date(calc.timestamp).toLocaleString()}</p>
                             </div>
                           </div>
@@ -281,7 +330,7 @@ const TripCalculatorPage = () => {
                         <Trash2 className="w-4 h-4" />
                       </Button>
                   </li>
-                ))}
+                )})}
               </ul>
             </div>
           )}

@@ -23,6 +23,16 @@ const AboutPage = () => {
           <p className="mb-4">
             We are working hard to bring you real-time fuel price data. Soon, you'll be able to compare prices at different gas stations to ensure you're getting the best deal.
           </p>
+          <h2 className="text-xl font-semibold mb-2">About the Developer</h2>
+          <p className="mb-4">
+            Fuel Finder is developed and maintained by a passionate solo developer. Have questions or feedback? I'd love to hear from you! Connect with me on Twitter: <a href="https://twitter.com/jicoing" target="_blank" rel="noopener noreferrer" className="text-blue-500 hover:underline">@jicoing</a>
+          </p>
+          <h2 className="text-xl font-semibold mb-2">Support the Project</h2>
+          <p className="mb-4">
+            If you find Fuel Finder useful, please consider supporting its development. Your donations help cover server costs and allow me to keep the app ad-free.
+            <br />- PayPal: <a href="https://paypal.me/jicoing" target="_blank" rel="noopener noreferrer" className="text-blue-500 hover:underline">paypal.me/jicoing</a>
+            <br />- UPI: jicoing@okicici
+          </p>
         </CardContent>
       </Card>
     </div>
