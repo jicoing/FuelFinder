@@ -1,7 +1,7 @@
 <?xml version='1.0' encoding='utf-8'?>
 <resources>
-    <string name="app_name">Fuel Finder</string>
-    <string name="title_activity_main">Fuel Finder</string>
-    <string name="package_name">com.example.fuelfinder</string>
-    <string name="custom_url_scheme">com.example.fuelfinder</string>
+    <string name="app_name">findmyfuel</string>
+    <string name="title_activity_main">findmyfuel</string>
+    <string name="package_name">com.example.findmyfuel</string>
+    <string name="custom_url_scheme">com.example.findmyfuel</string>
 </resources>

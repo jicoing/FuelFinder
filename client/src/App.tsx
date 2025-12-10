@@ -47,7 +47,7 @@ function App() {
           <Link href="/" className="flex items-center gap-2 text-primary">
             <Fuel className="w-6 h-6" />
             <span className="font-bold text-xl tracking-tight cursor-pointer">
-              Fuel Finder
+              findmyfuel
             </span>
           </Link>
           <Sheet>

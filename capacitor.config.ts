@@ -1,8 +1,8 @@
 import type { CapacitorConfig } from '@capacitor/cli';
 
 const config: CapacitorConfig = {
-  appId: 'com.example.fuelfinder',
-  appName: 'Fuel Finder',
+  appId: 'com.example.findmyfuel',
+  appName: 'Find My Fuel',
   webDir: 'dist/public'
 };
 
