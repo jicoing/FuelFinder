@@ -97,6 +97,7 @@ export default function Home() {
     } else {
       setDistanceUnit('km');
     }
+    setZipCode('');
   }, [country]);
 
   useEffect(() => {
