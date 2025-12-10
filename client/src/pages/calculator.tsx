@@ -13,6 +13,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { useCountryPreference } from "@/hooks/use-country-preference";
 
 const TripCalculatorPage = () => {
   const [distance, setDistance] = useState("200");
@@ -20,7 +21,7 @@ const TripCalculatorPage = () => {
   const [fuelRate, setFuelRate] = useState("107");
   const [budget, setBudget] = useState("200");
   const [calculations, setCalculations] = useState([]);
-  const [country, setCountry] = useState("India");
+  const { country, setCountry } = useCountryPreference();
 
   useEffect(() => {
     const savedCalculations = localStorage.getItem("tripCalculations");
@@ -30,7 +31,7 @@ const TripCalculatorPage = () => {
   }, []);
 
   const units = useMemo(() => {
-    if (country === "USA") {
+    if (country === "US") {
       return {
         distance: "miles",
         volume: "gallons",
@@ -168,13 +169,13 @@ const TripCalculatorPage = () => {
         </CardHeader>
         <CardContent>
           <div className="mb-4">
-            <Select onValueChange={setCountry} defaultValue={country}>
+            <Select onValueChange={setCountry} value={country || 'IN'}>
               <SelectTrigger className="w-[180px]">
                 <SelectValue placeholder="Select a country" />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="India">India</SelectItem>
-                <SelectItem value="USA">USA</SelectItem>
+                <SelectItem value="IN">India</SelectItem>
+                <SelectItem value="US">United States</SelectItem>
               </SelectContent>
             </Select>
           </div>
@@ -292,7 +293,7 @@ const TripCalculatorPage = () => {
               </div>
               <ul className="space-y-4">
                 {calculations.map((calc) => {
-                  const calcUnits = calc.inputs.country === "USA" ? {
+                  const calcUnits = calc.inputs.country === "US" ? {
                     distance: "miles",
                     volume: "gallons",
                     currency: "$",

@@ -17,6 +17,7 @@ import markerIcon2x from 'leaflet/dist/images/marker-icon-2x.png';
 import markerIcon from 'leaflet/dist/images/marker-icon.png';
 import markerShadow from 'leaflet/dist/images/marker-shadow.png';
 import { useIsMobile } from '@/hooks/use-mobile';
+import { useCountryPreference } from '@/hooks/use-country-preference';
 
 // @ts-ignore
 delete L.Icon.Default.prototype._getIconUrl;
@@ -75,7 +76,7 @@ export default function Home() {
   const [lat, setLat] = useState(null);
   const [lon, setLon] = useState(null);
   const [radius, setRadius] = useState('10');
-  const [country, setCountry] = useState('IN');
+  const { country, setCountry } = useCountryPreference();
   const [distanceUnit, setDistanceUnit] = useState('km');
 
   const [loading, setLoading] = useState(false);
@@ -381,7 +382,7 @@ export default function Home() {
                       </div>
                       <div className="space-y-2">
                         <p className="text-sm font-medium text-muted-foreground">Country</p>
-                        <Select value={country} onValueChange={setCountry}>
+                        <Select value={country || 'IN'} onValueChange={setCountry}>
                           <SelectTrigger>
                             <SelectValue placeholder="Country" />
                           </SelectTrigger>
