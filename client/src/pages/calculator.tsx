@@ -13,6 +13,16 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import {
+    AlertDialog,
+    AlertDialogAction,
+    AlertDialogCancel,
+    AlertDialogContent,
+    AlertDialogDescription,
+    AlertDialogFooter,
+    AlertDialogHeader,
+    AlertDialogTitle,
+  } from "@/components/ui/alert-dialog";
 import { useCountryPreference } from "@/hooks/use-country-preference";
 
 const TripCalculatorPage = () => {
@@ -22,6 +32,8 @@ const TripCalculatorPage = () => {
   const [budget, setBudget] = useState("200");
   const [calculations, setCalculations] = useState([]);
   const { country, setCountry } = useCountryPreference();
+  const [isDialogOpen, setIsDialogOpen] = useState(false);
+  const [selectedCountry, setSelectedCountry] = useState(country);
 
   useEffect(() => {
     const savedCalculations = localStorage.getItem("tripCalculations");
@@ -161,15 +173,48 @@ const TripCalculatorPage = () => {
     updateCalculations([]);
   };
 
+  const handleCountryChange = (newCountry) => {
+    if (calculations.length > 0) {
+      setSelectedCountry(newCountry);
+      setIsDialogOpen(true);
+    } else {
+      setCountry(newCountry);
+    }
+  };
+
+  const confirmCountryChange = () => {
+    setCountry(selectedCountry);
+    handleDeleteAllCalculations();
+    setIsDialogOpen(false);
+  };
+
+  const cancelCountryChange = () => {
+    setIsDialogOpen(false);
+  };
+
   return (
     <div className="container mx-auto p-4">
+        <AlertDialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
+            <AlertDialogContent>
+                <AlertDialogHeader>
+                <AlertDialogTitle>Are you sure?</AlertDialogTitle>
+                <AlertDialogDescription>
+                    Changing the country will delete all your saved trip history. This action cannot be undone.
+                </AlertDialogDescription>
+                </AlertDialogHeader>
+                <AlertDialogFooter>
+                <AlertDialogCancel onClick={cancelCountryChange}>Cancel</AlertDialogCancel>
+                <AlertDialogAction onClick={confirmCountryChange}>Continue</AlertDialogAction>
+                </AlertDialogFooter>
+            </AlertDialogContent>
+        </AlertDialog>
       <Card>
         <CardHeader>
           <CardTitle><Fuel className="w-6 h-6 mr-2" /></CardTitle>
         </CardHeader>
         <CardContent>
           <div className="mb-4">
-            <Select onValueChange={setCountry} value={country || 'IN'}>
+            <Select onValueChange={handleCountryChange} value={country || 'IN'}>
               <SelectTrigger className="w-[180px]">
                 <SelectValue placeholder="Select a country" />
               </SelectTrigger>
