@@ -42,6 +42,25 @@ const TripCalculatorPage = () => {
     }
   }, []);
 
+  useEffect(() => {
+    const savedMileage = localStorage.getItem("mileage");
+    if (savedMileage) {
+      setMileage(savedMileage);
+    }
+    const savedFuelRate = localStorage.getItem("fuelRate");
+    if (savedFuelRate) {
+      setFuelRate(savedFuelRate);
+    }
+  }, []);
+
+  useEffect(() => {
+    localStorage.setItem("mileage", mileage);
+  }, [mileage]);
+
+  useEffect(() => {
+    localStorage.setItem("fuelRate", fuelRate);
+  }, [fuelRate]);
+
   const units = useMemo(() => {
     return countryData[country] || countryData.IN;
   }, [country]);
