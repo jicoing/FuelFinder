@@ -23,7 +23,7 @@ import {
     AlertDialogHeader,
     AlertDialogTitle,
   } from "@/components/ui/alert-dialog";
-import { useCountryPreference } from "@/hooks/use-country-preference";
+import { useCountryPreference, countryData } from "@/hooks/use-country-preference";
 
 const TripCalculatorPage = () => {
   const [distance, setDistance] = useState("200");
@@ -43,20 +43,7 @@ const TripCalculatorPage = () => {
   }, []);
 
   const units = useMemo(() => {
-    if (country === "US") {
-      return {
-        distance: "miles",
-        volume: "gallons",
-        currency: "$",
-        mileage: "mpg",
-      };
-    }
-    return {
-      distance: "km",
-      volume: "L",
-      currency: "₹",
-      mileage: "km/L",
-    };
+    return countryData[country] || countryData.IN;
   }, [country]);
 
   const distanceToCostResult = useMemo(() => {
@@ -218,9 +205,10 @@ const TripCalculatorPage = () => {
               <SelectTrigger className="w-[180px]">
                 <SelectValue placeholder="Select a country" />
               </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="IN">India</SelectItem>
-                <SelectItem value="US">United States</SelectItem>
+              <SelectContent style={{ maxHeight: '20rem', overflowY: 'auto' }}>
+                {Object.entries(countryData).map(([code, data]) => (
+                  <SelectItem key={code} value={code}>{data.name}</SelectItem>
+                ))}
               </SelectContent>
             </Select>
           </div>
@@ -338,17 +326,7 @@ const TripCalculatorPage = () => {
               </div>
               <ul className="space-y-4">
                 {calculations.map((calc) => {
-                  const calcUnits = calc.inputs.country === "US" ? {
-                    distance: "miles",
-                    volume: "gallons",
-                    currency: "$",
-                    mileage: "mpg",
-                  } : {
-                    distance: "km",
-                    volume: "L",
-                    currency: "₹",
-                    mileage: "km/L",
-                  };
+                  const calcUnits = countryData[calc.inputs.country] || countryData.IN;
                   return (
                   <li key={calc.timestamp} className="p-4 bg-muted rounded-lg flex justify-between items-center">
                       <div>
