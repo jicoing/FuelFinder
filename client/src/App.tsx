@@ -1,4 +1,5 @@
 
+import { useState } from "react";
 import { Switch, Route, Link, useLocation } from "wouter";
 import { QueryClientProvider } from "@tanstack/react-query";
 import { Toaster } from "@/components/ui/toaster";
@@ -14,6 +15,15 @@ import { Button } from "./components/ui/button";
 import { queryClient } from "./lib/queryClient";
 import { Fuel, Calculator, Menu, Search, Info, FileText, Shield, Heart } from "lucide-react";
 import { Sheet, SheetContent, SheetTrigger, SheetClose } from "@/components/ui/sheet";
+import {
+    AlertDialog,
+    AlertDialogContent,
+    AlertDialogHeader,
+    AlertDialogTitle,
+    AlertDialogDescription,
+    AlertDialogFooter,
+    AlertDialogCancel,
+  } from "@/components/ui/alert-dialog";
 
 function Router() {
   return (
@@ -30,6 +40,7 @@ function Router() {
 
 function App() {
   const [location, navigate] = useLocation();
+  const [isDonateOpen, setIsDonateOpen] = useState(false);
 
   const handleNewSearch = () => {
     if (location === '/') {
@@ -99,12 +110,10 @@ function App() {
                   </SheetClose>
                 </div>
                 <div className="mt-auto pb-4">
-                  <a href="https://www.paypal.com/ncp/payment/7DCFJV7N2WS9L" target="_blank" rel="noopener noreferrer">
-                    <Button className="w-full bg-blue-500 hover:bg-blue-600 text-white justify-center gap-2 text-lg font-sans">
+                    <Button className="w-full bg-blue-500 hover:bg-blue-600 text-white justify-center gap-2 text-lg font-sans" onClick={() => setIsDonateOpen(true)}>
                       <Heart className="w-6 h-6" />
                       Donate
                     </Button>
-                  </a>
                 </div>
               </nav>
             </SheetContent>
@@ -113,6 +122,27 @@ function App() {
         <main className="pt-16 h-screen">
           <Router />
         </main>
+        <AlertDialog open={isDonateOpen} onOpenChange={setIsDonateOpen}>
+            <AlertDialogContent>
+                <AlertDialogHeader>
+                    <AlertDialogTitle>Support the Project</AlertDialogTitle>
+                    <AlertDialogDescription>
+                    Choose your preferred donation method:
+                    </AlertDialogDescription>
+                </AlertDialogHeader>
+                <div className="flex flex-col space-y-2">
+                    <Button asChild>
+                        <a href="https://paypal.me/jicoing" target="_blank" rel="noopener noreferrer">PayPal</a>
+                    </Button>
+                    <Button asChild>
+                        <a href="https://razorpay.me/@jicoing" target="_blank" rel="noopener noreferrer">Razorpay</a>
+                    </Button>
+                </div>
+                <AlertDialogFooter>
+                    <AlertDialogCancel>Cancel</AlertDialogCancel>
+                </AlertDialogFooter>
+            </AlertDialogContent>
+        </AlertDialog>
       </TooltipProvider>
     </QueryClientProvider>
   );
