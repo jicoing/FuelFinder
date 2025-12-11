@@ -27,7 +27,7 @@ import markerIcon2x from 'leaflet/dist/images/marker-icon-2x.png';
 import markerIcon from 'leaflet/dist/images/marker-icon.png';
 import markerShadow from 'leaflet/dist/images/marker-shadow.png';
 import { useIsMobile } from '@/hooks/use-mobile';
-import { useCountryPreference } from '@/hooks/use-country-preference';
+import { useCountryPreference, countryData } from '@/hooks/use-country-preference';
 
 // @ts-ignore
 delete L.Icon.Default.prototype._getIconUrl;
@@ -410,9 +410,10 @@ export default function Home() {
                           <SelectTrigger>
                             <SelectValue placeholder="Country" />
                           </SelectTrigger>
-                          <SelectContent>
-                            <SelectItem value="IN">India</SelectItem>
-                            <SelectItem value="US">United States</SelectItem>
+                          <SelectContent style={{ maxHeight: '20rem', overflowY: 'auto' }}>
+                            {Object.entries(countryData).map(([code, data]) => (
+                                <SelectItem key={code} value={code}>{data.name}</SelectItem>
+                            ))}
                           </SelectContent>
                         </Select>
                       </div>
