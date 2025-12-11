@@ -12,6 +12,16 @@ import { ScrollArea, ScrollBar } from '@/components/ui/scroll-area';
 import { MapContainer, TileLayer, Marker, Popup, Circle, useMap } from 'react-leaflet';
 import L from 'leaflet';
 import { Link } from 'wouter';
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 
 import markerIcon2x from 'leaflet/dist/images/marker-icon-2x.png';
 import markerIcon from 'leaflet/dist/images/marker-icon.png';
@@ -90,6 +100,9 @@ export default function Home() {
   const [canScrollLeft, setCanScrollLeft] = useState(false);
   const [canScrollRight, setCanScrollRight] = useState(false);
   const isMobile = useIsMobile();
+  
+  const [isCountryChangeDialogOpen, setIsCountryChangeDialogOpen] = useState(false);
+  const [nextCountry, setNextCountry] = useState<string | null>(null);
 
   useEffect(() => {
     if (country === 'US') {
@@ -271,6 +284,16 @@ export default function Home() {
       setUsingLocation(false);
     }
   };
+  
+  const handleCountryChange = (value) => {
+    const tripHistory = localStorage.getItem("tripCalculations");
+    if (tripHistory) {
+      setNextCountry(value);
+      setIsCountryChangeDialogOpen(true);
+    } else {
+      setCountry(value);
+    }
+  };
 
   return (
     <div className="h-full w-full bg-background text-foreground flex flex-col overflow-hidden">
@@ -383,7 +406,7 @@ export default function Home() {
                       </div>
                       <div className="space-y-2">
                         <p className="text-sm font-medium text-muted-foreground">Country</p>
-                        <Select value={country || 'IN'} onValueChange={setCountry}>
+                        <Select value={country || 'IN'} onValueChange={handleCountryChange}>
                           <SelectTrigger>
                             <SelectValue placeholder="Country" />
                           </SelectTrigger>
@@ -416,6 +439,31 @@ export default function Home() {
             </motion.div>
           )}
         </AnimatePresence>
+        
+        <AlertDialog open={isCountryChangeDialogOpen} onOpenChange={setIsCountryChangeDialogOpen}>
+          <AlertDialogContent>
+            <AlertDialogHeader>
+              <AlertDialogTitle>Change Country?</AlertDialogTitle>
+              <AlertDialogDescription>
+                Changing the country will erase your currently saved trip history. Are you sure you want to continue?
+              </AlertDialogDescription>
+            </AlertDialogHeader>
+            <AlertDialogFooter>
+              <AlertDialogCancel onClick={() => setNextCountry(null)}>Cancel</AlertDialogCancel>
+              <AlertDialogAction
+                onClick={() => {
+                  if (nextCountry) {
+                    setCountry(nextCountry);
+                    localStorage.removeItem("tripCalculations");
+                  }
+                  setNextCountry(null);
+                }}
+              >
+                Continue
+              </AlertDialogAction>
+            </AlertDialogFooter>
+          </AlertDialogContent>
+        </AlertDialog>
 
         <AnimatePresence>
           {view === 'results' && (
