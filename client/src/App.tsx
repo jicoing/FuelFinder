@@ -39,15 +39,12 @@ function Router() {
 }
 
 function App() {
-  const [location, navigate] = useLocation();
+  const [, navigate] = useLocation();
   const [isDonateOpen, setIsDonateOpen] = useState(false);
 
   const handleNewSearch = () => {
-    if (location === '/') {
-      window.location.reload();
-    } else {
-      navigate('/');
-    }
+    queryClient.invalidateQueries({ queryKey: ['stations'] });
+    navigate('/');
   };
 
   return (
