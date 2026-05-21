@@ -40,7 +40,7 @@ export function PremiumModal({ isOpen, onOpenChange }: PremiumModalProps) {
       const data = await response.json();
 
       if (!response.ok) {
-        throw new Error(data.error || 'Failed to create payment session');
+        throw new Error(data.details || data.error || 'Failed to create payment session');
       }
 
       const { payment_session_id } = data;
