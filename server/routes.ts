@@ -11,6 +11,11 @@ async function getUserFromRequest(req: Request) {
   if (!authHeader || !authHeader.startsWith('Bearer ')) {
     return { user: null, error: 'Missing or invalid authorization header' };
   }
+  
+  if (!supabaseAdmin) {
+    return { user: null, error: 'Server configuration error: Supabase Admin not initialized' };
+  }
+
   const token = authHeader.split(' ')[1];
   const { data: { user }, error } = await supabaseAdmin.auth.getUser(token);
   if (error || !user) {
@@ -192,7 +197,7 @@ export function registerRoutes(
        if (isPaymentSuccessful(order_status)) {
          const customerId = order?.customer_details?.customer_id;
 
-         if (customerId) {
+         if (customerId && supabaseAdmin) {
            const { error: updateError } = await supabaseAdmin
              .from('profiles')
              .update({
@@ -206,6 +211,8 @@ export function registerRoutes(
            } else {
              console.log(`Premium activated for user ${customerId}`);
            }
+         } else if (customerId && !supabaseAdmin) {
+           console.error('Cannot activate subscription: Supabase Admin not initialized');
          }
        }
 
