@@ -39,6 +39,10 @@ export function registerRoutes(
        return res.status(401).json({ error: 'Unauthorized' });
      }
 
+     if (!supabaseAdmin) {
+       return res.status(500).json({ error: 'Server configuration error: Supabase Admin not initialized' });
+     }
+
      // Check if user already has premium
      const { data: profile } = await supabaseAdmin
        .from('profiles')
@@ -112,6 +116,10 @@ export function registerRoutes(
       return res.status(400).json({ error: 'Missing order_id' });
     }
 
+    if (!supabaseAdmin) {
+      return res.status(500).json({ error: 'Server configuration error: Supabase Admin not initialized' });
+    }
+
     try {
       const order = await getCashfreeOrder(order_id);
       const { order_status } = order;
@@ -151,6 +159,10 @@ export function registerRoutes(
     const { user, error: authError } = await getUserFromRequest(req);
     if (authError || !user) {
       return res.status(401).json({ error: 'Unauthorized' });
+    }
+
+    if (!supabaseAdmin) {
+      return res.status(500).json({ error: 'Server configuration error: Supabase Admin not initialized' });
     }
 
     const { data: profile, error: profileError } = await supabaseAdmin
