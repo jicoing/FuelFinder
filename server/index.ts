@@ -61,13 +61,7 @@ app.use((req, res, next) => {
 });
 
 (async () => {
-  log("Initializing server routes...");
   await registerRoutes(httpServer, app);
-  log("Routes registered successfully.");
-
-  app.get("/api/health", (_req, res) => {
-    res.json({ status: "ok", message: "Server is running" });
-  });
 
   app.use((err: any, _req: Request, res: Response, _next: NextFunction) => {
     const status = err.status || err.statusCode || 500;
