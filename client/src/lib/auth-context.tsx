@@ -54,6 +54,15 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         if (createError) {
           if (createError.code === '42501') {
             console.error('Permission denied: Cannot create profile. Please ensure you have an INSERT policy for the "profiles" table in Supabase or run the handle_new_user trigger script.');
+          } else if (createError.code === '23505') {
+            // Duplicate key, profile already exists - this is fine, it means a concurrent call won
+            console.log('Profile already exists (duplicate key), fetching existing profile...');
+            const { data: existingProfile } = await supabase
+              .from('profiles')
+              .select('*')
+              .eq('id', userId)
+              .single();
+            setProfile(existingProfile);
           } else {
             console.error('Error creating profile:', createError);
           }
