@@ -1,11 +1,14 @@
 import { useEffect } from 'react';
 import { useLocation } from 'wouter';
-import { supabase } from '@/lib/supabase';
+import { createClient } from '@/lib/supabase';
 
 export default function AuthCallback() {
   const [, setLocation] = useLocation();
+  const supabase = createClient();
 
   useEffect(() => {
+    if (!supabase) return;
+
     // Listen for Supabase to process the hash fragment and set the session
     const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
       if (event === 'SIGNED_IN' && session) {
@@ -22,7 +25,7 @@ export default function AuthCallback() {
     });
 
     return () => subscription.unsubscribe();
-  }, []);
+  }, [supabase]);
 
   return (
     <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100vh' }}>
