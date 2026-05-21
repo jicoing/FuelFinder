@@ -107,44 +107,31 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       }
     };
 
-    // Timeout safety fallback: Force disable loading after 10 seconds if request hangs
+    // Timeout safety fallback: Force disable loading after 3 seconds if request hangs
     const timeoutId = setTimeout(() => {
-      console.warn('Session restoration timed out after 10s. Proceeding...');
+      console.warn('Session restoration timed out. Proceeding...');
       setIsLoading(false);
       cleanUrl();
-    }, 10000);
+    }, 3000);
 
-    console.log('AuthProvider: Initializing session check...');
     supabase.auth.getSession().then(({ data, error }) => {
+      clearTimeout(timeoutId);
       if (error) {
         console.error('Error getting session:', error);
-        setIsLoading(false);
-        clearTimeout(timeoutId);
-        return;
       }
-      
       const session = data?.session || null;
-      console.log('AuthProvider: getSession resolved:', session ? 'User logged in' : 'No session');
-      
       setSession(session);
       const currentUser = session?.user ?? null;
       setUser(currentUser);
-      
       if (currentUser) {
         fetchProfile(
           currentUser.id, 
           currentUser.email, 
           currentUser.user_metadata?.full_name || currentUser.user_metadata?.name
-        ).finally(() => {
-          setIsLoading(false);
-          clearTimeout(timeoutId);
-          cleanUrl();
-        });
-      } else {
-        setIsLoading(false);
-        clearTimeout(timeoutId);
-        cleanUrl();
+        );
       }
+      setIsLoading(false);
+      cleanUrl();
     }).catch((err) => {
       clearTimeout(timeoutId);
       console.error('Error getting session catch:', err);
@@ -154,14 +141,10 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
       async (event, session) => {
-        console.log('Auth state change event:', event, session ? 'Session exists' : 'No session');
-        
-        // Don't interrupt initial loading if it's just an INITIAL_SESSION event
-        // that's already being handled by getSession
+        console.log('Auth state change event:', event);
         setSession(session);
         const currentUser = session?.user ?? null;
         setUser(currentUser);
-        
         if (currentUser) {
           await fetchProfile(
             currentUser.id, 
