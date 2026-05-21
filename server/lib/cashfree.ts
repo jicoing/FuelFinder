@@ -1,13 +1,14 @@
 import crypto from 'crypto';
 
 // Cashfree API configuration
-const CASHFREE_BASE_URL = process.env.CASHFREE_ENV === 'production'
-  ? 'https://api.cashfree.com/pg'
-  : 'https://sandbox.cashfree.com/pg';
-
-const CLIENT_ID = process.env.CASHFREE_CLIENT_ID!;
-const CLIENT_SECRET = process.env.CASHFREE_CLIENT_SECRET!;
-const WEBHOOK_SECRET = process.env.CASHFREE_WEBHOOK_SECRET!;
+const getCashfreeConfig = () => ({
+  baseUrl: process.env.CASHFREE_ENV === 'production'
+    ? 'https://api.cashfree.com/pg'
+    : 'https://sandbox.cashfree.com/pg',
+  clientId: process.env.CASHFREE_CLIENT_ID || '',
+  clientSecret: process.env.CASHFREE_CLIENT_SECRET || '',
+  webhookSecret: process.env.CASHFREE_WEBHOOK_SECRET || '',
+});
 
 /**
  * Create a new order with Cashfree
@@ -28,12 +29,18 @@ export async function createCashfreeOrder(params: {
   };
   order_note?: string;
 }): Promise<any> {
-  const response = await fetch(`${CASHFREE_BASE_URL}/orders`, {
+  const { baseUrl, clientId, clientSecret } = getCashfreeConfig();
+
+  if (!clientId || !clientSecret) {
+    throw new Error('Cashfree credentials are not configured in environment variables');
+  }
+
+  const response = await fetch(`${baseUrl}/orders`, {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
-      'x-client-id': CLIENT_ID,
-      'x-client-secret': CLIENT_SECRET,
+      'x-client-id': clientId,
+      'x-client-secret': clientSecret,
       'x-api-version': '2023-08-01',
     },
     body: JSON.stringify(params),
@@ -51,11 +58,17 @@ export async function createCashfreeOrder(params: {
  * Get order status from Cashfree
  */
 export async function getCashfreeOrder(orderId: string): Promise<any> {
-  const response = await fetch(`${CASHFREE_BASE_URL}/orders/${orderId}`, {
+  const { baseUrl, clientId, clientSecret } = getCashfreeConfig();
+
+  if (!clientId || !clientSecret) {
+    throw new Error('Cashfree credentials are not configured');
+  }
+
+  const response = await fetch(`${baseUrl}/orders/${orderId}`, {
     method: 'GET',
     headers: {
-      'x-client-id': CLIENT_ID,
-      'x-client-secret': CLIENT_SECRET,
+      'x-client-id': clientId,
+      'x-client-secret': clientSecret,
       'x-api-version': '2023-08-01',
     },
   });
@@ -71,7 +84,9 @@ export async function getCashfreeOrder(orderId: string): Promise<any> {
  * Verify Cashfree webhook signature
  */
 export function verifyCashfreeWebhookSignature(payload: string, signature: string, timestamp: string): boolean {
-  if (!WEBHOOK_SECRET) {
+  const { webhookSecret } = getCashfreeConfig();
+
+  if (!webhookSecret) {
     console.warn('CASHFREE_WEBHOOK_SECRET not set, skipping verification');
     return true;
   }
@@ -79,7 +94,7 @@ export function verifyCashfreeWebhookSignature(payload: string, signature: strin
   try {
     const dataToVerify = timestamp + payload;
     const expectedSignature = crypto
-      .createHmac('sha256', WEBHOOK_SECRET)
+      .createHmac('sha256', webhookSecret)
       .update(dataToVerify)
       .digest('hex');
 
