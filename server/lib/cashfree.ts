@@ -35,23 +35,38 @@ export async function createCashfreeOrder(params: {
     throw new Error('Cashfree credentials are not configured in environment variables');
   }
 
-  const response = await fetch(`${baseUrl}/orders`, {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-      'x-client-id': clientId,
-      'x-client-secret': clientSecret,
-      'x-api-version': '2023-08-01',
-    },
-    body: JSON.stringify(params),
-  });
+  const controller = new AbortController();
+  const timeoutMs = 9000; // 9 seconds - less than Vercel's 10s timeout
+  const timeoutId = setTimeout(() => controller.abort(), timeoutMs);
 
-  if (!response.ok) {
-    const error = await response.text();
-    throw new Error(`Cashfree API error: ${response.status} - ${error}`);
+  try {
+    const response = await fetch(`${baseUrl}/orders`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'x-client-id': clientId,
+        'x-client-secret': clientSecret,
+        'x-api-version': '2023-08-01',
+      },
+      body: JSON.stringify(params),
+      signal: controller.signal,
+    });
+
+    clearTimeout(timeoutId);
+
+    if (!response.ok) {
+      const error = await response.text();
+      throw new Error(`Cashfree API error: ${response.status} - ${error}`);
+    }
+
+    return await response.json();
+  } catch (err: any) {
+    clearTimeout(timeoutId);
+    if (err.name === 'AbortError') {
+      throw new Error('Cashfree API request timed out after 9 seconds');
+    }
+    throw err;
   }
-
-  return await response.json();
 }
 
 /**
@@ -64,20 +79,35 @@ export async function getCashfreeOrder(orderId: string): Promise<any> {
     throw new Error('Cashfree credentials are not configured');
   }
 
-  const response = await fetch(`${baseUrl}/orders/${orderId}`, {
-    method: 'GET',
-    headers: {
-      'x-client-id': clientId,
-      'x-client-secret': clientSecret,
-      'x-api-version': '2023-08-01',
-    },
-  });
+  const controller = new AbortController();
+  const timeoutMs = 9000; // 9 seconds
+  const timeoutId = setTimeout(() => controller.abort(), timeoutMs);
 
-  if (!response.ok) {
-    throw new Error(`Failed to fetch order: ${response.status}`);
+  try {
+    const response = await fetch(`${baseUrl}/orders/${orderId}`, {
+      method: 'GET',
+      headers: {
+        'x-client-id': clientId,
+        'x-client-secret': clientSecret,
+        'x-api-version': '2023-08-01',
+      },
+      signal: controller.signal,
+    });
+
+    clearTimeout(timeoutId);
+
+    if (!response.ok) {
+      throw new Error(`Failed to fetch order: ${response.status}`);
+    }
+
+    return await response.json();
+  } catch (err: any) {
+    clearTimeout(timeoutId);
+    if (err.name === 'AbortError') {
+      throw new Error('Cashfree API request timed out after 9 seconds');
+    }
+    throw err;
   }
-
-  return await response.json();
 }
 
 /**

@@ -37,7 +37,14 @@ export function PremiumModal({ isOpen, onOpenChange }: PremiumModalProps) {
         },
       });
 
-      const data = await response.json();
+      let data;
+      try {
+        data = await response.json();
+      } catch (e) {
+        // If response is not JSON, read as text for error message
+        const text = await response.text();
+        throw new Error(text || 'Server returned invalid response');
+      }
 
       if (!response.ok) {
         throw new Error(data.details || data.error || 'Failed to create payment session');

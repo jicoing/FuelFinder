@@ -25,25 +25,30 @@ export default function PaymentSuccessPage() {
     let attempts = 0;
     const maxAttempts = 30; // ~60 seconds
 
-    const checkSubscription = async () => {
-      attempts++;
-      try {
-        // Trigger server-side verification of the order with Cashfree
-        const response = await fetch("/api/verify-payment", {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-            "Authorization": `Bearer ${session.access_token}`,
-          },
-          body: JSON.stringify({ order_id: orderId }),
-        });
+     const checkSubscription = async () => {
+        attempts++;
+        try {
+          // Trigger server-side verification of the order with Cashfree
+          const response = await fetch("/api/verify-payment", {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+              "Authorization": `Bearer ${session.access_token}`,
+            },
+            body: JSON.stringify({ order_id: orderId }),
+          });
 
-        if (!response.ok) {
-          const errData = await response.json().catch(() => ({}));
-          throw new Error(errData.error || "Failed to verify payment status");
-        }
+          let data;
+          try {
+            data = await response.json();
+          } catch (e) {
+            const text = await response.text();
+            throw new Error(text || 'Server returned invalid response');
+          }
 
-        const data = await response.json();
+          if (!response.ok) {
+            throw new Error(data.error || "Failed to verify payment status");
+          }
 
         if (data.success && data.subscription?.tier === "premium") {
           setStatus("success");
