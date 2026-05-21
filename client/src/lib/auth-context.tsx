@@ -52,7 +52,11 @@ export function AuthProvider({ children }: { children: ReactNode }) {
           .single();
 
         if (createError) {
-          console.error('Error creating profile:', createError);
+          if (createError.code === '42501') {
+            console.error('Permission denied: Cannot create profile. Please ensure you have an INSERT policy for the "profiles" table in Supabase or run the handle_new_user trigger script.');
+          } else {
+            console.error('Error creating profile:', createError);
+          }
         } else {
           setProfile(newProfile);
         }
