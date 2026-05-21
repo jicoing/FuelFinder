@@ -50,6 +50,13 @@ export function registerRoutes(
      const orderId = `order_${Date.now()}_${user.id}`.replace(/[^a-zA-Z0-9_-]/g, '_');
 
      try {
+       // Debug logs for environment variables (safely checked)
+       console.log('Payment session creation started');
+       console.log('SUPABASE_URL:', !!process.env.SUPABASE_URL);
+       console.log('SUPABASE_SERVICE_ROLE_KEY:', !!process.env.SUPABASE_SERVICE_ROLE_KEY);
+       console.log('CASHFREE_CLIENT_ID:', !!process.env.CASHFREE_CLIENT_ID);
+       console.log('CASHFREE_CLIENT_SECRET:', !!process.env.CASHFREE_CLIENT_SECRET);
+
        let frontendUrl = process.env.FRONTEND_URL || `http://localhost:${process.env.PORT || 5001}`;
        // Cashfree Production mode strictly mandates secure HTTPS URLs for redirecting
        if (process.env.CASHFREE_ENV === 'production' && frontendUrl.startsWith('http://')) {
@@ -79,8 +86,11 @@ export function registerRoutes(
          payment_session_id: session.payment_session_id,
        });
      } catch (err: any) {
-       console.error('Error creating Cashfree order:', err);
-       return res.status(500).json({ error: 'Failed to create payment session' });
+       console.error('Error creating Cashfree order:', err.message || err);
+       return res.status(500).json({ 
+         error: 'Failed to create payment session',
+         details: err.message || 'Unknown error'
+       });
      }
    });
 
