@@ -169,20 +169,20 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     }
   };
 
-  const signInWithGoogle = async () => {
-    if (!supabase) return { error: new Error('Supabase is not configured') };
-    try {
-      const { error } = await supabase.auth.signInWithOAuth({
-        provider: 'google',
-        options: {
-          redirectTo: window.location.href,
-        },
-      });
-      return { error };
-    } catch (error) {
-      return { error: error as Error };
-    }
-  };
+   const signInWithGoogle = async () => {
+     if (!supabase) return { error: new Error('Supabase is not configured') };
+     try {
+       const { error } = await supabase.auth.signInWithOAuth({
+         provider: 'google',
+         options: {
+           redirectTo: `${window.location.origin}/auth/callback`,
+         },
+       });
+       return { error };
+     } catch (error) {
+       return { error: error as Error };
+     }
+   };
 
   const isPremium = profile?.subscription_tier === 'premium' && profile?.subscription_status === 'active';
 

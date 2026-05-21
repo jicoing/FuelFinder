@@ -12,6 +12,7 @@ import AboutPage from "@/pages/about";
 import SavedStationsPage from "@/pages/saved-stations";
 import PaymentSuccessPage from "@/pages/payment-success";
 import ContactPage from "@/pages/contact";
+import AuthCallback from "@/pages/AuthCallback";
 import 'leaflet/dist/leaflet.css';
 import { Button } from "./components/ui/button";
 import { useToast } from "@/hooks/use-toast";
@@ -42,6 +43,7 @@ function Router() {
       <Route path="/calculator" component={TripCalculatorPage} />
       <Route path="/privacy" component={PrivacyPage} />
       <Route path="/terms" component={TermsPage} />
+      <Route path="/auth/callback" component={AuthCallback} />
       <Route path="/contact" component={ContactPage} />
       <Route path="/about" component={AboutPage} />
       <Route path="/saved-stations" component={SavedStationsPage} />
