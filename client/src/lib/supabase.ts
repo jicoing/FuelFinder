@@ -14,7 +14,13 @@ export function createClient() {
   console.log("createClient called. URL:", url, "hasAnonKey:", !!anonKey);
   
   if (!supabaseInstance) {
-    supabaseInstance = createSupabaseClient(url, anonKey);
+    supabaseInstance = createSupabaseClient(url, anonKey, {
+      auth: {
+        persistSession: true,
+        autoRefreshToken: true,
+        detectSessionInUrl: true
+      }
+    });
   }
   
   return supabaseInstance;

@@ -7,7 +7,7 @@ export default function AuthCallback() {
   const supabase = createClient();
 
   useEffect(() => {
-    console.log("AuthCallback: Component mounted");
+    console.log("AuthCallback: Component mounted. URL:", window.location.href);
     
     if (!supabase) {
       console.error("AuthCallback: Supabase client is null");
@@ -20,8 +20,8 @@ export default function AuthCallback() {
     const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
       console.log("AuthCallback: Auth event received:", event, session ? "Session exists" : "No session");
       
-      if ((event === 'SIGNED_IN' || event === 'INITIAL_SESSION') && session) {
-        console.log("AuthCallback: Redirecting to home...");
+      if (event === 'SIGNED_IN' && session) {
+        console.log("AuthCallback: SIGNED_IN event received, redirecting to home...");
         subscription.unsubscribe();
         setLocation('/');
       }
