@@ -19,10 +19,10 @@ async function getUserFromRequest(req: Request) {
   return { user };
 }
 
-export async function registerRoutes(
+export function registerRoutes(
   httpServer: Server,
   app: express.Express
-): Promise<Server> {
+): Server {
   // Prefix all API routes
   const api = express.Router();
 
