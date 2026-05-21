@@ -40,104 +40,207 @@
   --font-sans: 'Inter', sans-serif;
   --font-mono: 'JetBrains Mono', monospace;
 
-  --radius: 0.5rem;
+  --radius: 0.75rem;
 }
 
 :root {
-  /* Dark mode by default essentially, but handling light mode vars just in case */
-  --background: 222 47% 11%;
+  --background: 222 47% 8%;
   --foreground: 210 40% 98%;
 
   --card: 222 47% 11%;
   --card-foreground: 210 40% 98%;
 
-  --popover: 222 47% 11%;
+  --popover: 222 47% 9%;
   --popover-foreground: 210 40% 98%;
 
   --primary: 217 91% 60%;
-  --primary-foreground: 222 47% 11%;
+  --primary-foreground: 0 0% 100%;
 
-  --secondary: 217 19% 27%;
+  --secondary: 217 33% 17%;
   --secondary-foreground: 210 40% 98%;
 
-  --muted: 217 19% 27%;
-  --muted-foreground: 215 20% 65%;
+  --muted: 217 33% 17%;
+  --muted-foreground: 215 25% 80%;
 
-  --accent: 217 19% 27%;
+  --accent: 217 33% 17%;
   --accent-foreground: 210 40% 98%;
 
   --destructive: 0 62% 30%;
   --destructive-foreground: 210 40% 98%;
 
-  --border: 217 19% 27%;
-  --input: 217 19% 27%;
+  --border: 217 33% 20%;
+  --input: 217 33% 17%;
   --ring: 217 91% 60%;
 
-  --chart-1: 220 70% 50%;
+  --chart-1: 217 91% 60%;
   --chart-2: 160 60% 45%;
   --chart-3: 30 80% 55%;
   --chart-4: 280 65% 60%;
   --chart-5: 340 75% 55%;
   --chart-6: 40 75% 55%;
   --chart-7: 100 75% 55%;
-
 }
 
 .dark {
-  --background: 222 47% 11%;
+  --background: 222 47% 8%;
   --foreground: 210 40% 98%;
 
   --card: 222 47% 11%;
   --card-foreground: 210 40% 98%;
 
-  --popover: 222 47% 11%;
+  --popover: 222 47% 9%;
   --popover-foreground: 210 40% 98%;
 
   --primary: 217 91% 60%;
-  --primary-foreground: 222 47% 11%;
+  --primary-foreground: 0 0% 100%;
 
-  --secondary: 217 19% 27%;
+  --secondary: 217 33% 17%;
   --secondary-foreground: 210 40% 98%;
 
-  --muted: 217 19% 27%;
-  --muted-foreground: 215 20% 65%;
+  --muted: 217 33% 17%;
+  --muted-foreground: 215 25% 80%;
 
-  --accent: 217 19% 27%;
+  --accent: 217 33% 17%;
   --accent-foreground: 210 40% 98%;
 
   --destructive: 0 62% 30%;
   --destructive-foreground: 210 40% 98%;
 
-  --border: 217 19% 27%;
-  --input: 217 19% 27%;
+  --border: 217 33% 20%;
+  --input: 217 33% 17%;
   --ring: 217 91% 60%;
 
-  --chart-1: 220 70% 50%;
+  --chart-1: 217 91% 60%;
   --chart-2: 160 60% 45%;
   --chart-3: 30 80% 55%;
   --chart-4: 280 65% 60%;
   --chart-5: 340 75% 55%;
 }
 
-/* Add some subtle styling to the body */
+* {
+  -webkit-tap-highlight-color: transparent;
+}
+
 body {
-  background-color: #0c0c0c; /* Fallback for browsers that don't support the background pattern */
-  background-image: linear-gradient(
-      rgba(255, 255, 255, 0.05) 1px,
+  color: hsl(var(--foreground));
+  background-color: hsl(var(--background));
+  background-image: 
+    radial-gradient(ellipse 80% 50% at 50% -20%, rgba(59, 130, 246, 0.15), transparent),
+    linear-gradient(
+      rgba(255, 255, 255, 0.03) 1px,
       transparent 1px
     ),
-    linear-gradient(90deg, rgba(255, 255, 255, 0.05) 1px, transparent 1px);
-  background-size: 20px 20px;
+    linear-gradient(90deg, rgba(255, 255, 255, 0.03) 1px, transparent 1px);
+  background-size: 100% 100%, 40px 40px, 40px 40px;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
 }
 
-/* Smooth scrolling for the entire page */
 html {
   scroll-behavior: smooth;
 }
 
-/* Remove the blue highlight on touch */
-* {
-  -webkit-tap-highlight-color: transparent;
+::selection {
+  background-color: hsl(217 91% 60% / 0.3);
+  color: hsl(210 40% 98%);
+}
+
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+  background: hsl(217 33% 25%);
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: hsl(217 33% 35%);
+}
+
+input:-webkit-autofill,
+input:-webkit-autofill:hover,
+input:-webkit-autofill:focus {
+  -webkit-box-shadow: 0 0 0px 1000px hsl(var(--card)) inset;
+  -webkit-text-fill-color: hsl(var(--foreground));
+  transition: background-color 5000s ease-in-out 0s;
+}
+
+@keyframes shimmer {
+  0% {
+    background-position: -200% 0;
+  }
+  100% {
+    background-position: 200% 0;
+  }
+}
+
+@keyframes pulse-glow {
+  0%, 100% {
+    box-shadow: 0 0 20px rgba(59, 130, 246, 0.3);
+  }
+  50% {
+    box-shadow: 0 0 40px rgba(59, 130, 246, 0.5);
+  }
+}
+
+.animate-shimmer {
+  animation: shimmer 2s infinite;
+  background: linear-gradient(
+    90deg,
+    transparent 0%,
+    rgba(255, 255, 255, 0.05) 50%,
+    transparent 100%
+  );
+  background-size: 200% 100%;
+}
+
+.animate-pulse-glow {
+  animation: pulse-glow 2s ease-in-out infinite;
+}
+
+/* Premium shadow & soft glow for all inputs/selects/textboxes */
+input[type="text"],
+input[type="number"],
+input[type="email"],
+input[type="password"],
+input:not([type]),
+select,
+textarea,
+[role="combobox"],
+.select-trigger {
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.5), 0 0 0 1px rgba(255, 255, 255, 0.08) !important;
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1) !important;
+}
+
+input[type="text"]:focus,
+input[type="number"]:focus,
+input[type="email"]:focus,
+input[type="password"]:focus,
+input:not([type]):focus,
+select:focus,
+textarea:focus,
+[role="combobox"]:focus,
+.select-trigger:focus {
+  box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.2), 0 8px 24px rgba(0, 0, 0, 0.6), 0 0 12px rgba(59, 130, 246, 0.3) !important;
+  border-color: rgba(59, 130, 246, 0.5) !important;
+}
+
+/* Ensure cursor changes on all interactive elements */
+button, 
+[role="button"], 
+a, 
+select, 
+[role="tab"], 
+[role="combobox"],
+.cursor-pointer,
+[type="submit"],
+[type="button"],
+[type="reset"] {
+  cursor: pointer;
 }
