@@ -114,13 +114,14 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       }
     };
 
-    const applySession = async (session: Session | null) => {
+    const applySession = (session: Session | null) => {
       setSession(session);
       const currentUser = session?.user ?? null;
       setUser(currentUser);
 
       if (currentUser) {
-        await fetchProfile(
+        // Fetch profile in the background without blocking the session application
+        fetchProfile(
           currentUser.id,
           currentUser.email,
           currentUser.user_metadata?.full_name || currentUser.user_metadata?.name
@@ -135,14 +136,14 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       console.warn('Session restoration timed out. Proceeding...');
       setIsLoading(false);
       cleanUrl();
-    }, 10000);
+    }, 5000); // Reduced timeout to 5s for better responsiveness
 
-    supabase.auth.getSession().then(async ({ data, error }) => {
+    supabase.auth.getSession().then(({ data, error }) => {
       clearTimeout(timeoutId);
       if (error) {
         console.error('Error getting session:', error);
       }
-      await applySession(data?.session || null);
+      applySession(data?.session || null);
       setIsLoading(false);
       cleanUrl();
     }).catch((err) => {
@@ -153,14 +154,14 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     });
 
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
-      async (event, session) => {
+      (event, session) => {
         console.log('Auth state change event:', event);
-        if (!session && event !== 'SIGNED_OUT') {
-          setIsLoading(false);
-          return;
-        }
+        
+        // Don't flip loading state if we're just initializing and have no session yet
+        // as getSession above will handle the initial loading state.
+        if (!session && event === 'INITIAL_SESSION') return;
 
-        await applySession(session);
+        applySession(session);
         setIsLoading(false);
       }
     );
