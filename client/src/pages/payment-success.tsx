@@ -38,12 +38,12 @@ export default function PaymentSuccessPage() {
             body: JSON.stringify({ order_id: orderId }),
           });
 
-          let data;
+          const responseText = await response.text();
+          let data: any = {};
           try {
-            data = await response.json();
+            data = responseText ? JSON.parse(responseText) : {};
           } catch (e) {
-            const text = await response.text();
-            throw new Error(text || 'Server returned invalid response');
+            throw new Error(responseText || 'Server returned invalid response');
           }
 
           if (!response.ok) {
