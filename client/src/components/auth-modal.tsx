@@ -35,18 +35,19 @@ export function AuthModal({ isOpen, onOpenChange }: AuthModalProps) {
     setError(null);
     setSuccessMessage(null);
     setIsLoading(true);
+    const normalizedEmail = email.trim();
 
     try {
       if (mode === 'reset') {
-        const { error } = await resetPassword(email);
+        const { error } = await resetPassword(normalizedEmail);
         if (error) throw error;
         setSuccessMessage('Password reset email sent! Check your inbox.');
       } else if (mode === 'signup') {
-        const { error } = await signUp(email, password, fullName);
+        const { error } = await signUp(normalizedEmail, password, fullName);
         if (error) throw error;
         setSuccessMessage('Account created! Check your email to confirm your account.');
       } else {
-        const { error } = await signIn(email, password);
+        const { error } = await signIn(normalizedEmail, password);
         if (error) throw error;
         onOpenChange(false);
       }
@@ -72,12 +73,12 @@ export function AuthModal({ isOpen, onOpenChange }: AuthModalProps) {
 
   return (
     <Dialog open={isOpen} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-md bg-card/95 backdrop-blur-xl border-border">
+      <DialogContent className="max-h-[92dvh] w-[calc(100vw-1.5rem)] overflow-y-auto bg-card/95 p-4 backdrop-blur-xl border-border sm:max-w-md sm:p-6">
         <DialogHeader>
-          <DialogTitle className="text-xl">
+          <DialogTitle className="text-lg sm:text-xl">
             {mode === 'signup' ? 'Create an account' : mode === 'reset' ? 'Reset password' : 'Welcome back'}
           </DialogTitle>
-          <DialogDescription className="text-foreground/70">
+          <DialogDescription className="text-xs text-foreground/70 sm:text-sm">
             {mode === 'signup' 
               ? 'Sign up to sync your data across devices' 
               : mode === 'reset'
@@ -87,13 +88,13 @@ export function AuthModal({ isOpen, onOpenChange }: AuthModalProps) {
         </DialogHeader>
 
         {mode !== 'reset' && (
-          <div className="space-y-4">
+          <div className="space-y-3 sm:space-y-4">
             <Button
               type="button"
               variant="outline"
               onClick={handleGoogleSignIn}
               disabled={isLoading}
-              className="w-full h-11 flex items-center justify-center gap-2 border-border/50 bg-secondary/30 hover:bg-secondary/60 hover:text-foreground font-medium transition-all duration-300"
+              className="w-full h-10 sm:h-11 flex items-center justify-center gap-2 border-border/50 bg-secondary/30 hover:bg-secondary/60 hover:text-foreground text-sm font-medium transition-all duration-300"
             >
               <svg className="w-5 h-5" viewBox="0 0 24 24">
                 <path
@@ -120,7 +121,7 @@ export function AuthModal({ isOpen, onOpenChange }: AuthModalProps) {
               <div className="absolute inset-0 flex items-center">
                 <span className="w-full border-t border-border/50" />
               </div>
-              <span className="relative px-3 text-xs uppercase bg-card text-foreground/50 font-medium">
+              <span className="relative px-3 text-[11px] uppercase bg-card text-foreground/50 font-medium sm:text-xs">
                 Or continue with email
               </span>
             </div>
@@ -128,14 +129,14 @@ export function AuthModal({ isOpen, onOpenChange }: AuthModalProps) {
         )}
 
         <Tabs value={mode} onValueChange={(v) => { setMode(v as any); setError(null); setSuccessMessage(null); }} className="w-full">
-          <TabsList className="grid w-full grid-cols-3">
+          <TabsList className="grid h-9 w-full grid-cols-3">
             <TabsTrigger value="signin">Sign In</TabsTrigger>
             <TabsTrigger value="signup">Sign Up</TabsTrigger>
             <TabsTrigger value="reset">Reset</TabsTrigger>
           </TabsList>
 
-          <TabsContent value={mode} className="mt-4">
-            <form onSubmit={handleSubmit} className="space-y-4">
+          <TabsContent value={mode} className="mt-3 sm:mt-4">
+            <form onSubmit={handleSubmit} className="space-y-3 sm:space-y-4">
               {error && (
                 <Alert variant="destructive" className="bg-destructive/10 border-destructive/20">
                   <AlertCircle className="h-4 w-4" />
@@ -151,7 +152,7 @@ export function AuthModal({ isOpen, onOpenChange }: AuthModalProps) {
               )}
 
               {mode === 'signup' && (
-                <div className="space-y-2">
+                <div className="space-y-1.5 sm:space-y-2">
                   <Label htmlFor="fullName">Full Name</Label>
                   <Input
                     id="fullName"
@@ -160,43 +161,49 @@ export function AuthModal({ isOpen, onOpenChange }: AuthModalProps) {
                     value={fullName}
                     onChange={(e) => setFullName(e.target.value)}
                     required
-                    className="h-11 bg-secondary/50 border-border/50"
+                    autoComplete="name"
+                    className="h-10 bg-secondary/50 border-border/50 text-base sm:h-11"
                   />
                 </div>
               )}
 
-              <div className="space-y-2">
+              <div className="space-y-1.5 sm:space-y-2">
                 <Label htmlFor="email">Email</Label>
                 <Input
                   id="email"
                   type="email"
+                  inputMode="email"
+                  autoCapitalize="none"
+                  autoCorrect="off"
+                  autoComplete="email"
                   placeholder="you@example.com"
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
                   required
-                  className="h-11 bg-secondary/50 border-border/50"
+                  className="h-10 bg-secondary/50 border-border/50 text-base sm:h-11"
                 />
               </div>
 
               {mode !== 'reset' && (
-                <div className="space-y-2">
+                <div className="space-y-1.5 sm:space-y-2">
                   <Label htmlFor="password">Password</Label>
                   <Input
                     id="password"
                     type="password"
                     placeholder="••••••••"
-                    value={password}
-                    onChange={(e) => setPassword(e.target.value)}
-                    required
-                    minLength={6}
-                    className="h-11 bg-secondary/50 border-border/50"
-                  />
-                </div>
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  required
+                  minLength={6}
+                  autoComplete={mode === 'signup' ? 'new-password' : 'current-password'}
+                  className="h-10 bg-secondary/50 border-border/50 text-base sm:h-11"
+                />
+              </div>
               )}
 
               <Button
                 type="submit"
-                className="w-full h-12 text-base font-semibold bg-gradient-to-r from-primary to-primary/90 hover:from-primary/90 hover:to-primary"
+                className="w-full h-11 text-sm font-semibold bg-gradient-to-r from-primary to-primary/90 hover:from-primary/90 hover:to-primary sm:h-12 sm:text-base"
                 disabled={isLoading}
               >
                 {isLoading ? (
