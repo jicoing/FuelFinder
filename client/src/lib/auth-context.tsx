@@ -3,6 +3,8 @@ import { type User, type Session } from '@supabase/supabase-js';
 import { createClient } from '@/lib/supabase';
 import type { Profile } from '@/lib/database.types';
 import { isCapacitor } from '@/lib/capacitor';
+import { openBrowser, closeBrowser } from '@/lib/browser';
+import { setupAppUrlListener, getLaunchUrl } from '@/lib/app';
 
 interface AuthContextType {
   user: User | null;
@@ -186,19 +188,14 @@ export function AuthProvider({ children }: { children: ReactNode }) {
            return;
          }
 
-         if (code) {
-           // Close the browser window if on native
-           if (isCapacitor()) {
-             try {
-               const { Browser } = await import('@capacitor/browser');
-               await Browser.close();
-             } catch (e) {
-               console.warn('Browser.close failed (maybe not open):', e);
-             }
-           }
-           const { error } = await sb.auth.exchangeCodeForSession(code);
-           if (error) throw error;
-         }
+          if (code) {
+            // Close the browser window if on native
+            if (isCapacitor()) {
+              await closeBrowser();
+            }
+            const { error } = await sb.auth.exchangeCodeForSession(code);
+            if (error) throw error;
+          }
        } catch (err: any) {
          console.error('Failed to handle deep link:', err);
        }
@@ -206,29 +203,26 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
      let isMounted = true;
 
-     const setupListeners = async () => {
-       if (isCapacitor()) {
-         // Dynamically import Capacitor App
-         const { App } = await import('@capacitor/app');
-         
-         // Handle app opened via deep link (warm start)
-         App.addListener('appUrlOpen', (event: { url: string }) => {
-           if (isMounted) {
-             handleDeepLink(event.url);
-           }
-         });
+      const setupListeners = async () => {
+        if (isCapacitor()) {
+          // Setup listener for warm starts
+          setupAppUrlListener((url) => {
+            if (isMounted) {
+              handleDeepLink(url);
+            }
+          });
 
-         // Handle app launched from deep link (cold start)
-         try {
-           const result = await App.getLaunchUrl();
-           if (isMounted && result.url) {
-             handleDeepLink(result.url);
-           }
-         } catch (err) {
-           console.error('getLaunchUrl error:', err);
-         }
-       }
-     };
+          // Check for cold start
+          try {
+            const result = await getLaunchUrl();
+            if (isMounted && result?.url) {
+              handleDeepLink(result.url);
+            }
+          } catch (err) {
+            console.error('getLaunchUrl error:', err);
+          }
+        }
+      };
 
      setupListeners();
 
@@ -308,9 +302,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         if (error) throw error;
 
         if (isNative && data?.url) {
-          // Dynamically import Capacitor Browser only when needed
-          const { Browser } = await import('@capacitor/browser');
-          await Browser.open({ url: data.url });
+          await openBrowser(data.url);
         }
 
         return { error: null };
