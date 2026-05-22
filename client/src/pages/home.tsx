@@ -597,9 +597,9 @@ export default function Home() {
               animate={{ opacity: 1, scale: 1 }}
               exit={{ opacity: 0, scale: 0.96 }}
               transition={{ duration: 0.3, ease: [0.16, 1, 0.3, 1] }}
-              className="absolute inset-0 z-10 flex flex-col items-center justify-between gap-5 bg-background/45 backdrop-blur-md px-4 py-6 overflow-y-auto"
+              className="absolute inset-0 z-10 flex flex-col items-center justify-between gap-3 sm:gap-5 bg-background/45 backdrop-blur-md px-3 py-3 sm:px-4 sm:py-6 overflow-y-auto"
             >
-              <div className="h-4 shrink-0" />
+              <div className="hidden h-4 shrink-0 sm:block" />
 
               <motion.div
                 initial={{ y: 22, opacity: 0 }}
@@ -610,20 +610,20 @@ export default function Home() {
               <Card className="relative w-full shadow-2xl border border-border/50 bg-card/85 backdrop-blur-xl overflow-hidden">
                 <div className="absolute inset-0 bg-gradient-to-br from-primary/5 via-transparent to-transparent pointer-events-none"></div>
                 <div className="absolute left-0 right-0 top-0 h-1 bg-gradient-to-r from-primary via-amber-500 to-emerald-500" />
-                <CardContent className="p-8 space-y-6 relative">
-                  <div className="flex justify-between items-center">
+                <CardContent className="relative space-y-4 p-4 sm:space-y-6 sm:p-8">
+                  <div className="flex items-start justify-between gap-3">
                     <div className="space-y-1">
                       <motion.div
                         initial={{ y: -8, opacity: 0 }}
                         animate={{ y: 0, opacity: 1 }}
                         transition={{ delay: 0.2, duration: 0.35 }}
-                        className="inline-flex items-center gap-2 rounded-full border border-primary/20 bg-primary/10 px-3 py-1 text-xs font-medium text-primary"
+                        className="inline-flex items-center gap-2 rounded-full border border-primary/20 bg-primary/10 px-2.5 py-1 text-[11px] font-medium text-primary sm:px-3 sm:text-xs"
                       >
                         <Fuel className="h-3.5 w-3.5" />
                         Live fuel station finder
                       </motion.div>
-                      <h2 className="text-2xl font-bold tracking-tight">Find Fuel Nearby</h2>
-                      <p className="text-sm text-muted-foreground">Discover the best fuel stations around you</p>
+                      <h2 className="text-xl font-bold tracking-tight sm:text-2xl">Find Fuel Nearby</h2>
+                      <p className="text-xs text-muted-foreground sm:text-sm">Discover the best fuel stations around you</p>
                     </div>
                     <Link href="/calculator">
                       <Button variant="ghost" size="icon" className="hover:bg-accent/50 transition-colors">
@@ -632,18 +632,18 @@ export default function Home() {
                     </Link>
                   </div>
 
-                  <div className="space-y-5">
-                    <div className="space-y-3">
-                      <p className="text-sm font-medium text-foreground/80">Location</p>
+                  <div className="space-y-4 sm:space-y-5">
+                    <div className="space-y-2.5 sm:space-y-3">
+                      <p className="text-xs font-medium text-foreground/80 sm:text-sm">Location</p>
                       <div className="relative">
                         <Input 
                           placeholder="Enter ZIP Code" 
                           value={zipCode} 
                           onChange={handleZipChange}
-                          className="pr-24 h-12 bg-secondary/50 border-border/50 focus:bg-secondary/30 transition-colors text-base"
+                          className="h-11 pr-20 bg-secondary/50 border-border/50 focus:bg-secondary/30 transition-colors text-base sm:h-12 sm:pr-24"
                         />
                         {usingLocation && (
-                          <div className="absolute right-3 top-1/2 -translate-y-1/2 text-xs text-primary flex items-center gap-1.5 font-semibold bg-primary/10 px-3 py-1.5 rounded-lg border border-primary/20">
+                          <div className="absolute right-2 top-1/2 -translate-y-1/2 text-[11px] text-primary flex items-center gap-1 font-semibold bg-primary/10 px-2 py-1 rounded-md border border-primary/20 sm:right-3 sm:gap-1.5 sm:px-3 sm:py-1.5 sm:text-xs sm:rounded-lg">
                             <MapPin className="w-3.5 h-3.5" />
                             Current
                           </div>
@@ -651,7 +651,7 @@ export default function Home() {
                       </div>
                        <Button 
                          variant={usingLocation ? "default" : "outline"}
-                         className={`w-full h-12 text-base font-medium transition-all duration-300 ${
+                         className={`w-full h-11 text-sm font-medium transition-all duration-300 sm:h-12 sm:text-base ${
                            usingLocation 
                              ? 'bg-primary text-primary-foreground hover:bg-primary/90 hover:shadow-xl shadow-lg shadow-primary/25' 
                              : 'bg-transparent hover:bg-accent border-border/50 hover:border-primary/50'
@@ -664,11 +664,11 @@ export default function Home() {
                        </Button>
                     </div>
 
-                    <div className="grid grid-cols-2 gap-4">
-                      <div className="space-y-2.5">
-                        <p className="text-sm font-medium text-foreground/80">Radius</p>
+                    <div className="grid grid-cols-2 gap-3 sm:gap-4">
+                      <div className="space-y-2">
+                        <p className="text-xs font-medium text-foreground/80 sm:text-sm">Radius</p>
                         <Select value={radius} onValueChange={setRadius}>
-                          <SelectTrigger className="h-12 bg-secondary/50 border-border/50 focus:bg-secondary/30 transition-colors">
+                          <SelectTrigger className="h-11 bg-secondary/50 border-border/50 focus:bg-secondary/30 transition-colors sm:h-12">
                             <SelectValue placeholder="Radius" />
                           </SelectTrigger>
                           <SelectContent>
@@ -679,10 +679,10 @@ export default function Home() {
                           </SelectContent>
                         </Select>
                       </div>
-                      <div className="space-y-2.5">
-                        <p className="text-sm font-medium text-foreground/80">Country</p>
+                      <div className="space-y-2">
+                        <p className="text-xs font-medium text-foreground/80 sm:text-sm">Country</p>
                         <Select value={country || 'IN'} onValueChange={handleCountryChange}>
-                          <SelectTrigger className="h-12 bg-secondary/50 border-border/50 focus:bg-secondary/30 transition-colors">
+                          <SelectTrigger className="h-11 bg-secondary/50 border-border/50 focus:bg-secondary/30 transition-colors sm:h-12">
                             <SelectValue placeholder="Country" />
                           </SelectTrigger>
                           <SelectContent style={{ maxHeight: '20rem', overflowY: 'auto' }}>
@@ -695,7 +695,7 @@ export default function Home() {
                     </div>
 
                     <Button 
-                      className="w-full h-12 text-base font-semibold bg-gradient-to-r from-primary to-primary/90 hover:from-primary/90 hover:to-primary text-primary-foreground shadow-lg shadow-primary/25 transition-all duration-300"
+                      className="w-full h-11 text-sm font-semibold bg-gradient-to-r from-primary to-primary/90 hover:from-primary/90 hover:to-primary text-primary-foreground shadow-lg shadow-primary/25 transition-all duration-300 sm:h-12 sm:text-base"
                       onClick={fetchStations}
                       disabled={loading}
                     >
@@ -718,7 +718,7 @@ export default function Home() {
                     )}
                   </div>
                  </CardContent>
-                 <div className="px-8 pb-6">
+                 <div className="px-4 pb-4 sm:px-8 sm:pb-6">
                    <p className="text-xs text-center text-muted-foreground">Made with care for travellers worldwide</p>
                  </div>
               </Card>
@@ -728,7 +728,7 @@ export default function Home() {
                 initial={{ y: 18, opacity: 0 }}
                 animate={{ y: 0, opacity: 1 }}
                 transition={{ delay: 0.18, duration: 0.45, ease: [0.16, 1, 0.3, 1] }}
-                className="grid w-full max-w-2xl grid-cols-1 gap-2 sm:grid-cols-3"
+                className="grid w-full max-w-2xl grid-cols-3 gap-2"
               >
                 {[
                   { icon: MapPin, label: 'Nearby stations' },
@@ -742,7 +742,7 @@ export default function Home() {
                       initial={{ y: 14, opacity: 0 }}
                       animate={{ y: 0, opacity: 1 }}
                       transition={{ delay: 0.26 + index * 0.06, duration: 0.35 }}
-                      className="flex h-11 items-center justify-center gap-2 rounded-md border border-border/40 bg-card/75 px-4 text-sm font-medium text-foreground/80 shadow-sm backdrop-blur"
+                      className="flex h-10 items-center justify-center gap-1.5 rounded-md border border-border/40 bg-card/75 px-2 text-center text-[11px] font-medium text-foreground/80 shadow-sm backdrop-blur sm:h-11 sm:gap-2 sm:px-4 sm:text-sm"
                     >
                       <Icon className="h-4 w-4 text-primary" />
                       <span>{item.label}</span>
@@ -755,7 +755,7 @@ export default function Home() {
                 initial={{ opacity: 0 }}
                 animate={{ opacity: 1 }}
                 transition={{ delay: 0.42, duration: 0.4 }}
-                className="shrink-0 text-center text-xs text-foreground/65"
+                className="shrink-0 px-2 text-center text-[11px] text-foreground/65 sm:text-xs"
               >
                 <span>Copyright {new Date().getFullYear()} findmyfuel. Created by </span>
                 <a
@@ -798,7 +798,7 @@ export default function Home() {
 
 <AnimatePresence>
           {view === 'results' && (
-            <div className="absolute bottom-0 left-0 right-0 z-20 p-4 md:p-6 pointer-events-none">
+            <div className="absolute bottom-0 left-0 right-0 z-20 p-3 md:p-6 pointer-events-none">
               {!selectedStation && stations.length > 0 && (
                 <motion.div
                   initial={{ y: 100, opacity: 0 }}
@@ -807,7 +807,7 @@ export default function Home() {
                   transition={{ duration: 0.4, ease: [0.16, 1, 0.3, 1] }}
                   className="pointer-events-auto"
                 >
-                  <div className="mb-3 flex items-center justify-between">
+                  <div className="mb-2 flex items-center justify-between">
                      <Button variant="ghost" size="sm" onClick={handleNewSearch} className="gap-2 pointer-events-auto text-foreground/80 hover:text-foreground hover:bg-accent/50 transition-colors">
                         <Search className="w-4 h-4" /> New Search
                      </Button>
@@ -821,7 +821,7 @@ export default function Home() {
                         {stations.map((station) => (
                           <Card 
                             key={station.id} 
-                            className="w-[300px] shrink-0 cursor-pointer hover:shadow-xl hover:shadow-primary/10 transition-all duration-300 border border-border/30 bg-card/90 backdrop-blur-sm overflow-hidden group"
+                            className="w-[260px] sm:w-[300px] shrink-0 cursor-pointer hover:shadow-xl hover:shadow-primary/10 transition-all duration-300 border border-border/30 bg-card/90 backdrop-blur-sm overflow-hidden group"
                             onClick={() => setSelectedStation(station)}
                           >
                             <div className="absolute inset-0 bg-gradient-to-br from-primary/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
@@ -869,7 +869,7 @@ export default function Home() {
                   transition={{ duration: 0.4, ease: [0.16, 1, 0.3, 1] }}
                   className="pointer-events-auto w-full max-w-3xl mx-auto"
                 >
-                  <Card className="shadow-2xl border border-border/30 bg-card/95 backdrop-blur-xl overflow-hidden">
+                  <Card className="max-h-[78dvh] overflow-y-auto shadow-2xl border border-border/30 bg-card/95 backdrop-blur-xl sm:max-h-none sm:overflow-hidden">
                     <div className="absolute inset-0 bg-gradient-to-br from-primary/5 via-transparent to-transparent pointer-events-none"></div>
                     <div className="relative">
                        <Button 
@@ -889,23 +889,23 @@ export default function Home() {
                          <X className="w-4 h-4" />
                       </Button>
                       
-                      <CardContent className="p-6 md:p-8">
-                        <div className="flex flex-col md:flex-row gap-6 md:gap-8">
+                      <CardContent className="p-4 sm:p-6 md:p-8">
+                        <div className="flex flex-col gap-4 md:flex-row md:gap-8">
                            <div className="shrink-0">
-                              <div className="h-28 w-28 rounded-2xl bg-gradient-to-br from-primary to-primary/70 flex items-center justify-center text-white shadow-xl shadow-primary/30 mx-auto md:mx-0 group-hover:scale-105 transition-transform duration-300">
-                                 <Fuel className="w-12 h-12" />
+                              <div className="h-20 w-20 rounded-xl bg-gradient-to-br from-primary to-primary/70 flex items-center justify-center text-white shadow-xl shadow-primary/30 mx-auto md:mx-0 group-hover:scale-105 transition-transform duration-300 sm:h-28 sm:w-28 sm:rounded-2xl">
+                                 <Fuel className="h-9 w-9 sm:h-12 sm:w-12" />
                               </div>
                            </div>
                            
-                           <div className="flex-1 space-y-3 text-center md:text-left">
-                             <h2 className="text-2xl md:text-3xl font-bold tracking-tight">{selectedStation.name}</h2>
-                             <div className="flex items-center justify-center md:justify-start gap-2 text-foreground/70">
+                           <div className="flex-1 space-y-2 text-center md:text-left sm:space-y-3">
+                             <h2 className="text-xl font-bold tracking-tight md:text-3xl">{selectedStation.name}</h2>
+                             <div className="flex flex-wrap items-center justify-center gap-2 text-sm text-foreground/70 md:justify-start">
                                 <Star className="w-4 h-4 fill-amber-500 text-amber-500" />
                                 <span className="font-semibold text-amber-500">{selectedStation.rating}</span>
                                 <span className="text-muted-foreground">•</span>
                                 <span className="text-muted-foreground">{selectedStation.distance.toFixed(1)} {distanceUnit} away</span>
                              </div>
-                             <p className="text-sm text-muted-foreground flex items-center justify-center md:justify-start gap-2">
+                             <p className="text-xs text-muted-foreground flex items-center justify-center md:justify-start gap-2 sm:text-sm">
                                 <MapPin className="w-4 h-4" />
                                 {selectedStation.lat.toFixed(4)}, {selectedStation.lon.toFixed(4)}
                              </p>
@@ -920,14 +920,14 @@ export default function Home() {
                            </div>
                         </div>
                         
-                        <div className="mt-8 grid grid-cols-2 gap-4">
-                           <Button variant="outline" className="w-full h-14 text-base font-medium bg-transparent hover:bg-accent/50 border-border/50 transition-all duration-300" onClick={() => handleAddLog(selectedStation)}>
-                              <Plus className="w-5 h-5 mr-2.5" />
+                        <div className="mt-5 grid grid-cols-2 gap-3 sm:mt-8 sm:gap-4">
+                           <Button variant="outline" className="w-full h-12 text-sm font-medium bg-transparent hover:bg-accent/50 border-border/50 transition-all duration-300 sm:h-14 sm:text-base" onClick={() => handleAddLog(selectedStation)}>
+                              <Plus className="w-4 h-4 mr-2 sm:h-5 sm:w-5 sm:mr-2.5" />
                               Add Log
                            </Button>
-                           <Button className="w-full h-14 text-base font-semibold bg-gradient-to-r from-primary to-primary/90 hover:from-primary/90 hover:to-primary text-primary-foreground shadow-lg shadow-primary/25 transition-all duration-300" asChild>
+                           <Button className="w-full h-12 text-sm font-semibold bg-gradient-to-r from-primary to-primary/90 hover:from-primary/90 hover:to-primary text-primary-foreground shadow-lg shadow-primary/25 transition-all duration-300 sm:h-14 sm:text-base" asChild>
                               <a href={directionsUrl(selectedStation)} target="_blank" rel="noreferrer">
-                                 <Navigation className="w-5 h-5 mr-2.5" />
+                                 <Navigation className="w-4 h-4 mr-2 sm:h-5 sm:w-5 sm:mr-2.5" />
                                  Get Directions
                               </a>
                            </Button>

@@ -87,15 +87,15 @@ function HeaderContent() {
 
   return (
     <>
-      <header className="h-16 border-b border-border/50 bg-card/60 backdrop-blur-xl flex items-center justify-between px-6 z-50 shrink-0">
-        <Link href="/" className="flex items-center gap-3 group" onClick={() => window.dispatchEvent(new Event('findmyfuel:go-home'))}>
+      <header className="h-14 sm:h-16 border-b border-border/50 bg-card/60 backdrop-blur-xl flex items-center justify-between px-3 sm:px-6 z-50 shrink-0">
+        <Link href="/" className="flex min-w-0 items-center gap-2 sm:gap-3 group" onClick={() => window.dispatchEvent(new Event('findmyfuel:go-home'))}>
           <div className="relative">
             <div className="absolute inset-0 bg-primary/30 rounded-xl blur-md group-hover:bg-primary/50 transition-colors duration-300"></div>
-            <div className="relative bg-gradient-to-br from-primary to-primary/80 rounded-xl p-2">
-              <Fuel className="w-5 h-5 text-primary-foreground" />
+            <div className="relative bg-gradient-to-br from-primary to-primary/80 rounded-lg sm:rounded-xl p-1.5 sm:p-2">
+              <Fuel className="w-4 h-4 sm:w-5 sm:h-5 text-primary-foreground" />
             </div>
           </div>
-          <span className="font-bold text-xl tracking-tight bg-gradient-to-r from-foreground to-foreground/70 bg-clip-text text-transparent">
+          <span className="truncate font-bold text-lg sm:text-xl tracking-tight bg-gradient-to-r from-foreground to-foreground/70 bg-clip-text text-transparent">
             findmyfuel
           </span>
           {isPremium && (
@@ -106,7 +106,7 @@ function HeaderContent() {
           )}
         </Link>
         
-        <div className="flex items-center gap-2">
+        <div className="flex shrink-0 items-center gap-1.5 sm:gap-2">
           {isLoading ? (
             <div className="h-9 w-24 rounded-md bg-muted/50" aria-hidden="true" />
           ) : user ? (
@@ -259,7 +259,7 @@ function App() {
       <AuthProvider>
         <TooltipProvider>
           <Toaster />
-          <div className="h-screen flex flex-col">
+          <div className="min-h-[100dvh] h-[100dvh] flex flex-col">
             <HeaderContent />
             <main className="flex-1 overflow-y-auto">
               <Router />
