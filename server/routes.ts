@@ -1,8 +1,8 @@
 import express from "express";
 import type { Request, Response } from "express";
 import { createServer, type Server } from "http";
-import { supabaseAdmin } from "./lib/supabase";
-import { createCashfreeOrder, getCashfreeOrder, verifyCashfreeWebhookSignature, isPaymentSuccessful, isPaymentFailed } from "./lib/cashfree";
+import { supabaseAdmin } from "./lib/supabase.js";
+import { createCashfreeOrder, getCashfreeOrder, verifyCashfreeWebhookSignature, isPaymentSuccessful, isPaymentFailed } from "./lib/cashfree.js";
 
 // Helper: Verify JWT token and get user
 async function getUserFromRequest(req: Request) {
