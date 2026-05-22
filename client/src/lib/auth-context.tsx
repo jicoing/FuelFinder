@@ -94,6 +94,10 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
     const cleanUrl = () => {
       try {
+        if (window.location.pathname === '/auth/callback') {
+          return;
+        }
+
         if (window.location.search.includes('code=') || window.location.search.includes('error=')) {
           const url = new URL(window.location.href);
           url.searchParams.delete('code');

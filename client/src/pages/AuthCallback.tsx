@@ -1,44 +1,66 @@
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { useLocation } from 'wouter';
 import { createClient } from '@/lib/supabase';
 
 export default function AuthCallback() {
   const [, setLocation] = useLocation();
   const supabase = createClient();
+  const [message, setMessage] = useState('Signing you in, please wait...');
 
   useEffect(() => {
     if (!supabase) {
       console.error("AuthCallback: Supabase client is null");
+      setMessage('Authentication is not configured.');
       return;
     }
 
     let isMounted = true;
 
-    supabase.auth.getSession().then(({ data: { session }, error }) => {
-      if (error) {
-        console.error("AuthCallback: getSession error:", error);
-      }
+    const finishSignIn = async () => {
+      try {
+        const params = new URLSearchParams(window.location.search);
+        const code = params.get('code');
+        const authError = params.get('error_description') || params.get('error');
 
-      if (isMounted && session) {
-        setLocation('/');
-      }
-    });
+        if (authError) {
+          throw new Error(authError);
+        }
 
-    const timeout = setTimeout(() => {
-      if (isMounted) {
-        setLocation('/');
+        if (code) {
+          setMessage('Completing secure sign in...');
+          const { error } = await supabase.auth.exchangeCodeForSession(code);
+          if (error) throw error;
+        }
+
+        const { data: { session }, error } = await supabase.auth.getSession();
+        if (error) throw error;
+
+        if (!session) {
+          throw new Error('No session was created. Please try signing in again.');
+        }
+
+        if (isMounted) {
+          window.history.replaceState({}, document.title, '/auth/callback');
+          setLocation('/');
+        }
+      } catch (error: any) {
+        console.error('AuthCallback error:', error);
+        if (isMounted) {
+          setMessage(error.message || 'Sign in failed. Please try again.');
+        }
       }
-    }, 10000);
+    };
+
+    finishSignIn();
 
     return () => {
       isMounted = false;
-      clearTimeout(timeout);
     };
   }, [supabase, setLocation]);
 
   return (
-    <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100vh' }}>
-      <p>Signing you in, please wait...</p>
+    <div className="min-h-[100dvh] flex items-center justify-center bg-background p-4 text-center text-foreground">
+      <p>{message}</p>
     </div>
   );
 }
