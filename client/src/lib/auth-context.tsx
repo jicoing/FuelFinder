@@ -293,16 +293,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       if (!supabase) return { error: new Error('Supabase is not configured') };
       try {
         const isNative = isCapacitor();
-        
-        let origin = window.location.origin;
-        // Normalize production origin to include 'www' to match Vercel config
-        if (!isNative && origin.includes('findmyfuel.site') && !origin.includes('www.')) {
-          origin = 'https://www.findmyfuel.site';
-        }
-
         const redirectUri = isNative
           ? 'com.example.findmyfuel://auth/callback'
-          : `${origin}/auth/callback`;
+          : `${window.location.origin}/auth/callback`;
 
         console.log('Initiating Google Sign In with redirect:', redirectUri);
 
@@ -312,7 +305,11 @@ export function AuthProvider({ children }: { children: ReactNode }) {
             redirectTo: redirectUri,
             queryParams: {
               prompt: 'select_account',
+              access_type: 'offline',
             },
+            // PKCE is default in newer versions but let's be explicit if we can.
+            // Note: flowType is actually handled automatically by the library 
+            // but ensuring queryParams and prompt can help with consistency.
           },
         });
 
