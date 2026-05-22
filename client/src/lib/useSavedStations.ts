@@ -6,11 +6,16 @@ import type { SavedStation } from './database.types';
 const FREE_TIER_MAX_SAVED_STATIONS = 5;
 
 export function useSavedStations() {
-  const { user, isPremium } = useAuth();
+  const { user, isLoading: isAuthLoading, isPremium } = useAuth();
   const [savedStations, setSavedStations] = useState<SavedStation[]>([]);
   const [loading, setLoading] = useState(true);
 
   const fetchSavedStations = useCallback(async () => {
+    if (isAuthLoading) {
+      setLoading(true);
+      return;
+    }
+
     if (!user) {
       setSavedStations([]);
       setLoading(false);
@@ -37,7 +42,7 @@ export function useSavedStations() {
     } finally {
       setLoading(false);
     }
-  }, [user]);
+  }, [isAuthLoading, user]);
 
   useEffect(() => {
     fetchSavedStations();

@@ -45,7 +45,7 @@ import { Textarea } from '@/components/ui/textarea';
 
 export default function SavedStationsPage() {
   const [, navigate] = useLocation();
-  const { user } = useAuth();
+  const { user, isLoading: isAuthLoading } = useAuth();
   const { savedStations, loading: stationsLoading, removeStation } = useSavedStations();
   const { logs, loading: logsLoading, addLog, deleteLog } = useFuelLogs();
   const { country } = useCountryPreference();
@@ -64,6 +64,14 @@ export default function SavedStationsPage() {
     mileage: '',
     notes: '',
   });
+
+  if (isAuthLoading) {
+    return (
+      <div className="h-full flex items-center justify-center bg-background">
+        <Loader2 className="w-8 h-8 animate-spin text-primary" />
+      </div>
+    );
+  }
 
   if (!user) {
     return (

@@ -4,11 +4,16 @@ import { createClient } from './supabase';
 import type { FuelLog } from './database.types';
 
 export function useFuelLogs() {
-  const { user } = useAuth();
+  const { user, isLoading: isAuthLoading } = useAuth();
   const [logs, setLogs] = useState<FuelLog[]>([]);
   const [loading, setLoading] = useState(true);
 
   const fetchLogs = useCallback(async () => {
+    if (isAuthLoading) {
+      setLoading(true);
+      return;
+    }
+
     if (!user) {
       setLogs([]);
       setLoading(false);
@@ -38,7 +43,7 @@ export function useFuelLogs() {
     } finally {
       setLoading(false);
     }
-  }, [user]);
+  }, [isAuthLoading, user]);
 
   useEffect(() => {
     fetchLogs();
