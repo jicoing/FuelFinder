@@ -323,34 +323,37 @@ export default function SavedStationsPage() {
 
                   return (
                     <Card key={station.id} className="overflow-hidden">
-                      <CardContent className="p-6">
-                        <div className="flex items-start justify-between gap-4">
-                          <div className="flex items-start gap-4">
-                            <div className="p-3 bg-primary/10 rounded-xl text-primary shrink-0">
-                              <Fuel className="w-6 h-6" />
+                      <CardContent className="p-4 sm:p-6">
+                        <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-4">
+                          <div className="flex items-start gap-3 sm:gap-4">
+                            <div className="p-2.5 sm:p-3 bg-primary/10 rounded-xl text-primary shrink-0">
+                              <Fuel className="w-5 h-5 sm:w-6 sm:h-6" />
                             </div>
-                            <div>
-                              <h3 className="font-semibold text-lg">{station.name}</h3>
-                              {station.brand && (
-                                <Badge variant="outline" className="mt-1">
-                                  {station.brand}
-                                </Badge>
-                              )}
-                              <p className="text-sm text-muted-foreground mt-2 flex items-center gap-1">
-                                <MapPin className="w-3 h-3" />
-                                {station.lat.toFixed(4)}, {station.lon.toFixed(4)}
-                              </p>
+                            <div className="min-w-0 flex-1">
+                              <h3 className="font-semibold text-base sm:text-lg truncate">{station.name}</h3>
+                              <div className="flex flex-wrap items-center gap-2 mt-1">
+                                {station.brand && (
+                                  <Badge variant="outline" className="text-[10px] sm:text-xs">
+                                    {station.brand}
+                                  </Badge>
+                                )}
+                                <p className="text-[11px] sm:text-sm text-muted-foreground flex items-center gap-1">
+                                  <MapPin className="w-3 h-3" />
+                                  {station.lat.toFixed(2)}, {station.lon.toFixed(4)}
+                                </p>
+                              </div>
                             </div>
                           </div>
-                          <div className="flex gap-2">
+                          
+                          <div className="flex items-center gap-2 w-full sm:w-auto mt-2 sm:mt-0">
                             <Button
                               size="sm"
                               variant="outline"
                               onClick={() => handleOpenAddLog(station.id)}
-                              className="gap-1"
+                              className="flex-1 sm:flex-initial gap-1.5 h-9"
                             >
-                              <Plus className="w-4 h-4" />
-                              Add Log
+                              <Plus className="w-3.5 h-3.5" />
+                              <span className="text-xs">Add Log</span>
                             </Button>
                             <Button
                               size="sm"
@@ -359,16 +362,16 @@ export default function SavedStationsPage() {
                                 setSelectedStation(station.id);
                                 setIsHistoryOpen(true);
                               }}
-                              className="gap-1"
+                              className="flex-1 sm:flex-initial gap-1.5 h-9"
                             >
-                              <History className="w-4 h-4" />
-                              History
+                              <History className="w-3.5 h-3.5" />
+                              <span className="text-xs">History</span>
                             </Button>
                             <Button
-                              size="sm"
+                              size="icon"
                               variant="ghost"
                               onClick={() => handleRemoveStation(station.id)}
-                              className="text-destructive hover:text-destructive"
+                              className="h-9 w-9 text-destructive hover:text-destructive hover:bg-destructive/10 shrink-0"
                             >
                               <Trash2 className="w-4 h-4" />
                             </Button>
