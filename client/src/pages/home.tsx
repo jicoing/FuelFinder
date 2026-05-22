@@ -597,13 +597,31 @@ export default function Home() {
               animate={{ opacity: 1, scale: 1 }}
               exit={{ opacity: 0, scale: 0.96 }}
               transition={{ duration: 0.3, ease: [0.16, 1, 0.3, 1] }}
-              className="absolute inset-0 z-10 flex flex-col items-center justify-center gap-6 bg-background/40 backdrop-blur-md p-4 overflow-y-auto"
+              className="absolute inset-0 z-10 flex flex-col items-center justify-between gap-5 bg-background/45 backdrop-blur-md px-4 py-6 overflow-y-auto"
             >
-              <Card className="w-full max-w-md shadow-2xl border border-border/50 bg-card/80 backdrop-blur-xl overflow-hidden">
+              <div className="h-4 shrink-0" />
+
+              <motion.div
+                initial={{ y: 22, opacity: 0 }}
+                animate={{ y: 0, opacity: 1 }}
+                transition={{ delay: 0.08, duration: 0.45, ease: [0.16, 1, 0.3, 1] }}
+                className="w-full max-w-md"
+              >
+              <Card className="relative w-full shadow-2xl border border-border/50 bg-card/85 backdrop-blur-xl overflow-hidden">
                 <div className="absolute inset-0 bg-gradient-to-br from-primary/5 via-transparent to-transparent pointer-events-none"></div>
+                <div className="absolute left-0 right-0 top-0 h-1 bg-gradient-to-r from-primary via-amber-500 to-emerald-500" />
                 <CardContent className="p-8 space-y-6 relative">
                   <div className="flex justify-between items-center">
                     <div className="space-y-1">
+                      <motion.div
+                        initial={{ y: -8, opacity: 0 }}
+                        animate={{ y: 0, opacity: 1 }}
+                        transition={{ delay: 0.2, duration: 0.35 }}
+                        className="inline-flex items-center gap-2 rounded-full border border-primary/20 bg-primary/10 px-3 py-1 text-xs font-medium text-primary"
+                      >
+                        <Fuel className="h-3.5 w-3.5" />
+                        Live fuel station finder
+                      </motion.div>
                       <h2 className="text-2xl font-bold tracking-tight">Find Fuel Nearby</h2>
                       <p className="text-sm text-muted-foreground">Discover the best fuel stations around you</p>
                     </div>
@@ -704,6 +722,51 @@ export default function Home() {
                    <p className="text-xs text-center text-muted-foreground">Made with care for travellers worldwide</p>
                  </div>
               </Card>
+              </motion.div>
+
+              <motion.div
+                initial={{ y: 18, opacity: 0 }}
+                animate={{ y: 0, opacity: 1 }}
+                transition={{ delay: 0.18, duration: 0.45, ease: [0.16, 1, 0.3, 1] }}
+                className="grid w-full max-w-2xl grid-cols-1 gap-2 sm:grid-cols-3"
+              >
+                {[
+                  { icon: MapPin, label: 'Nearby stations' },
+                  { icon: Bookmark, label: 'Save favorites' },
+                  { icon: Navigation, label: 'Quick directions' },
+                ].map((item, index) => {
+                  const Icon = item.icon;
+                  return (
+                    <motion.div
+                      key={item.label}
+                      initial={{ y: 14, opacity: 0 }}
+                      animate={{ y: 0, opacity: 1 }}
+                      transition={{ delay: 0.26 + index * 0.06, duration: 0.35 }}
+                      className="flex h-11 items-center justify-center gap-2 rounded-md border border-border/40 bg-card/75 px-4 text-sm font-medium text-foreground/80 shadow-sm backdrop-blur"
+                    >
+                      <Icon className="h-4 w-4 text-primary" />
+                      <span>{item.label}</span>
+                    </motion.div>
+                  );
+                })}
+              </motion.div>
+
+              <motion.footer
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                transition={{ delay: 0.42, duration: 0.4 }}
+                className="shrink-0 text-center text-xs text-foreground/65"
+              >
+                <span>Copyright {new Date().getFullYear()} findmyfuel. Created by </span>
+                <a
+                  href="https://jicoing.site"
+                  target="_blank"
+                  rel="noreferrer"
+                  className="font-semibold text-primary underline-offset-4 hover:underline"
+                >
+                  jicoing
+                </a>
+              </motion.footer>
             </motion.div>
           )}
         </AnimatePresence>
