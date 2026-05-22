@@ -58,18 +58,21 @@ export function AuthModal({ isOpen, onOpenChange }: AuthModalProps) {
     }
   };
 
-  const handleGoogleSignIn = async () => {
-    setError(null);
-    setSuccessMessage(null);
-    setIsLoading(true);
-    try {
-      const { error } = await signInWithGoogle();
-      if (error) throw error;
-    } catch (err: any) {
-      setError(err.message || 'An error occurred during Google Sign In');
-      setIsLoading(false);
-    }
-  };
+   const handleGoogleSignIn = async () => {
+     setError(null);
+     setSuccessMessage(null);
+     setIsLoading(true);
+     try {
+       const { error } = await signInWithGoogle();
+       if (error) throw error;
+       // On success, close the modal (web redirects away, mobile returns from browser)
+       setIsLoading(false);
+       onOpenChange(false);
+     } catch (err: any) {
+       setError(err.message || 'An error occurred during Google Sign In');
+       setIsLoading(false);
+     }
+   };
 
   return (
     <Dialog open={isOpen} onOpenChange={onOpenChange}>

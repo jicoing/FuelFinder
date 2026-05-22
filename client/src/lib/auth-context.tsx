@@ -1,7 +1,10 @@
-import { createContext, useContext, useEffect, useState, type ReactNode } from 'react';
+import { createContext, useContext, useEffect, useState, type ReactNode, useCallback } from 'react';
 import { type User, type Session } from '@supabase/supabase-js';
 import { createClient } from '@/lib/supabase';
 import type { Profile } from '@/lib/database.types';
+import { isCapacitor } from '@/lib/capacitor';
+import { App } from '@capacitor/app';
+import { Browser } from '@capacitor/browser';
 
 interface AuthContextType {
   user: User | null;
@@ -162,13 +165,75 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       }
     );
 
-    return () => {
-      clearTimeout(timeoutId);
-      subscription?.unsubscribe();
-    };
-  }, []);
+     return () => {
+       clearTimeout(timeoutId);
+       subscription?.unsubscribe();
+     };
+   }, []);
 
-  const signUp = async (email: string, password: string, fullName?: string) => {
+   // Handle deep link callbacks for mobile
+   useEffect(() => {
+     if (!supabase) return;
+
+     const sb = supabase; // capture non-null reference
+
+     const handleDeepLink = async (url: string) => {
+       try {
+         const parsedUrl = new URL(url);
+         const code = parsedUrl.searchParams.get('code');
+         const errorDesc = parsedUrl.searchParams.get('error_description') || parsedUrl.searchParams.get('error');
+
+         if (errorDesc) {
+           console.error('Deep link auth error:', errorDesc);
+           return;
+         }
+
+         if (code) {
+           // Close the browser window if on native
+           if (isCapacitor()) {
+             try {
+               await Browser.close();
+             } catch (e) {
+               console.warn('Browser.close failed (maybe not open):', e);
+             }
+           }
+           const { error } = await sb.auth.exchangeCodeForSession(code);
+           if (error) throw error;
+         }
+       } catch (err: any) {
+         console.error('Failed to handle deep link:', err);
+       }
+     };
+
+     let isMounted = true;
+
+     if (isCapacitor()) {
+       // Handle app opened via deep link (warm start)
+       App.addListener('appUrlOpen', (event: { url: string }) => {
+         if (isMounted) {
+           handleDeepLink(event.url);
+         }
+       });
+
+       // Handle app launched from deep link (cold start)
+       App.getLaunchUrl()
+         .then((result) => {
+           if (isMounted && result?.url) {
+             handleDeepLink(result.url);
+           }
+         })
+         .catch(console.error);
+     }
+
+     return () => {
+       isMounted = false;
+       if (isCapacitor()) {
+         App.removeAllListeners();
+       }
+     };
+   }, [supabase]);
+
+   const signUp = async (email: string, password: string, fullName?: string) => {
     if (!supabase) return { error: new Error('Supabase is not configured') };
     try {
       const { error } = await supabase.auth.signUp({
@@ -224,13 +289,25 @@ export function AuthProvider({ children }: { children: ReactNode }) {
    const signInWithGoogle = async () => {
      if (!supabase) return { error: new Error('Supabase is not configured') };
      try {
-       const { error } = await supabase.auth.signInWithOAuth({
+       const isNative = isCapacitor();
+       const redirectUri = isNative
+         ? 'com.example.findmyfuel://auth/callback'
+         : `${window.location.origin}/auth/callback`;
+
+       const { data, error } = await supabase.auth.signInWithOAuth({
          provider: 'google',
          options: {
-           redirectTo: `${window.location.origin}/auth/callback`,
+           redirectTo: redirectUri,
          },
        });
-       return { error };
+
+       if (error) throw error;
+
+       if (isNative && data?.url) {
+         await Browser.open({ url: data.url });
+       }
+
+       return { error: null };
      } catch (error) {
        return { error: error as Error };
      }
