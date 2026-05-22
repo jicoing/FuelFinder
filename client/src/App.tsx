@@ -55,7 +55,7 @@ function Router() {
 
 function HeaderContent() {
   const [, navigate] = useLocation();
-  const { user, isPremium, signOut } = useAuth();
+  const { user, isLoading, isPremium, signOut } = useAuth();
   const { toast } = useToast();
   const { exportData } = useDataExport();
   const [isAuthOpen, setIsAuthOpen] = useState(false);
@@ -107,7 +107,9 @@ function HeaderContent() {
         </Link>
         
         <div className="flex items-center gap-2">
-          {user ? (
+          {isLoading ? (
+            <div className="h-9 w-24 rounded-md bg-muted/50" aria-hidden="true" />
+          ) : user ? (
             <>
               {!isPremium && (
                 <Button 
@@ -206,7 +208,7 @@ function HeaderContent() {
                     </SheetClose>
                 </div>
                  <div className="mt-auto pt-4 border-t border-border/50 space-y-2">
-                  {!user && (
+                  {!isLoading && !user && (
                     <Button 
                       variant="outline" 
                       className="w-full h-12 text-base font-medium bg-transparent hover:bg-primary/10 border-primary/30 text-primary hover:text-primary transition-all duration-300 shadow-sm"
@@ -216,7 +218,7 @@ function HeaderContent() {
                       Sign In / Sign Up
                     </Button>
                   )}
-                  {!isPremium && user && (
+                  {!isLoading && !isPremium && user && (
                     <Button 
                       className="w-full h-12 text-base font-medium bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-600 hover:to-amber-700 text-white shadow-lg shadow-amber-500/25 transition-all duration-300"
                       onClick={() => setIsPremiumOpen(true)}

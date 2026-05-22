@@ -107,29 +107,35 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       }
     };
 
-    // Timeout safety fallback: Force disable loading after 3 seconds if request hangs
+    const applySession = async (session: Session | null) => {
+      setSession(session);
+      const currentUser = session?.user ?? null;
+      setUser(currentUser);
+
+      if (currentUser) {
+        await fetchProfile(
+          currentUser.id,
+          currentUser.email,
+          currentUser.user_metadata?.full_name || currentUser.user_metadata?.name
+        );
+      } else {
+        setProfile(null);
+      }
+    };
+
+    // Timeout safety fallback: avoid a permanent loading state if storage/network hangs.
     const timeoutId = setTimeout(() => {
       console.warn('Session restoration timed out. Proceeding...');
       setIsLoading(false);
       cleanUrl();
-    }, 3000);
+    }, 10000);
 
-    supabase.auth.getSession().then(({ data, error }) => {
+    supabase.auth.getSession().then(async ({ data, error }) => {
       clearTimeout(timeoutId);
       if (error) {
         console.error('Error getting session:', error);
       }
-      const session = data?.session || null;
-      setSession(session);
-      const currentUser = session?.user ?? null;
-      setUser(currentUser);
-      if (currentUser) {
-        fetchProfile(
-          currentUser.id, 
-          currentUser.email, 
-          currentUser.user_metadata?.full_name || currentUser.user_metadata?.name
-        );
-      }
+      await applySession(data?.session || null);
       setIsLoading(false);
       cleanUrl();
     }).catch((err) => {
@@ -142,18 +148,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
       async (event, session) => {
         console.log('Auth state change event:', event);
-        setSession(session);
-        const currentUser = session?.user ?? null;
-        setUser(currentUser);
-        if (currentUser) {
-          await fetchProfile(
-            currentUser.id, 
-            currentUser.email, 
-            currentUser.user_metadata?.full_name || currentUser.user_metadata?.name
-          );
-        } else {
-          setProfile(null);
-        }
+        await applySession(session);
+        setIsLoading(false);
       }
     );
 
