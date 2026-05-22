@@ -10,6 +10,8 @@ const getCashfreeConfig = () => ({
   webhookSecret: process.env.CASHFREE_WEBHOOK_SECRET || '',
 });
 
+const CASHFREE_TIMEOUT_MS = 5000;
+
 /**
  * Create a new order with Cashfree
  */
@@ -36,8 +38,7 @@ export async function createCashfreeOrder(params: {
   }
 
   const controller = new AbortController();
-  const timeoutMs = 9000; // 9 seconds - less than Vercel's 10s timeout
-  const timeoutId = setTimeout(() => controller.abort(), timeoutMs);
+  const timeoutId = setTimeout(() => controller.abort(), CASHFREE_TIMEOUT_MS);
 
   try {
     const response = await fetch(`${baseUrl}/orders`, {
@@ -63,7 +64,7 @@ export async function createCashfreeOrder(params: {
   } catch (err: any) {
     clearTimeout(timeoutId);
     if (err.name === 'AbortError') {
-      throw new Error('Cashfree API request timed out after 9 seconds');
+      throw new Error(`Cashfree API request timed out after ${CASHFREE_TIMEOUT_MS / 1000} seconds`);
     }
     throw err;
   }
@@ -80,8 +81,7 @@ export async function getCashfreeOrder(orderId: string): Promise<any> {
   }
 
   const controller = new AbortController();
-  const timeoutMs = 9000; // 9 seconds
-  const timeoutId = setTimeout(() => controller.abort(), timeoutMs);
+  const timeoutId = setTimeout(() => controller.abort(), CASHFREE_TIMEOUT_MS);
 
   try {
     const response = await fetch(`${baseUrl}/orders/${orderId}`, {
@@ -104,7 +104,7 @@ export async function getCashfreeOrder(orderId: string): Promise<any> {
   } catch (err: any) {
     clearTimeout(timeoutId);
     if (err.name === 'AbortError') {
-      throw new Error('Cashfree API request timed out after 9 seconds');
+      throw new Error(`Cashfree API request timed out after ${CASHFREE_TIMEOUT_MS / 1000} seconds`);
     }
     throw err;
   }
