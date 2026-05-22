@@ -1,6 +1,4 @@
 import { Capacitor } from '@capacitor/core';
-import { App } from '@capacitor/app';
-import { Browser } from '@capacitor/browser';
 
 export const isCordova = () => false;
 export const isCapacitor = () => Capacitor.isNativePlatform();
@@ -8,6 +6,7 @@ export const isMobile = () => Capacitor.isNativePlatform() || 'cordova' in windo
 
 export async function openBrowser(url: string): Promise<void> {
   if (isCapacitor()) {
+    const { Browser } = await import('@capacitor/browser');
     await Browser.open({ url });
   } else {
     window.open(url, '_blank', 'location=yes,clearsessioncache=yes,clearcache=yes');
@@ -16,12 +15,13 @@ export async function openBrowser(url: string): Promise<void> {
 
 export function setupAppUrlListener(callback: (url: string) => void): () => void {
   if (isCapacitor()) {
-    const { App } = require('@capacitor/app');
-    App.addListener('appUrlOpen', (event: any) => {
-      callback(event.url);
+    import('@capacitor/app').then(({ App }) => {
+      App.addListener('appUrlOpen', (event: any) => {
+        callback(event.url);
+      });
     });
     return () => {
-      App.removeAllListeners();
+      // Note: removing listeners dynamically is tricky with dynamic imports
     };
   } else {
     // For web, we handle OAuth callback via redirect

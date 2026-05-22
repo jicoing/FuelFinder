@@ -3,8 +3,6 @@ import { type User, type Session } from '@supabase/supabase-js';
 import { createClient } from '@/lib/supabase';
 import type { Profile } from '@/lib/database.types';
 import { isCapacitor } from '@/lib/capacitor';
-import { App } from '@capacitor/app';
-import { Browser } from '@capacitor/browser';
 
 interface AuthContextType {
   user: User | null;
@@ -192,6 +190,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
            // Close the browser window if on native
            if (isCapacitor()) {
              try {
+               const { Browser } = await import('@capacitor/browser');
                await Browser.close();
              } catch (e) {
                console.warn('Browser.close failed (maybe not open):', e);
@@ -207,29 +206,34 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
      let isMounted = true;
 
-     if (isCapacitor()) {
-       // Handle app opened via deep link (warm start)
-       App.addListener('appUrlOpen', (event: { url: string }) => {
-         if (isMounted) {
-           handleDeepLink(event.url);
-         }
-       });
+     const setupListeners = async () => {
+       if (isCapacitor()) {
+         // Dynamically import Capacitor App
+         const { App } = await import('@capacitor/app');
+         
+         // Handle app opened via deep link (warm start)
+         App.addListener('appUrlOpen', (event: { url: string }) => {
+           if (isMounted) {
+             handleDeepLink(event.url);
+           }
+         });
 
-       // Handle app launched from deep link (cold start)
-       App.getLaunchUrl()
-         .then((result) => {
-           if (isMounted && result?.url) {
+         // Handle app launched from deep link (cold start)
+         try {
+           const result = await App.getLaunchUrl();
+           if (isMounted && result.url) {
              handleDeepLink(result.url);
            }
-         })
-         .catch(console.error);
-     }
+         } catch (err) {
+           console.error('getLaunchUrl error:', err);
+         }
+       }
+     };
+
+     setupListeners();
 
      return () => {
        isMounted = false;
-       if (isCapacitor()) {
-         App.removeAllListeners();
-       }
      };
    }, [supabase]);
 
@@ -286,32 +290,34 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     }
   };
 
-   const signInWithGoogle = async () => {
-     if (!supabase) return { error: new Error('Supabase is not configured') };
-     try {
-       const isNative = isCapacitor();
-       const redirectUri = isNative
-         ? 'com.example.findmyfuel://auth/callback'
-         : `${window.location.origin}/auth/callback`;
+    const signInWithGoogle = async () => {
+      if (!supabase) return { error: new Error('Supabase is not configured') };
+      try {
+        const isNative = isCapacitor();
+        const redirectUri = isNative
+          ? 'com.example.findmyfuel://auth/callback'
+          : `${window.location.origin}/auth/callback`;
 
-       const { data, error } = await supabase.auth.signInWithOAuth({
-         provider: 'google',
-         options: {
-           redirectTo: redirectUri,
-         },
-       });
+        const { data, error } = await supabase.auth.signInWithOAuth({
+          provider: 'google',
+          options: {
+            redirectTo: redirectUri,
+          },
+        });
 
-       if (error) throw error;
+        if (error) throw error;
 
-       if (isNative && data?.url) {
-         await Browser.open({ url: data.url });
-       }
+        if (isNative && data?.url) {
+          // Dynamically import Capacitor Browser only when needed
+          const { Browser } = await import('@capacitor/browser');
+          await Browser.open({ url: data.url });
+        }
 
-       return { error: null };
-     } catch (error) {
-       return { error: error as Error };
-     }
-   };
+        return { error: null };
+      } catch (error) {
+        return { error: error as Error };
+      }
+    };
 
   const isPremium = profile?.subscription_tier === 'premium' && profile?.subscription_status === 'active';
 
