@@ -1,10 +1,11 @@
-import { useState } from 'react';
+import { useState, useMemo } from 'react';
 import { useLocation } from 'wouter';
 import { Link } from 'wouter';
 import { motion } from 'framer-motion';
 import {
   Fuel,
   MapPin,
+  Navigation,
   Calendar,
   DollarSign,
   Plus,
@@ -64,6 +65,30 @@ export default function SavedStationsPage() {
     mileage: '',
     notes: '',
   });
+
+  const metrics = useMemo(() => {
+    if (!logs || logs.length === 0) {
+      return {
+        totalFuel: 0,
+        totalStations: 0,
+        totalDistance: 0,
+        totalSpent: 0,
+        avgPricePerL: 0,
+      };
+    }
+
+    const totalFuel = logs.reduce((sum, log) => sum + (log.amount || 0), 0);
+    const stationIds = new Set(logs.map(log => log.station_id).filter(Boolean));
+    const totalStations = stationIds.size;
+
+    // Sum all individual mileage entries (distance between fill-ups)
+    const totalDistance = logs.reduce((sum, log) => sum + (log.mileage || 0), 0);
+
+    const totalSpent = logs.reduce((sum, log) => sum + (log.price || 0), 0);
+    const avgPricePerL = totalFuel > 0 ? totalSpent / totalFuel : 0;
+
+    return { totalFuel, totalStations, totalDistance, totalSpent, avgPricePerL };
+  }, [logs]);
 
   if (isAuthLoading) {
     return (
@@ -239,6 +264,39 @@ export default function SavedStationsPage() {
                 </Button>
               </Link>
             </div>
+
+            {user && !logsLoading && logs.length > 0 && (
+              <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
+                <Card className="bg-primary/5 border-primary/10">
+                  <CardContent className="p-4 flex flex-col items-center justify-center text-center">
+                    <Fuel className="w-5 h-5 text-primary mb-2" />
+                    <p className="text-xs text-muted-foreground uppercase tracking-wider font-semibold">Total Fuel</p>
+                    <p className="text-xl font-bold">{metrics.totalFuel.toFixed(1)} L</p>
+                  </CardContent>
+                </Card>
+                <Card className="bg-primary/5 border-primary/10">
+                  <CardContent className="p-4 flex flex-col items-center justify-center text-center">
+                    <MapPin className="w-5 h-5 text-primary mb-2" />
+                    <p className="text-xs text-muted-foreground uppercase tracking-wider font-semibold">Stations</p>
+                    <p className="text-xl font-bold">{metrics.totalStations}</p>
+                  </CardContent>
+                </Card>
+                <Card className="bg-primary/5 border-primary/10">
+                  <CardContent className="p-4 flex flex-col items-center justify-center text-center">
+                    <Navigation className="w-5 h-5 text-primary mb-2" />
+                    <p className="text-xs text-muted-foreground uppercase tracking-wider font-semibold">Distance</p>
+                    <p className="text-xl font-bold">{metrics.totalDistance.toFixed(1)} km</p>
+                  </CardContent>
+                </Card>
+                <Card className="bg-primary/5 border-primary/10">
+                  <CardContent className="p-4 flex flex-col items-center justify-center text-center">
+                    <DollarSign className="w-5 h-5 text-primary mb-2" />
+                    <p className="text-xs text-muted-foreground uppercase tracking-wider font-semibold">Total Spent</p>
+                    <p className="text-xl font-bold">{currency}{metrics.totalSpent.toFixed(2)}</p>
+                  </CardContent>
+                </Card>
+              </div>
+            )}
 
             {loading ? (
               <div className="flex items-center justify-center py-12">

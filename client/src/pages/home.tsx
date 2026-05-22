@@ -911,26 +911,7 @@ export default function Home() {
                   </Card>
                 </motion.div>
               )}
-              {user && !logsLoading && logs.length > 0 && (
-                <div className="flex items-center justify-center gap-4 text-sm text-foreground/80 bg-card/90 backdrop-blur rounded-lg p-3 shadow-sm mb-2">
-                  <div className="flex items-center gap-1">
-                    <Fuel className="w-4 h-4 text-primary" />
-                    <span>{metrics.totalFuel.toFixed(1)} L</span>
-                  </div>
-                  <div className="flex items-center gap-1">
-                    <MapPin className="w-4 h-4 text-primary" />
-                    <span>{metrics.totalStations} stations</span>
-                  </div>
-                  <div className="flex items-center gap-1">
-                    <Navigation className="w-4 h-4 text-primary" />
-                    <span>{metrics.totalDistance.toFixed(1)} km</span>
-                  </div>
-                  <div className="flex items-center gap-1">
-                    <DollarSign className="w-4 h-4 text-primary" />
-                    <span>{currency}{metrics.totalSpent.toFixed(2)}</span>
-                  </div>
-                </div>
-              )}
+              {user && !logsLoading && logs.length > 0 && null}
             </div>
           )}
         </AnimatePresence>
