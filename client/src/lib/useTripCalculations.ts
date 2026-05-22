@@ -4,7 +4,7 @@ import { createClient } from '@/lib/supabase';
 import type { TripCalculationInput, TripCalculationOutput, TripCalculation } from '@/lib/database.types';
 
 export function useTripCalculations() {
-  const { user, isPremium } = useAuth();
+  const { user, isLoading: isAuthLoading, isPremium } = useAuth();
   const supabase = createClient();
   const [calculations, setCalculations] = useState<TripCalculation[]>([]);
   const [isLoading, setIsLoading] = useState(false);
@@ -12,6 +12,11 @@ export function useTripCalculations() {
   const maxHistory = isPremium ? Infinity : 10;
 
   useEffect(() => {
+    if (isAuthLoading) {
+      setIsLoading(true);
+      return;
+    }
+
     if (user) {
       fetchCalculations();
     } else {
@@ -19,8 +24,9 @@ export function useTripCalculations() {
       if (localData) {
         setCalculations(JSON.parse(localData));
       }
+      setIsLoading(false);
     }
-  }, [user]);
+  }, [isAuthLoading, user]);
 
   const fetchCalculations = async () => {
     if (!user) return;

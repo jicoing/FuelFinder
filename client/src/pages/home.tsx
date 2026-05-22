@@ -599,7 +599,7 @@ export default function Home() {
                       <h2 className="text-2xl font-bold tracking-tight">Find Fuel Nearby</h2>
                       <p className="text-sm text-muted-foreground">Discover the best fuel stations around you</p>
                     </div>
-                    <Link to="/calculator">
+                    <Link href="/calculator">
                       <Button variant="ghost" size="icon" className="hover:bg-accent/50 transition-colors">
                         <Calculator className="w-5 h-5 text-primary" />
                       </Button>

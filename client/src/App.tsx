@@ -88,7 +88,7 @@ function HeaderContent() {
   return (
     <>
       <header className="h-16 border-b border-border/50 bg-card/60 backdrop-blur-xl flex items-center justify-between px-6 z-50 shrink-0">
-        <Link to="/" className="flex items-center gap-3 group" onClick={() => window.dispatchEvent(new Event('findmyfuel:go-home'))}>
+        <Link href="/" className="flex items-center gap-3 group" onClick={() => window.dispatchEvent(new Event('findmyfuel:go-home'))}>
           <div className="relative">
             <div className="absolute inset-0 bg-primary/30 rounded-xl blur-md group-hover:bg-primary/50 transition-colors duration-300"></div>
             <div className="relative bg-gradient-to-br from-primary to-primary/80 rounded-xl p-2">
@@ -159,7 +159,7 @@ function HeaderContent() {
                     </Button>
                   </SheetClose>
                    <SheetClose asChild>
-                     <Link to="/calculator">
+                     <Link href="/calculator">
                        <Button variant="ghost" className="w-full justify-start gap-3 text-base font-medium h-12 text-foreground/80 hover:text-foreground hover:bg-accent/50 transition-all">
                          <Calculator className="w-5 h-5 text-primary" />
                          Calculator
@@ -167,7 +167,7 @@ function HeaderContent() {
                      </Link>
                    </SheetClose>
                    <SheetClose asChild>
-                     <Link to="/saved-stations">
+                     <Link href="/saved-stations">
                        <Button variant="ghost" className="w-full justify-start gap-3 text-base font-medium h-12 text-foreground/80 hover:text-foreground hover:bg-accent/50 transition-all">
                          <Bookmark className="w-5 h-5 text-primary" />
                          Saved Stations
@@ -175,7 +175,7 @@ function HeaderContent() {
                      </Link>
                    </SheetClose>
                    <SheetClose asChild>
-                     <Link to="/privacy">
+                    <Link href="/privacy">
                       <Button variant="ghost" className="w-full justify-start gap-3 text-base font-medium h-12 text-foreground/80 hover:text-foreground hover:bg-accent/50 transition-all">
                         <Shield className="w-5 h-5 text-primary" />
                         Privacy
@@ -183,7 +183,7 @@ function HeaderContent() {
                     </Link>
                   </SheetClose>
                   <SheetClose asChild>
-                    <Link to="/terms">
+                    <Link href="/terms">
                       <Button variant="ghost" className="w-full justify-start gap-3 text-base font-medium h-12 text-foreground/80 hover:text-foreground hover:bg-accent/50 transition-all">
                         <FileText className="w-5 h-5 text-primary" />
                         Terms
@@ -191,7 +191,7 @@ function HeaderContent() {
                     </Link>
                   </SheetClose>
                     <SheetClose asChild>
-                      <Link to="/about">
+                      <Link href="/about">
                         <Button variant="ghost" className="w-full justify-start gap-3 text-base font-medium h-12 text-foreground/80 hover:text-foreground hover:bg-accent/50 transition-all">
                           <Info className="w-5 h-5 text-primary" />
                           About
@@ -199,7 +199,7 @@ function HeaderContent() {
                       </Link>
                     </SheetClose>
                     <SheetClose asChild>
-                      <Link to="/contact">
+                      <Link href="/contact">
                         <Button variant="ghost" className="w-full justify-start gap-3 text-base font-medium h-12 text-foreground/80 hover:text-foreground hover:bg-accent/50 transition-all">
                           <MessageCircle className="w-5 h-5 text-primary" />
                           Contact Us

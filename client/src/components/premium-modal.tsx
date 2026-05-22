@@ -18,12 +18,20 @@ interface PremiumModalProps {
 }
 
 export function PremiumModal({ isOpen, onOpenChange }: PremiumModalProps) {
-  const { user, session } = useAuth();
+  const { user, session, isLoading: isAuthLoading } = useAuth();
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
   const handleUpgrade = async () => {
-    if (!user || !session) return;
+    if (isAuthLoading) {
+      setError('Still restoring your session. Please try again in a moment.');
+      return;
+    }
+
+    if (!user || !session) {
+      setError('Please sign in before upgrading.');
+      return;
+    }
 
     setIsLoading(true);
     setError(null);
@@ -133,7 +141,7 @@ export function PremiumModal({ isOpen, onOpenChange }: PremiumModalProps) {
 
            <Button
              onClick={handleUpgrade}
-             disabled={isLoading}
+             disabled={isLoading || isAuthLoading}
              className="w-full h-12 text-base font-semibold bg-gradient-to-r from-primary to-primary/90 hover:from-primary/90 hover:to-primary shadow-lg shadow-primary/25"
            >
              {isLoading ? (

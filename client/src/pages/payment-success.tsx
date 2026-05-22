@@ -7,11 +7,17 @@ import { Loader2, CheckCircle, XCircle } from "lucide-react";
 
 export default function PaymentSuccessPage() {
   const [, setLocation] = useLocation();
-  const { user, session, refetch: refetchAuth } = useAuth();
+  const { user, session, isLoading: isAuthLoading, refetch: refetchAuth } = useAuth();
   const [status, setStatus] = useState<"verifying" | "success" | "failed">("verifying");
   const [message, setMessage] = useState<string>("Verifying your payment...");
 
   useEffect(() => {
+    if (isAuthLoading) {
+      setStatus("verifying");
+      setMessage("Restoring your session...");
+      return;
+    }
+
     if (!user || !session) {
       setStatus("failed");
       setMessage("You must be logged in to verify payment.");
@@ -84,7 +90,7 @@ export default function PaymentSuccessPage() {
     }, 2000);
 
     return () => clearInterval(interval);
-  }, [user, session, refetchAuth]);
+  }, [isAuthLoading, user, session, refetchAuth]);
 
   if (status === "verifying") {
     return (
