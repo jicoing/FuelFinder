@@ -95,7 +95,7 @@ export function PremiumModal({ isOpen, onOpenChange }: PremiumModalProps) {
 
   return (
     <Dialog open={isOpen} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-md bg-card/95 backdrop-blur-xl border-border overflow-hidden">
+      <DialogContent className="max-h-[92dvh] w-[calc(100vw-1.5rem)] overflow-y-auto bg-card/95 p-4 backdrop-blur-xl border-border sm:max-w-md sm:p-6">
         <div className="absolute inset-0 bg-gradient-to-br from-primary/5 via-transparent to-transparent pointer-events-none" />
         
          <DialogHeader className="relative">

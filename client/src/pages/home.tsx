@@ -815,9 +815,9 @@ export default function Home() {
                         {stations.length} stations found
                      </Badge>
                   </div>
-                  <div className="relative">
-                    <ScrollArea className="w-full whitespace-nowrap pb-4" viewportRef={scrollViewportRef} onScroll={handleScroll}>
-                      <div className="flex space-x-4">
+                  <div className="relative pointer-events-auto">
+                    <ScrollArea className="w-full whitespace-nowrap pb-4 touch-pan-x" viewportRef={scrollViewportRef} onScroll={handleScroll}>
+                      <div className="flex space-x-4 px-1">
                         {stations.map((station) => (
                           <Card 
                             key={station.id} 
