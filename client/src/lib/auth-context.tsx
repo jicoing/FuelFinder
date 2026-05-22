@@ -297,10 +297,19 @@ export function AuthProvider({ children }: { children: ReactNode }) {
           ? 'com.example.findmyfuel://auth/callback'
           : `${window.location.origin}/auth/callback`;
 
+        console.log('Initiating Google Sign In with redirect:', redirectUri);
+
         const { data, error } = await supabase.auth.signInWithOAuth({
           provider: 'google',
           options: {
             redirectTo: redirectUri,
+            queryParams: {
+              prompt: 'select_account',
+              access_type: 'offline',
+            },
+            // PKCE is default in newer versions but let's be explicit if we can.
+            // Note: flowType is actually handled automatically by the library 
+            // but ensuring queryParams and prompt can help with consistency.
           },
         });
 
@@ -312,6 +321,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
         return { error: null };
       } catch (error) {
+        console.error('signInWithGoogle error:', error);
         return { error: error as Error };
       }
     };
