@@ -35,30 +35,3 @@ export async function getLaunchUrl(): Promise<{ url: string } | null> {
   const module = await import('./capacitor-app');
   return module.getLaunchUrl();
 }
-
-    };
-    window.addEventListener('load', handler);
-    return () => window.removeEventListener('load', handler);
-  }
-
-  // For native, use dynamic import to load Capacitor App module
-  import('./capacitor-app').then((module) => {
-    appListenerCleanup = module.setupAppUrlListener(callback);
-  });
-
-  return () => {
-    if (appListenerCleanup) {
-      appListenerCleanup();
-      appListenerCleanup = null;
-    }
-  };
-}
-
-export async function getLaunchUrl(): Promise<{ url: string } | null> {
-  if (!isCapacitor()) {
-    return null;
-  }
-
-  const module = await import('./capacitor-app');
-  return module.getLaunchUrl();
-}
