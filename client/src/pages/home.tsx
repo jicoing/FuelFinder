@@ -10,6 +10,13 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Badge } from '@/components/ui/badge';
 import { ScrollArea, ScrollBar } from '@/components/ui/scroll-area';
+import {
+  Carousel,
+  CarouselContent,
+  CarouselItem,
+  CarouselPrevious,
+  CarouselNext,
+} from "@/components/ui/carousel";
 import { MapContainer, TileLayer, Marker, Popup, Circle, useMap } from 'react-leaflet';
 import L from 'leaflet';
 import { Link } from 'wouter';
@@ -169,9 +176,6 @@ export default function Home() {
   const [stations, setStations] = useState([]);
   const [selectedStation, setSelectedStation] = useState(null);
 
-  const scrollViewportRef = useRef<HTMLDivElement>(null);
-  const [canScrollLeft, setCanScrollLeft] = useState(false);
-  const [canScrollRight, setCanScrollRight] = useState(false);
   const isMobile = useIsMobile();
   
   const [isCountryChangeDialogOpen, setIsCountryChangeDialogOpen] = useState(false);
@@ -185,10 +189,6 @@ export default function Home() {
     }
     setZipCode('');
   }, [country]);
-
-  useEffect(() => {
-    checkScrollability();
-  }, [stations]);
 
   useEffect(() => {
     const handleGoHome = () => {
@@ -209,30 +209,6 @@ export default function Home() {
       setError('');
     }
   }, [location]);
-
-  const checkScrollability = () => {
-    const viewport = scrollViewportRef.current;
-    if (viewport) {
-      setCanScrollLeft(viewport.scrollLeft > 0);
-      setCanScrollRight(viewport.scrollLeft < viewport.scrollWidth - viewport.clientWidth);
-    }
-  };
-
-  const handleScroll = () => {
-    checkScrollability();
-  };
-
-  const scrollLeft = () => {
-    if (scrollViewportRef.current) {
-      scrollViewportRef.current.scrollBy({ left: -300, behavior: 'smooth' });
-    }
-  };
-
-  const scrollRight = () => {
-    if (scrollViewportRef.current) {
-      scrollViewportRef.current.scrollBy({ left: 300, behavior: 'smooth' });
-    }
-  };
 
   const handleUseMyLocation = () => {
     if (!navigator.geolocation) {
@@ -815,48 +791,46 @@ export default function Home() {
                         {stations.length} stations found
                      </Badge>
                   </div>
-                  <div className="relative pointer-events-auto">
-                    <ScrollArea className="w-full whitespace-nowrap pb-4 touch-pan-x" viewportRef={scrollViewportRef} onScroll={handleScroll}>
-                      <div className="flex space-x-4 px-1">
+                  <div className="relative pointer-events-auto w-full">
+                    <Carousel 
+                      opts={{ 
+                        align: "start",
+                        loop: false,
+                      }} 
+                      className="w-full"
+                    >
+                      <CarouselContent className="-ml-3 pb-4">
                         {stations.map((station) => (
-                          <Card 
-                            key={station.id} 
-                            className="w-[260px] sm:w-[300px] shrink-0 cursor-pointer hover:shadow-xl hover:shadow-primary/10 transition-all duration-300 border border-border/30 bg-card/90 backdrop-blur-sm overflow-hidden group"
-                            onClick={() => setSelectedStation(station)}
-                          >
-                            <div className="absolute inset-0 bg-gradient-to-br from-primary/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
-                            <CardContent className="p-5 relative">
-                              <div className="flex items-start justify-between mb-3">
-                                <div className="p-2.5 bg-gradient-to-br from-primary/20 to-primary/10 rounded-xl text-primary group-hover:scale-110 transition-transform duration-300">
-                                  <Fuel className="w-5 h-5" />
+                          <CarouselItem key={station.id} className="pl-3 basis-[280px] sm:basis-[320px]">
+                            <Card 
+                              className="cursor-pointer hover:shadow-xl hover:shadow-primary/10 transition-all duration-300 border border-border/30 bg-card/90 backdrop-blur-sm overflow-hidden group h-full"
+                              onClick={() => setSelectedStation(station)}
+                            >
+                              <div className="absolute inset-0 bg-gradient-to-br from-primary/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+                              <CardContent className="p-5 relative">
+                                <div className="flex items-start justify-between mb-3">
+                                  <div className="p-2.5 bg-gradient-to-br from-primary/20 to-primary/10 rounded-xl text-primary group-hover:scale-110 transition-transform duration-300">
+                                    <Fuel className="w-5 h-5" />
+                                  </div>
+                                  <span className="text-sm font-mono text-muted-foreground bg-muted/50 px-2.5 py-1 rounded-lg">
+                                    {station.distance.toFixed(1)} {distanceUnit}
+                                  </span>
                                 </div>
-                                <span className="text-sm font-mono text-muted-foreground bg-muted/50 px-2.5 py-1 rounded-lg">
-                                  {station.distance.toFixed(1)} {distanceUnit}
-                                </span>
-                              </div>
-                              <h3 className="font-semibold text-base truncate pr-2">{station.name}</h3>
-                              <p className="text-sm text-muted-foreground truncate mt-0.5">{station.brand}</p>
-                              <div className="mt-3 flex items-center gap-2 text-sm">
-                                 <span className="flex items-center text-amber-500 font-semibold">
-                                   <Star className="w-3.5 h-3.5 mr-1 fill-current" /> {station.rating}
-                                 </span>
-                              </div>
-                            </CardContent>
-                          </Card>
+                                <h3 className="font-semibold text-base truncate pr-2">{station.name}</h3>
+                                <p className="text-sm text-muted-foreground truncate mt-0.5">{station.brand}</p>
+                                <div className="mt-3 flex items-center gap-2 text-sm">
+                                   <span className="flex items-center text-amber-500 font-semibold">
+                                     <Star className="w-3.5 h-3.5 mr-1 fill-current" /> {station.rating}
+                                   </span>
+                                </div>
+                              </CardContent>
+                            </Card>
+                          </CarouselItem>
                         ))}
-                      </div>
-                      <ScrollBar orientation="horizontal" />
-                    </ScrollArea>
-                    {canScrollLeft && (
-                      <Button variant="outline" size="icon" className="absolute left-0 top-1/2 -translate-y-1/2 rounded-full h-10 w-10 bg-card/95 backdrop-blur border-border/50 hover:bg-card shadow-lg transition-all duration-300" onClick={scrollLeft}>
-                        <ChevronLeft className="h-5 w-5" />
-                      </Button>
-                    )}
-                    {canScrollRight && (
-                      <Button variant="outline" size="icon" className="absolute right-0 top-1/2 -translate-y-1/2 rounded-full h-10 w-10 bg-card/95 backdrop-blur border-border/50 hover:bg-card shadow-lg transition-all duration-300" onClick={scrollRight}>
-                        <ChevronRight className="h-5 w-5" />
-                      </Button>
-                    )}
+                      </CarouselContent>
+                      <CarouselPrevious className="hidden md:flex -left-4 bg-card/90 backdrop-blur border-border/50" />
+                      <CarouselNext className="hidden md:flex -right-4 bg-card/90 backdrop-blur border-border/50" />
+                    </Carousel>
                   </div>
                 </motion.div>
               )}
