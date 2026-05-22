@@ -172,21 +172,26 @@ export function AuthProvider({ children }: { children: ReactNode }) {
    }, []);
 
    // Handle deep link callbacks for mobile
-   useEffect(() => {
-     if (!supabase) return;
+    useEffect(() => {
+      if (!supabase) return;
 
-     const sb = supabase; // capture non-null reference
+      const sb = supabase; // capture non-null reference
 
-     const handleDeepLink = async (url: string) => {
-       try {
-         const parsedUrl = new URL(url);
-         const code = parsedUrl.searchParams.get('code');
-         const errorDesc = parsedUrl.searchParams.get('error_description') || parsedUrl.searchParams.get('error');
+      const handleDeepLink = async (url: string) => {
+        try {
+          const parsedUrl = new URL(url);
+          const code = parsedUrl.searchParams.get('code');
+          const errorDesc = parsedUrl.searchParams.get('error_description') || parsedUrl.searchParams.get('error');
 
-         if (errorDesc) {
-           console.error('Deep link auth error:', errorDesc);
-           return;
-         }
+          if (errorDesc) {
+            console.error('Deep link auth error:', errorDesc);
+            return;
+          }
+
+          if (window.location.pathname === '/auth/callback') {
+            console.log('Already on auth callback page, skipping deep link handler');
+            return;
+          }
 
           if (code) {
             // Close the browser window if on native
@@ -196,10 +201,10 @@ export function AuthProvider({ children }: { children: ReactNode }) {
             const { error } = await sb.auth.exchangeCodeForSession(code);
             if (error) throw error;
           }
-       } catch (err: any) {
-         console.error('Failed to handle deep link:', err);
-       }
-     };
+        } catch (err: any) {
+          console.error('Failed to handle deep link:', err);
+        }
+      };
 
      let isMounted = true;
 
