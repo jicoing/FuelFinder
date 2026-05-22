@@ -5,6 +5,14 @@ import type { SavedStation } from './database.types';
 
 const FREE_TIER_MAX_SAVED_STATIONS = 5;
 
+function toError(error: unknown, fallback: string) {
+  if (error instanceof Error) return error;
+  if (error && typeof error === 'object' && 'message' in error) {
+    return new Error(String((error as { message?: unknown }).message || fallback));
+  }
+  return new Error(fallback);
+}
+
 export function useSavedStations() {
   const { user, isLoading: isAuthLoading, isPremium } = useAuth();
   const [savedStations, setSavedStations] = useState<SavedStation[]>([]);
@@ -24,6 +32,10 @@ export function useSavedStations() {
 
     try {
       const supabase = createClient();
+      if (!supabase) {
+        return { error: new Error('Supabase is not configured') };
+      }
+
       const { data, error } = await supabase
         .from('saved_stations')
         .select('*')
@@ -74,16 +86,16 @@ export function useSavedStations() {
 
       if (error) {
         console.error('Error saving station:', error);
-        return { error };
+        return { error: toError(error, 'Failed to save station') };
       }
 
       await fetchSavedStations();
       return { data };
     } catch (error) {
       console.error('Error saving station:', error);
-      return { error: error as Error };
+      return { error: toError(error, 'Failed to save station') };
     }
-  }, [user, fetchSavedStations]);
+  }, [user, isPremium, savedStations.length, fetchSavedStations]);
 
   const removeStation = useCallback(async (stationId: string) => {
     if (!user) {
@@ -92,6 +104,10 @@ export function useSavedStations() {
 
     try {
       const supabase = createClient();
+      if (!supabase) {
+        return { error: new Error('Supabase is not configured') };
+      }
+
       const { error } = await supabase
         .from('saved_stations')
         .delete()
@@ -100,14 +116,14 @@ export function useSavedStations() {
 
       if (error) {
         console.error('Error removing station:', error);
-        return { error };
+        return { error: toError(error, 'Failed to remove station') };
       }
 
       await fetchSavedStations();
       return { success: true };
     } catch (error) {
       console.error('Error removing station:', error);
-      return { error: error as Error };
+      return { error: toError(error, 'Failed to remove station') };
     }
    }, [user, fetchSavedStations]);
 

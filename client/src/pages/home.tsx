@@ -431,11 +431,19 @@ export default function Home() {
     const isSaved = savedStations.find(s => s.lat === station.lat && s.lon === station.lon);
     
     if (isSaved) {
-      await removeStation(isSaved.id);
-      toast({
-        title: "Station removed",
-        description: "The station has been removed from your saved list.",
-      });
+      const result = await removeStation(isSaved.id);
+      if (result?.error) {
+        toast({
+          title: "Failed to remove station",
+          description: result.error.message,
+          variant: "destructive",
+        });
+      } else {
+        toast({
+          title: "Station removed",
+          description: "The station has been removed from your saved list.",
+        });
+      }
     } else {
       const result = await saveStation({
         name: station.name,
@@ -447,7 +455,7 @@ export default function Home() {
       if (result?.error) {
         toast({
           title: "Failed to save station",
-          description: result.error,
+          description: result.error.message,
           variant: "destructive",
         });
       } else {
@@ -479,7 +487,7 @@ export default function Home() {
        if (result?.error) {
          toast({
            title: "Failed to save station",
-           description: result.error,
+           description: result.error.message,
            variant: "destructive",
          });
          return;
