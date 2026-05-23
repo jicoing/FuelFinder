@@ -821,8 +821,16 @@ export default function Home() {
                               <Card 
                                 className="cursor-pointer hover:shadow-xl hover:shadow-primary/10 transition-all duration-300 border border-border/30 bg-card/90 backdrop-blur-sm overflow-hidden group h-full"
                                 onClick={() => {
-                                  if (isMobile && !hasScrolled) {
-                                    setSelectedStation(stations[0]);
+                                  if (isMobile) {
+                                    const activeIndex = carouselApi?.selectedScrollSnap();
+                                    if (activeIndex !== undefined) {
+                                      const activeStation = stations[activeIndex];
+                                      if (activeStation) {
+                                        setSelectedStation(activeStation);
+                                      } else if (activeIndex === stations.length) {
+                                        navigate('/saved-stations');
+                                      }
+                                    }
                                   } else {
                                     setSelectedStation(station);
                                   }
