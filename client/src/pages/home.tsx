@@ -794,59 +794,66 @@ export default function Home() {
                       className="w-full"
                     >
                       <CarouselContent className="-ml-3 pb-4">
-                        {stations.map((station) => (
-                          <CarouselItem key={station.id} className="pl-3 basis-[85%] sm:basis-[320px]">
+                        {useMemo(() => [
+                          ...stations.map(s => ({ ...s, type: 'station' })),
+                          { id: 'saved-stations-link', type: 'link' }
+                        ], [stations]).map((item) => (
+                          <CarouselItem key={item.id} className="pl-3 basis-[85%] sm:basis-[320px]">
                             <motion.div whileTap={{ scale: 0.98 }} className="h-full">
-                              <Card 
-                                className="cursor-pointer hover:shadow-xl hover:shadow-primary/10 transition-all duration-300 border border-border/30 bg-card/90 backdrop-blur-sm overflow-hidden group h-full"
-                                onClick={() => setSelectedStation(station)}
-                              >
-                                <div className="absolute inset-0 bg-gradient-to-br from-primary/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
-                                <CardContent className="p-5 relative">
-                                  <div className="flex items-start justify-between mb-3">
-                                    <div className="p-2.5 bg-gradient-to-br from-primary/20 to-primary/10 rounded-xl text-primary group-hover:scale-110 transition-transform duration-300">
-                                      <Fuel className="w-5 h-5" />
+                              {item.type === 'station' ? (
+                                <Card 
+                                  className="cursor-pointer hover:shadow-xl hover:shadow-primary/10 transition-all duration-300 border border-border/30 bg-card/90 backdrop-blur-sm overflow-hidden group h-full"
+                                  onClick={(e) => {
+                                    e.stopPropagation();
+                                    setSelectedStation(item);
+                                  }}
+                                >
+                                  <div className="absolute inset-0 bg-gradient-to-br from-primary/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+                                  <CardContent className="p-5 relative">
+                                    <div className="flex items-start justify-between mb-3">
+                                      <div className="p-2.5 bg-gradient-to-br from-primary/20 to-primary/10 rounded-xl text-primary group-hover:scale-110 transition-transform duration-300">
+                                        <Fuel className="w-5 h-5" />
+                                      </div>
+                                      <span className="text-sm font-mono text-muted-foreground bg-muted/50 px-2.5 py-1 rounded-lg">
+                                        {(item as any).distance.toFixed(1)} {distanceUnit}
+                                      </span>
                                     </div>
-                                    <span className="text-sm font-mono text-muted-foreground bg-muted/50 px-2.5 py-1 rounded-lg">
-                                      {station.distance.toFixed(1)} {distanceUnit}
-                                    </span>
-                                  </div>
-                                  <h3 className="font-semibold text-base truncate pr-2">{station.name}</h3>
-                                  <p className="text-sm text-muted-foreground truncate mt-0.5">{station.brand}</p>
-                                  <div className="mt-3 flex items-center gap-2 text-sm">
-                                     <span className="flex items-center text-amber-500 font-semibold">
-                                       <Star className="w-3.5 h-3.5 mr-1 fill-current" /> {station.rating}
-                                     </span>
-                                  </div>
-                                </CardContent>
-                              </Card>
+                                    <h3 className="font-semibold text-base truncate pr-2">{(item as any).name}</h3>
+                                    <p className="text-sm text-muted-foreground truncate mt-0.5">{(item as any).brand}</p>
+                                    <div className="mt-3 flex items-center gap-2 text-sm">
+                                       <span className="flex items-center text-amber-500 font-semibold">
+                                         <Star className="w-3.5 h-3.5 mr-1 fill-current" /> {(item as any).rating}
+                                       </span>
+                                    </div>
+                                  </CardContent>
+                                </Card>
+                              ) : (
+                                <Card 
+                                  className="cursor-pointer hover:shadow-xl hover:shadow-primary/10 transition-all duration-300 border border-border/30 bg-card/90 backdrop-blur-sm overflow-hidden group h-full border-dashed"
+                                  onClick={(e) => {
+                                    e.stopPropagation();
+                                    navigate('/saved-stations');
+                                  }}
+                                >
+                                  <div className="absolute inset-0 bg-gradient-to-br from-primary/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+                                  <CardContent className="p-5 relative flex flex-col items-center justify-center h-full text-center space-y-4">
+                                    <div className="p-4 bg-primary/10 rounded-full text-primary group-hover:scale-110 transition-transform duration-300">
+                                      <Bookmark className="w-8 h-8" />
+                                    </div>
+                                    <div className="space-y-1">
+                                      <h3 className="font-bold text-lg">Saved Stations</h3>
+                                      <p className="text-sm text-muted-foreground">View all your favorite fuel stations in one place</p>
+                                    </div>
+                                    <div className="mt-2 inline-flex items-center justify-center rounded-md text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 hover:bg-accent hover:text-accent-foreground h-9 px-3 group-hover:translate-x-1 transition-transform">
+                                      View all <ChevronRight className="w-4 h-4 ml-1" />
+                                    </div>
+                                  </CardContent>
+                                </Card>
+                              )}
                             </motion.div>
                           </CarouselItem>
                         ))}
-                        <CarouselItem key="static-saved-stations" className="pl-3 basis-[85%] sm:basis-[320px]">
-                          <motion.div whileTap={{ scale: 0.98 }} className="h-full">
-                            <Card 
-                              className="cursor-pointer hover:shadow-xl hover:shadow-primary/10 transition-all duration-300 border border-border/30 bg-card/90 backdrop-blur-sm overflow-hidden group h-full border-dashed"
-                              onClick={() => navigate('/saved-stations')}
-                            >
-                              <div className="absolute inset-0 bg-gradient-to-br from-primary/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
-                              <CardContent className="p-5 relative flex flex-col items-center justify-center h-full text-center space-y-4">
-                                <div className="p-4 bg-primary/10 rounded-full text-primary group-hover:scale-110 transition-transform duration-300">
-                                  <Bookmark className="w-8 h-8" />
-                                </div>
-                                <div className="space-y-1">
-                                  <h3 className="font-bold text-lg">Saved Stations</h3>
-                                  <p className="text-sm text-muted-foreground">View all your favorite fuel stations in one place</p>
-                                </div>
-                                <div className="mt-2 inline-flex items-center justify-center rounded-md text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 hover:bg-accent hover:text-accent-foreground h-9 px-3 group-hover:translate-x-1 transition-transform">
-                                  View all <ChevronRight className="w-4 h-4 ml-1" />
-                                </div>
-                              </CardContent>
-                            </Card>
-                          </motion.div>
-                        </CarouselItem>
-                      </CarouselContent>
-                      <CarouselPrevious className="hidden md:flex -left-4 bg-card/90 backdrop-blur border-border/50" />
+                      </CarouselContent>                      <CarouselPrevious className="hidden md:flex -left-4 bg-card/90 backdrop-blur border-border/50" />
                       <CarouselNext className="hidden md:flex -right-4 bg-card/90 backdrop-blur border-border/50" />
                     </Carousel>
                   </div>
