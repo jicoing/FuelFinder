@@ -574,6 +574,13 @@ export default function SavedStationsPage() {
                                   <p className="font-medium">{log.amount} L</p>
                                 </div>
                                 <div>
+                                  <p className="text-sm text-muted-foreground">Rate</p>
+                                  <p className="font-medium flex items-center gap-1">
+                                    <span className="text-sm">{log.currency || currency}</span>
+                                    {(log.price / log.amount).toFixed(2)}/L
+                                  </p>
+                                </div>
+                                <div>
                                   <p className="text-sm text-muted-foreground">Total</p>
                                   <p className="font-medium flex items-center gap-1">
                                     <span className="text-sm">{log.currency || currency}</span>
