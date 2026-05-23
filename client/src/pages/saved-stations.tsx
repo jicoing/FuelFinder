@@ -1,7 +1,7 @@
 import { useState, useMemo } from 'react';
 import { useLocation } from 'wouter';
 import { Link } from 'wouter';
-import { motion } from 'framer-motion';
+import { motion, AnimatePresence } from 'framer-motion';
 import {
   Fuel,
   MapPin,
@@ -15,6 +15,8 @@ import {
   X,
   AlertCircle,
   Loader2,
+  LayoutDashboard,
+  List,
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
@@ -25,6 +27,8 @@ import { useSavedStations } from '@/lib/useSavedStations';
 import { useFuelLogs } from '@/lib/useFuelLogs';
 import { useCountryPreference, countryData } from '@/hooks/use-country-preference';
 import { useToast } from '@/hooks/use-toast';
+import { FuelAnalytics } from '@/components/fuel-analytics';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import {
   Dialog,
   DialogContent,
@@ -54,8 +58,15 @@ export default function SavedStationsPage() {
 
   const [isAddLogOpen, setIsAddLogOpen] = useState(false);
   const [isHistoryOpen, setIsHistoryOpen] = useState(false);
+  const [isStationAnalyticsOpen, setIsStationAnalyticsOpen] = useState(false);
   const [selectedStation, setSelectedStation] = useState<string | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [activeTab, setActiveTab] = useState('stations');
+
+  const handleOpenStationAnalytics = (stationId: string) => {
+    setSelectedStation(stationId);
+    setIsStationAnalyticsOpen(true);
+  };
 
   const [formData, setFormData] = useState({
     filled_at: new Date().toISOString().slice(0, 16),
@@ -243,192 +254,222 @@ export default function SavedStationsPage() {
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.3 }}
           >
-            <div className="flex items-center justify-between mb-8">
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-8">
               <div>
                 <h1 className="text-3xl font-bold tracking-tight">Saved Stations</h1>
                 <p className="text-muted-foreground mt-1">
                   View and manage your fuel logs
                 </p>
               </div>
-              <Link href="/">
-                <Button variant="outline">
-                  <Fuel className="w-4 h-4 mr-2" />
-                  Back to Map
-                </Button>
-              </Link>
+              <div className="flex items-center gap-2">
+                <Tabs value={activeTab} onValueChange={setActiveTab} className="w-auto">
+                  <TabsList className="grid w-full grid-cols-2">
+                    <TabsTrigger value="stations" className="gap-2">
+                      <List className="w-4 h-4" />
+                      <span className="hidden xs:inline">Stations</span>
+                    </TabsTrigger>
+                    <TabsTrigger value="analytics" className="gap-2">
+                      <LayoutDashboard className="w-4 h-4" />
+                      <span className="hidden xs:inline">Analytics</span>
+                    </TabsTrigger>
+                  </TabsList>
+                </Tabs>
+                <Link href="/">
+                  <Button variant="outline" size="sm" className="h-9">
+                    <Fuel className="w-4 h-4 mr-2" />
+                    <span className="hidden sm:inline">Back to Map</span>
+                  </Button>
+                </Link>
+              </div>
             </div>
 
-            {user && !logsLoading && logs.length > 0 && (
-              <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
-                <Card className="bg-primary/5 border-primary/10">
-                  <CardContent className="p-4 flex flex-col items-center justify-center text-center">
-                    <Fuel className="w-5 h-5 text-primary mb-2" />
-                    <p className="text-xs text-muted-foreground uppercase tracking-wider font-semibold">Total Fuel</p>
-                    <p className="text-xl font-bold">{metrics.totalFuel.toFixed(1)} L</p>
-                  </CardContent>
-                </Card>
-                <Card className="bg-primary/5 border-primary/10">
-                  <CardContent className="p-4 flex flex-col items-center justify-center text-center">
-                    <MapPin className="w-5 h-5 text-primary mb-2" />
-                    <p className="text-xs text-muted-foreground uppercase tracking-wider font-semibold">Stations</p>
-                    <p className="text-xl font-bold">{metrics.totalStations}</p>
-                  </CardContent>
-                </Card>
-                <Card className="bg-primary/5 border-primary/10">
-                  <CardContent className="p-4 flex flex-col items-center justify-center text-center">
-                    <Navigation className="w-5 h-5 text-primary mb-2" />
-                    <p className="text-xs text-muted-foreground uppercase tracking-wider font-semibold">Distance</p>
-                    <p className="text-xl font-bold">{metrics.totalDistance.toFixed(1)} km</p>
-                  </CardContent>
-                </Card>
-                <Card className="bg-primary/5 border-primary/10">
-                  <CardContent className="p-4 flex flex-col items-center justify-center text-center">
-                    <DollarSign className="w-5 h-5 text-primary mb-2" />
-                    <p className="text-xs text-muted-foreground uppercase tracking-wider font-semibold">Total Spent</p>
-                    <p className="text-xl font-bold">{currency}{metrics.totalSpent.toFixed(2)}</p>
-                  </CardContent>
-                </Card>
-              </div>
-            )}
-
-            {loading ? (
-              <div className="flex items-center justify-center py-12">
-                <Loader2 className="w-8 h-8 animate-spin text-primary" />
-              </div>
-            ) : savedStations.length === 0 ? (
-              <Card className="p-8 text-center">
-                <CardContent className="pt-6">
-                  <MapPin className="w-16 h-16 mx-auto mb-4 text-muted-foreground" />
-                  <h2 className="text-2xl font-bold mb-2">No Saved Stations</h2>
-                  <p className="text-muted-foreground mb-6">
-                    Save gas stations from the map to track your fuel purchases.
-                  </p>
-                  <Link href="/">
-                    <Button>Explore Map</Button>
-                  </Link>
-                </CardContent>
-              </Card>
-            ) : (
-              <div className="space-y-6">
-                {savedStations.map((station) => {
-                  const lastFill = getLastFill(station.id);
-                  const stationLogs = getLogsForStation(station.id);
-
-                  return (
-                    <Card key={station.id} className="overflow-hidden">
-                      <CardContent className="p-4 sm:p-6">
-                        <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-4">
-                          <div className="flex items-start gap-3 sm:gap-4">
-                            <div className="p-2.5 sm:p-3 bg-primary/10 rounded-xl text-primary shrink-0">
-                              <Fuel className="w-5 h-5 sm:w-6 sm:h-6" />
-                            </div>
-                            <div className="min-w-0 flex-1">
-                              <h3 className="font-semibold text-base sm:text-lg truncate">{station.name}</h3>
-                              <div className="flex flex-wrap items-center gap-2 mt-1">
-                                {station.brand && (
-                                  <Badge variant="outline" className="text-[10px] sm:text-xs">
-                                    {station.brand}
-                                  </Badge>
-                                )}
-                                <p className="text-[11px] sm:text-sm text-muted-foreground flex items-center gap-1">
-                                  <MapPin className="w-3 h-3" />
-                                  {station.lat.toFixed(2)}, {station.lon.toFixed(4)}
-                                </p>
-                              </div>
-                            </div>
-                          </div>
-                          
-                          <div className="flex items-center gap-2 w-full sm:w-auto mt-2 sm:mt-0">
-                            <motion.div whileTap={{ scale: 0.95 }} className="flex-1 sm:flex-initial">
-                              <Button
-                                size="sm"
-                                onClick={() => handleOpenAddLog(station.id)}
-                                className="w-full h-9 gap-1.5 bg-gradient-to-r from-blue-600 to-blue-500 hover:from-blue-500 hover:to-blue-600 text-white shadow-md shadow-blue-500/20 text-xs font-semibold"
-                              >
-                                <Plus className="w-3.5 h-3.5" />
-                                Add Log
-                              </Button>
-                            </motion.div>
-                            <Button
-                              size="sm"
-                              variant="outline"
-                              onClick={() => {
-                                setSelectedStation(station.id);
-                                setIsHistoryOpen(true);
-                              }}
-                              className="flex-1 sm:flex-initial gap-1.5 h-9 relative"
-                            >
-                              <History className="w-3.5 h-3.5" />
-                              <span className="text-xs">History</span>
-                              {stationLogs.length > 0 && (
-                                <Badge className="ml-1 h-5 w-5 flex items-center justify-center p-0 text-[10px] rounded-full">
-                                  {stationLogs.length}
-                                </Badge>
-                              )}
-                            </Button>                            <Button
-                              size="icon"
-                              variant="ghost"
-                              onClick={() => handleRemoveStation(station.id)}
-                              className="h-9 w-9 text-destructive hover:text-destructive hover:bg-destructive/10 shrink-0"
-                            >
-                              <Trash2 className="w-4 h-4" />
-                            </Button>
-                          </div>
-                        </div>
-
-                        {lastFill && (
-                          <div className="mt-4 p-4 bg-primary/5 rounded-lg border border-primary/10">
-                            <div className="flex items-center gap-2 text-sm text-primary mb-2">
-                              <Calendar className="w-4 h-4" />
-                              <span className="font-medium">Last Fill</span>
-                            </div>
-                            <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-sm">
-                              <div>
-                                <p className="text-muted-foreground">Date</p>
-                                <p className="font-medium">{formatDate(lastFill.filled_at)}</p>
-                              </div>
-                              <div>
-                                <p className="text-muted-foreground">Fuel Type</p>
-                                <p className="font-medium capitalize">{lastFill.fuel_type}</p>
-                              </div>
-                              <div>
-                                <p className="text-muted-foreground">Amount</p>
-                                <p className="font-medium">{lastFill.amount} L</p>
-                              </div>
-                               <div>
-                                 <p className="text-muted-foreground">Total</p>
-                                 <p className="font-medium flex items-center gap-1">
-                                   <span className="text-sm">{lastFill.currency}</span>
-                                   {lastFill.price.toFixed(2)}
-                                 </p>
-                               </div>
-                            </div>
-                            {lastFill.mileage && (
-                              <div className="mt-2 text-sm">
-                                <span className="text-muted-foreground">Mileage: </span>
-                                <span className="font-medium">{lastFill.mileage} km</span>
-                              </div>
-                            )}
-                            {lastFill.notes && (
-                              <div className="mt-2 text-sm">
-                                <span className="text-muted-foreground">Notes: </span>
-                                <span className="font-medium">{lastFill.notes}</span>
-                              </div>
-                            )}
-                          </div>
-                        )}
-
-                        {stationLogs.length > 0 && !lastFill && (
-                          <p className="text-sm text-muted-foreground mt-3">
-                            {stationLogs.length} log(s) on file
-                          </p>
-                        )}
+            <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
+              <TabsContent value="stations" className="mt-0 outline-none">
+                {user && !logsLoading && logs.length > 0 && (
+                  <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
+                    <Card className="bg-primary/5 border-primary/10">
+                      <CardContent className="p-4 flex flex-col items-center justify-center text-center">
+                        <Fuel className="w-5 h-5 text-primary mb-2" />
+                        <p className="text-xs text-muted-foreground uppercase tracking-wider font-semibold">Total Fuel</p>
+                        <p className="text-xl font-bold">{metrics.totalFuel.toFixed(1)} L</p>
                       </CardContent>
                     </Card>
-                  );
-                })}
-              </div>
-            )}
+                    <Card className="bg-primary/5 border-primary/10">
+                      <CardContent className="p-4 flex flex-col items-center justify-center text-center">
+                        <MapPin className="w-5 h-5 text-primary mb-2" />
+                        <p className="text-xs text-muted-foreground uppercase tracking-wider font-semibold">Stations</p>
+                        <p className="text-xl font-bold">{metrics.totalStations}</p>
+                      </CardContent>
+                    </Card>
+                    <Card className="bg-primary/5 border-primary/10">
+                      <CardContent className="p-4 flex flex-col items-center justify-center text-center">
+                        <Navigation className="w-5 h-5 text-primary mb-2" />
+                        <p className="text-xs text-muted-foreground uppercase tracking-wider font-semibold">Distance</p>
+                        <p className="text-xl font-bold">{metrics.totalDistance.toFixed(1)} km</p>
+                      </CardContent>
+                    </Card>
+                    <Card className="bg-primary/5 border-primary/10">
+                      <CardContent className="p-4 flex flex-col items-center justify-center text-center">
+                        <DollarSign className="w-5 h-5 text-primary mb-2" />
+                        <p className="text-xs text-muted-foreground uppercase tracking-wider font-semibold">Total Spent</p>
+                        <p className="text-xl font-bold">{currency}{metrics.totalSpent.toFixed(2)}</p>
+                      </CardContent>
+                    </Card>
+                  </div>
+                )}
+
+                {loading ? (
+                  <div className="flex items-center justify-center py-12">
+                    <Loader2 className="w-8 h-8 animate-spin text-primary" />
+                  </div>
+                ) : savedStations.length === 0 ? (
+                  <Card className="p-8 text-center">
+                    <CardContent className="pt-6">
+                      <MapPin className="w-16 h-16 mx-auto mb-4 text-muted-foreground" />
+                      <h2 className="text-2xl font-bold mb-2">No Saved Stations</h2>
+                      <p className="text-muted-foreground mb-6">
+                        Save gas stations from the map to track your fuel purchases.
+                      </p>
+                      <Link href="/">
+                        <Button>Explore Map</Button>
+                      </Link>
+                    </CardContent>
+                  </Card>
+                ) : (
+                  <div className="space-y-6">
+                    {savedStations.map((station) => {
+                      const lastFill = getLastFill(station.id);
+                      const stationLogs = getLogsForStation(station.id);
+
+                      return (
+                        <Card key={station.id} className="overflow-hidden">
+                          <CardContent className="p-4 sm:p-6">
+                            <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-4">
+                              <div className="flex items-start gap-3 sm:gap-4">
+                                <div className="p-2.5 sm:p-3 bg-primary/10 rounded-xl text-primary shrink-0">
+                                  <Fuel className="w-5 h-5 sm:w-6 sm:h-6" />
+                                </div>
+                                <div className="min-w-0 flex-1">
+                                  <h3 className="font-semibold text-base sm:text-lg truncate">{station.name}</h3>
+                                  <div className="flex flex-wrap items-center gap-2 mt-1">
+                                    {station.brand && (
+                                      <Badge variant="outline" className="text-[10px] sm:text-xs">
+                                        {station.brand}
+                                      </Badge>
+                                    )}
+                                    <p className="text-[11px] sm:text-sm text-muted-foreground flex items-center gap-1">
+                                      <MapPin className="w-3 h-3" />
+                                      {station.lat.toFixed(2)}, {station.lon.toFixed(4)}
+                                    </p>
+                                  </div>
+                                </div>
+                              </div>
+
+                              <div className="flex items-center gap-2 w-full sm:w-auto mt-2 sm:mt-0">
+                                <motion.div whileTap={{ scale: 0.95 }} className="flex-1 sm:flex-initial">
+                                  <Button
+                                    size="sm"
+                                    onClick={() => handleOpenAddLog(station.id)}
+                                    className="w-full h-9 gap-1.5 bg-gradient-to-r from-blue-600 to-blue-500 hover:from-blue-500 hover:to-blue-600 text-white shadow-md shadow-blue-500/20 text-xs font-semibold"
+                                  >
+                                    <Plus className="w-3.5 h-3.5" />
+                                    Add Log
+                                  </Button>
+                                </motion.div>
+                                <Button
+                                  size="sm"
+                                  variant="outline"
+                                  onClick={() => {
+                                    setSelectedStation(station.id);
+                                    setIsHistoryOpen(true);
+                                  }}
+                                  className="flex-1 sm:flex-initial gap-1.5 h-9 relative"
+                                >
+                                  <History className="w-3.5 h-3.5" />
+                                  <span className="text-xs">History</span>
+                                  {stationLogs.length > 0 && (
+                                    <Badge className="ml-1 h-5 w-5 flex items-center justify-center p-0 text-[10px] rounded-full">
+                                      {stationLogs.length}
+                                    </Badge>
+                                  )}
+                                </Button>
+                                <Button
+                                  size="icon"
+                                  variant="outline"
+                                  onClick={() => handleOpenStationAnalytics(station.id)}
+                                  className="h-9 w-9 text-primary hover:text-primary hover:bg-primary/10 shrink-0"
+                                >
+                                  <LayoutDashboard className="w-4 h-4" />
+                                </Button>
+                                <Button
+                                  size="icon"
+                                  variant="ghost"
+                                  onClick={() => handleRemoveStation(station.id)}
+                                  className="h-9 w-9 text-destructive hover:text-destructive hover:bg-destructive/10 shrink-0"
+                                >
+                                  <Trash2 className="w-4 h-4" />
+                                </Button>
+                              </div>
+                            </div>
+
+                            {lastFill && (
+                              <div className="mt-4 p-4 bg-primary/5 rounded-lg border border-primary/10">
+                                <div className="flex items-center gap-2 text-sm text-primary mb-2">
+                                  <Calendar className="w-4 h-4" />
+                                  <span className="font-medium">Last Fill</span>
+                                </div>
+                                <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-sm">
+                                  <div>
+                                    <p className="text-muted-foreground">Date</p>
+                                    <p className="font-medium">{formatDate(lastFill.filled_at)}</p>
+                                  </div>
+                                  <div>
+                                    <p className="text-muted-foreground">Fuel Type</p>
+                                    <p className="font-medium capitalize">{lastFill.fuel_type}</p>
+                                  </div>
+                                  <div>
+                                    <p className="text-muted-foreground">Amount</p>
+                                    <p className="font-medium">{lastFill.amount} L</p>
+                                  </div>
+                                   <div>
+                                     <p className="text-muted-foreground">Total</p>
+                                     <p className="font-medium flex items-center gap-1">
+                                       <span className="text-sm">{lastFill.currency}</span>
+                                       {lastFill.price.toFixed(2)}
+                                     </p>
+                                   </div>
+                                </div>
+                                {lastFill.mileage && (
+                                  <div className="mt-2 text-sm">
+                                    <span className="text-muted-foreground">Mileage: </span>
+                                    <span className="font-medium">{lastFill.mileage} km</span>
+                                  </div>
+                                )}
+                                {lastFill.notes && (
+                                  <div className="mt-2 text-sm">
+                                    <span className="text-muted-foreground">Notes: </span>
+                                    <span className="font-medium">{lastFill.notes}</span>
+                                  </div>
+                                )}
+                              </div>
+                            )}
+
+                            {stationLogs.length > 0 && !lastFill && (
+                              <p className="text-sm text-muted-foreground mt-3">
+                                {stationLogs.length} log(s) on file
+                              </p>
+                            )}
+                          </CardContent>
+                        </Card>
+                      );
+                    })}
+                  </div>
+                )}
+              </TabsContent>
+              <TabsContent value="analytics" className="mt-0 outline-none">
+                <FuelAnalytics logs={logs} currency={currency} />
+              </TabsContent>
+            </Tabs>
           </motion.div>
         </div>
       </main>
@@ -620,6 +661,28 @@ export default function SavedStationsPage() {
           </div>
           <DialogFooter>
             <Button variant="outline" onClick={() => setIsHistoryOpen(false)}>
+              Close
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Station Analytics Dialog */}
+      <Dialog open={isStationAnalyticsOpen} onOpenChange={setIsStationAnalyticsOpen}>
+        <DialogContent className="sm:max-w-[800px] max-h-[90vh] overflow-y-auto">
+          <DialogHeader>
+            <DialogTitle>
+              {selectedStation ? savedStations.find(s => s.id === selectedStation)?.name : 'Station'} Analytics
+            </DialogTitle>
+            <DialogDescription>
+              Performance and usage metrics for this specific station.
+            </DialogDescription>
+          </DialogHeader>
+          <div className="py-4">
+            <FuelAnalytics logs={logs} currency={currency} stationId={selectedStation} />
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setIsStationAnalyticsOpen(false)}>
               Close
             </Button>
           </DialogFooter>
