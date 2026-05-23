@@ -828,6 +828,27 @@ export default function Home() {
                             </Card>
                           </CarouselItem>
                         ))}
+                        <CarouselItem className="pl-3 basis-[85%] sm:basis-[320px]">
+                          <Link href="/saved-stations">
+                            <Card 
+                              className="cursor-pointer hover:shadow-xl hover:shadow-primary/10 transition-all duration-300 border border-border/30 bg-card/90 backdrop-blur-sm overflow-hidden group h-full border-dashed"
+                            >
+                              <div className="absolute inset-0 bg-gradient-to-br from-primary/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+                              <CardContent className="p-5 relative flex flex-col items-center justify-center h-full text-center space-y-4">
+                                <div className="p-4 bg-primary/10 rounded-full text-primary group-hover:scale-110 transition-transform duration-300">
+                                  <Bookmark className="w-8 h-8" />
+                                </div>
+                                <div className="space-y-1">
+                                  <h3 className="font-bold text-lg">Saved Stations</h3>
+                                  <p className="text-sm text-muted-foreground">View all your favorite fuel stations in one place</p>
+                                </div>
+                                <Button variant="ghost" size="sm" className="mt-2 group-hover:translate-x-1 transition-transform">
+                                  View all <ChevronRight className="w-4 h-4 ml-1" />
+                                </Button>
+                              </CardContent>
+                            </Card>
+                          </Link>
+                        </CarouselItem>
                       </CarouselContent>
                       <CarouselPrevious className="hidden md:flex -left-4 bg-card/90 backdrop-blur border-border/50" />
                       <CarouselNext className="hidden md:flex -right-4 bg-card/90 backdrop-blur border-border/50" />
