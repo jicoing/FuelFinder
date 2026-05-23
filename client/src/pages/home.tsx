@@ -803,7 +803,7 @@ export default function Home() {
                               <Card 
                                 className="cursor-pointer hover:shadow-xl hover:shadow-primary/10 transition-all duration-300 border border-border/30 bg-card/90 backdrop-blur-sm overflow-hidden group h-full"
                                 onClick={() => {
-                                  if (!carouselApi || carouselApi.clickAllowed()) {
+                                  if (!isMobile || !carouselApi || carouselApi.clickAllowed()) {
                                     setSelectedStation(station);
                                   }
                                 }}
@@ -835,7 +835,7 @@ export default function Home() {
                             <Card 
                               className="cursor-pointer hover:shadow-xl hover:shadow-primary/10 transition-all duration-300 border border-border/30 bg-card/90 backdrop-blur-sm overflow-hidden group h-full border-dashed"
                               onClick={() => {
-                                if (!carouselApi || carouselApi.clickAllowed()) {
+                                if (!isMobile || !carouselApi || carouselApi.clickAllowed()) {
                                   navigate('/saved-stations');
                                 }
                               }}
