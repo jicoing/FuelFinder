@@ -11,6 +11,7 @@ import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Badge } from '@/components/ui/badge';
 import { ScrollArea, ScrollBar } from '@/components/ui/scroll-area';
 import {
+  type CarouselApi,
   Carousel,
   CarouselContent,
   CarouselItem,
@@ -113,6 +114,7 @@ export default function Home() {
   const [isAuthOpen, setIsAuthOpen] = useState(false);
   const [isAddLogOpen, setIsAddLogOpen] = useState(false);
   const [stationForLog, setStationForLog] = useState<{id?: string; name: string; brand?: string; lat: number; lon: number} | null>(null);
+  const [carouselApi, setCarouselApi] = useState<CarouselApi>();
 
   const [logFormData, setLogFormData] = useState({
     filled_at: new Date().toISOString().slice(0, 16),
@@ -786,6 +788,7 @@ export default function Home() {
                   </div>
                   <div className="relative pointer-events-auto w-full">
                     <Carousel 
+                      setApi={setCarouselApi}
                       opts={{ 
                         align: "start",
                         loop: false,
@@ -799,7 +802,11 @@ export default function Home() {
                             <motion.div whileTap={{ scale: 0.98 }} className="h-full">
                               <Card 
                                 className="cursor-pointer hover:shadow-xl hover:shadow-primary/10 transition-all duration-300 border border-border/30 bg-card/90 backdrop-blur-sm overflow-hidden group h-full"
-                                onClick={() => setSelectedStation(station)}
+                                onClick={() => {
+                                  if (!carouselApi || carouselApi.clickAllowed()) {
+                                    setSelectedStation(station);
+                                  }
+                                }}
                               >
                                 <div className="absolute inset-0 bg-gradient-to-br from-primary/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
                                 <CardContent className="p-5 relative">
@@ -827,7 +834,11 @@ export default function Home() {
                           <motion.div whileTap={{ scale: 0.98 }} className="h-full">
                             <Card 
                               className="cursor-pointer hover:shadow-xl hover:shadow-primary/10 transition-all duration-300 border border-border/30 bg-card/90 backdrop-blur-sm overflow-hidden group h-full border-dashed"
-                              onClick={() => navigate('/saved-stations')}
+                              onClick={() => {
+                                if (!carouselApi || carouselApi.clickAllowed()) {
+                                  navigate('/saved-stations');
+                                }
+                              }}
                             >
                               <div className="absolute inset-0 bg-gradient-to-br from-primary/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
                               <CardContent className="p-5 relative flex flex-col items-center justify-center h-full text-center space-y-4">
