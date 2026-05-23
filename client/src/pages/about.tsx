@@ -17,22 +17,10 @@ const AboutPage = () => {
         </CardHeader>
         <CardContent className="p-6 md:p-8 space-y-8 relative">
           <p className="text-foreground/80 leading-relaxed">
-            <strong className="text-foreground">findmyfuel</strong> is a comprehensive tool designed to help you manage your fuel expenses and optimize your journeys. From finding nearby stations to tracking your long-term fuel consumption, we provide the insights you need.
+            <strong className="text-foreground">findmyfuel</strong> is a powerful tool designed to help you save money on gas. Whether you're planning a road trip or just running errands around town, our app provides the tools you need to make informed decisions about your fuel consumption.
           </p>
           
           <div className="space-y-4">
-            <div className="p-5 bg-secondary/30 rounded-xl border border-border/30">
-              <div className="flex items-center gap-3 mb-3">
-                <div className="p-2 bg-primary/10 rounded-lg">
-                  <Fuel className="w-5 h-5 text-primary" />
-                </div>
-                <h2 className="text-lg font-semibold">Fuel Station Locator</h2>
-              </div>
-              <p className="text-sm text-muted-foreground leading-relaxed">
-                Using precise geolocation or ZIP codes, find fuel stations in your area. View them on an interactive map, check distance, and get instant navigation.
-              </p>
-            </div>
-
             <div className="p-5 bg-secondary/30 rounded-xl border border-border/30">
               <div className="flex items-center gap-3 mb-3">
                 <div className="p-2 bg-primary/10 rounded-lg">
@@ -41,19 +29,31 @@ const AboutPage = () => {
                 <h2 className="text-lg font-semibold">Trip Fuel Cost Calculator</h2>
               </div>
               <p className="text-sm text-muted-foreground leading-relaxed">
-                Estimate the cost of your trips by inputting distance, vehicle efficiency, and fuel prices to budget accurately before you hit the road.
+                Our main feature is the Trip Fuel Cost Calculator. Simply enter your trip distance, your vehicle's fuel efficiency (MPG), and the current gas price, and we'll instantly calculate the estimated cost of your journey. This helps you budget for your trips and understand your vehicle's fuel expenses.
               </p>
             </div>
 
             <div className="p-5 bg-secondary/30 rounded-xl border border-border/30">
               <div className="flex items-center gap-3 mb-3">
                 <div className="p-2 bg-primary/10 rounded-lg">
-                  <History className="w-5 h-5 text-primary" />
+                  <Zap className="w-5 h-5 text-primary" />
                 </div>
-                <h2 className="text-lg font-semibold">Fuel Logging & History</h2>
+                <h2 className="text-lg font-semibold">Nearby Gas Stations</h2>
               </div>
               <p className="text-sm text-muted-foreground leading-relaxed">
-                Track every fill-up. Save stations, record amount, price, and mileage for each trip, and view a comprehensive history of your fuel consumption with detailed rate analysis.
+                Using your device's location, <strong className="text-foreground">findmyfuel</strong> can quickly locate gas stations near you. We provide a map view to easily navigate to the station of your choice.
+              </p>
+            </div>
+
+            <div className="p-5 bg-secondary/30 rounded-xl border border-border/30">
+              <div className="flex items-center gap-3 mb-3">
+                <div className="p-2 bg-amber-500/10 rounded-lg">
+                  <Zap className="w-5 h-5 text-amber-500" />
+                </div>
+                <h2 className="text-lg font-semibold">Fuel Price Comparison <span className="text-xs bg-amber-500/20 text-amber-500 px-2 py-0.5 rounded-full font-medium">Coming Soon</span></h2>
+              </div>
+              <p className="text-sm text-muted-foreground leading-relaxed">
+                We are working hard to bring you real-time fuel price data. Soon, you'll be able to compare prices at different gas stations to ensure you're getting the best deal.
               </p>
             </div>
           </div>
