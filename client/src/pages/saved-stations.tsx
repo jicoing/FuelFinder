@@ -346,15 +346,16 @@ export default function SavedStationsPage() {
                           </div>
                           
                           <div className="flex items-center gap-2 w-full sm:w-auto mt-2 sm:mt-0">
-                            <Button
-                              size="sm"
-                              variant="outline"
-                              onClick={() => handleOpenAddLog(station.id)}
-                              className="flex-1 sm:flex-initial gap-1.5 h-9"
-                            >
-                              <Plus className="w-3.5 h-3.5" />
-                              <span className="text-xs">Add Log</span>
-                            </Button>
+                            <motion.div whileTap={{ scale: 0.95 }} className="flex-1 sm:flex-initial">
+                              <Button
+                                size="sm"
+                                onClick={() => handleOpenAddLog(station.id)}
+                                className="w-full h-9 gap-1.5 bg-gradient-to-r from-blue-600 to-blue-500 hover:from-blue-500 hover:to-blue-600 text-white shadow-md shadow-blue-500/20 text-xs font-semibold"
+                              >
+                                <Plus className="w-3.5 h-3.5" />
+                                Add Log
+                              </Button>
+                            </motion.div>
                             <Button
                               size="sm"
                               variant="outline"

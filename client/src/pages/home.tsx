@@ -910,16 +910,23 @@ export default function Home() {
                         </div>
                         
                         <div className="mt-5 grid grid-cols-2 gap-3 sm:mt-8 sm:gap-4">
-                           <Button variant="outline" className="w-full h-12 text-sm font-medium bg-transparent hover:bg-accent/50 border-border/50 transition-all duration-300 sm:h-14 sm:text-base" onClick={() => handleAddLog(selectedStation)}>
-                              <Plus className="w-4 h-4 mr-2 sm:h-5 sm:w-5 sm:mr-2.5" />
-                              Add Log
-                           </Button>
-                           <Button className="w-full h-12 text-sm font-semibold bg-gradient-to-r from-primary to-primary/90 hover:from-primary/90 hover:to-primary text-primary-foreground shadow-lg shadow-primary/25 transition-all duration-300 sm:h-14 sm:text-base" asChild>
-                              <a href={directionsUrl(selectedStation)} target="_blank" rel="noreferrer">
-                                 <Navigation className="w-4 h-4 mr-2 sm:h-5 sm:w-5 sm:mr-2.5" />
-                                 Get Directions
-                              </a>
-                           </Button>
+                           <motion.div whileTap={{ scale: 0.95 }} className="w-full">
+                             <Button 
+                               className="w-full h-12 text-sm font-semibold bg-gradient-to-r from-blue-600 to-blue-500 hover:from-blue-500 hover:to-blue-600 text-white shadow-lg shadow-blue-500/25 transition-all duration-300 sm:h-14 sm:text-base" 
+                               onClick={() => handleAddLog(selectedStation)}
+                             >
+                                <Plus className="w-4 h-4 mr-2 sm:h-5 sm:w-5 sm:mr-2.5" />
+                                Add Log
+                             </Button>
+                           </motion.div>
+                           <motion.div whileTap={{ scale: 0.95 }} className="w-full">
+                             <Button className="w-full h-12 text-sm font-semibold bg-gradient-to-r from-primary to-primary/90 hover:from-primary/90 hover:to-primary text-primary-foreground shadow-lg shadow-primary/25 transition-all duration-300 sm:h-14 sm:text-base" asChild>
+                                <a href={directionsUrl(selectedStation)} target="_blank" rel="noreferrer">
+                                   <Navigation className="w-4 h-4 mr-2 sm:h-5 sm:w-5 sm:mr-2.5" />
+                                   Get Directions
+                                </a>
+                             </Button>
+                           </motion.div>
                         </div>
                       </CardContent>
                     </div>
