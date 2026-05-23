@@ -4,12 +4,12 @@ This is a web application that helps users find fuel stations near their locatio
 
 ## Features
 
-- Find fuel stations using your current location or by entering a ZIP code.
-- Specify a search radius.
-- View fuel stations on a map.
-- Get directions to a selected fuel station.
-- Switch between countries (currently supports India and the United States).
-- Fuel cost calculator.
+- **Fuel Station Locator:** Find fuel stations nearby using geolocation or ZIP code, with map integration and navigation.
+- **Trip Fuel Cost Calculator:** Plan your trips and budget fuel costs based on distance and vehicle efficiency.
+- **Saved Stations:** Bookmark your favorite fuel stations for quick access.
+- **Fuel Logging:** Track your fill-ups by logging fuel amount, price, and mileage for every trip.
+- **Fuel History & Analysis:** Review detailed fuel history per station, with calculated fuel rates and usage statistics.
+- **Multi-Country Support:** Support for global usage with local currency/unit adaptation.
 
 ## Tech Stack
 
