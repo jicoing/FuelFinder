@@ -792,8 +792,8 @@ export default function Home() {
                       opts={{ 
                         align: "start",
                         loop: false,
-                        dragFree: true, // Allow smooth free dragging on mobile
-                        dragThreshold: 30, // Higher threshold for small touch screens (iPhone SE)
+                        dragFree: !isMobile,
+                        dragThreshold: isMobile ? 40 : 30,
                       }} 
                       className="w-full"
                     >
