@@ -23,7 +23,7 @@ import { Badge } from '@/components/ui/badge';
 import { useAuth } from '@/lib/auth-context';
 import { useSavedStations } from '@/lib/useSavedStations';
 import { useFuelLogs } from '@/lib/useFuelLogs';
-import { useCountryPreference } from '@/hooks/use-country-preference';
+import { useCountryPreference, countryData } from '@/hooks/use-country-preference';
 import { useToast } from '@/hooks/use-toast';
 import {
   Dialog,
@@ -130,17 +130,10 @@ export default function SavedStationsPage() {
   };
 
   // Get currency symbol based on selected country
-  const getCurrency = () => {
-    if (!country) return '$';
-    const countryData: Record<string, string> = {
-      US: '$', IN: '₹', UK: '£', CA: 'CAD', AU: 'AUD',
-      DE: '€', NO: 'NOK', JP: '¥', CN: '¥', SA: 'SAR',
-      AE: 'AED', LK: 'LKR', NG: '₦', IR: 'rial', VE: 'Bs'
-    };
-    return countryData[country] || '$';
-  };
-
-  const currency = getCurrency();
+  const currency = useMemo(() => {
+    const countryCode = country || 'IN';
+    return (countryData as any)[countryCode]?.currency || '$';
+  }, [country]);
 
   const handleOpenAddLog = (stationId: string) => {
     setSelectedStation(stationId);
