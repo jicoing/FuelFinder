@@ -115,6 +115,23 @@ export default function Home() {
   const [isAddLogOpen, setIsAddLogOpen] = useState(false);
   const [stationForLog, setStationForLog] = useState<{id?: string; name: string; brand?: string; lat: number; lon: number} | null>(null);
   const [carouselApi, setCarouselApi] = useState<CarouselApi>();
+  const [hasScrolled, setHasScrolled] = useState(false);
+
+  useEffect(() => {
+    if (!carouselApi) return;
+
+    const onScroll = () => {
+      setHasScrolled(true);
+    };
+
+    carouselApi.on("scroll", onScroll);
+    carouselApi.on("reInit", () => setHasScrolled(false));
+
+    return () => {
+      carouselApi.off("scroll", onScroll);
+      carouselApi.off("reInit", () => setHasScrolled(false));
+    };
+  }, [carouselApi]);
 
   const [logFormData, setLogFormData] = useState({
     filled_at: new Date().toISOString().slice(0, 16),
@@ -803,7 +820,13 @@ export default function Home() {
                             <div className="h-full">
                               <Card 
                                 className="cursor-pointer hover:shadow-xl hover:shadow-primary/10 transition-all duration-300 border border-border/30 bg-card/90 backdrop-blur-sm overflow-hidden group h-full"
-                                onClick={() => setSelectedStation(station)}
+                                onClick={() => {
+                                  if (isMobile && !hasScrolled) {
+                                    setSelectedStation(stations[0]);
+                                  } else {
+                                    setSelectedStation(station);
+                                  }
+                                }}
                               >
                                 <div className="absolute inset-0 bg-gradient-to-br from-primary/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
                                 <CardContent className="p-5 relative">
