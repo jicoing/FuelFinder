@@ -133,17 +133,10 @@ export default function Home() {
   const [distanceUnit, setDistanceUnit] = useState('km');
 
   // Get currency symbol based on selected country
-  const getCurrency = () => {
-    if (!country) return '$';
-    const countryData: Record<string, string> = {
-      US: '$', IN: '₹', UK: '£', CA: 'CAD', AU: 'AUD',
-      DE: '€', NO: 'NOK', JP: '¥', CN: '¥', SA: 'SAR',
-      AE: 'AED', LK: 'LKR', NG: '₦', IR: 'rial', VE: 'Bs'
-    };
-    return countryData[country] || '$';
-  };
-
-  const currency = getCurrency();
+  const currency = useMemo(() => {
+    const countryCode = country || 'IN';
+    return (countryData as any)[countryCode]?.currency || '$';
+  }, [country]);
 
   const metrics = useMemo(() => {
     if (!logs || logs.length === 0) {
