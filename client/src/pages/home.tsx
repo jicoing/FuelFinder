@@ -799,9 +799,9 @@ export default function Home() {
                       <CarouselContent className="-ml-3 pb-4">
                         {stations.map((station) => (
                           <CarouselItem key={station.id} className="pl-3 basis-[85%] sm:basis-[320px]">
-                            <motion.div whileTap={{ scale: 0.98 }} className="h-full">
+                            <div className="h-full">
                               <Card 
-                                className="cursor-pointer hover:shadow-xl hover:shadow-primary/10 transition-all duration-300 border border-border/30 bg-card/90 backdrop-blur-sm overflow-hidden group h-full"
+                                className="cursor-pointer hover:shadow-xl hover:shadow-primary/10 active:scale-[0.98] transition-all duration-300 border border-border/30 bg-card/90 backdrop-blur-sm overflow-hidden group h-full"
                                 onClick={() => {
                                   if (!isMobile || !carouselApi || carouselApi.clickAllowed()) {
                                     setSelectedStation(station);
@@ -827,13 +827,13 @@ export default function Home() {
                                   </div>
                                 </CardContent>
                               </Card>
-                            </motion.div>
+                            </div>
                           </CarouselItem>
                         ))}
                         <CarouselItem key="static-saved-stations" className="pl-3 basis-[85%] sm:basis-[320px]">
-                          <motion.div whileTap={{ scale: 0.98 }} className="h-full">
+                          <div className="h-full">
                             <Card 
-                              className="cursor-pointer hover:shadow-xl hover:shadow-primary/10 transition-all duration-300 border border-border/30 bg-card/90 backdrop-blur-sm overflow-hidden group h-full border-dashed"
+                              className="cursor-pointer hover:shadow-xl hover:shadow-primary/10 active:scale-[0.98] transition-all duration-300 border border-border/30 bg-card/90 backdrop-blur-sm overflow-hidden group h-full border-dashed"
                               onClick={() => {
                                 if (!isMobile || !carouselApi || carouselApi.clickAllowed()) {
                                   navigate('/saved-stations');
@@ -854,7 +854,7 @@ export default function Home() {
                                 </div>
                               </CardContent>
                             </Card>
-                          </motion.div>
+                          </div>
                         </CarouselItem>
                       </CarouselContent>
                       <CarouselPrevious className="hidden md:flex -left-4 bg-card/90 backdrop-blur border-border/50" />
