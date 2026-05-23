@@ -356,12 +356,16 @@ export default function SavedStationsPage() {
                                 setSelectedStation(station.id);
                                 setIsHistoryOpen(true);
                               }}
-                              className="flex-1 sm:flex-initial gap-1.5 h-9"
+                              className="flex-1 sm:flex-initial gap-1.5 h-9 relative"
                             >
                               <History className="w-3.5 h-3.5" />
                               <span className="text-xs">History</span>
-                            </Button>
-                            <Button
+                              {stationLogs.length > 0 && (
+                                <Badge className="ml-1 h-5 w-5 flex items-center justify-center p-0 text-[10px] rounded-full">
+                                  {stationLogs.length}
+                                </Badge>
+                              )}
+                            </Button>                            <Button
                               size="icon"
                               variant="ghost"
                               onClick={() => handleRemoveStation(station.id)}
