@@ -803,14 +803,7 @@ export default function Home() {
                             <div className="h-full">
                               <Card 
                                 className="cursor-pointer hover:shadow-xl hover:shadow-primary/10 active:scale-[0.98] transition-all duration-300 border border-border/30 bg-card/90 backdrop-blur-sm overflow-hidden group h-full"
-                                onClickCapture={(e) => {
-                                  if (carouselApi && !carouselApi.clickAllowed()) {
-                                    e.preventDefault();
-                                    e.stopPropagation();
-                                    return;
-                                  }
-                                  setSelectedStation(station);
-                                }}
+                                onClick={() => setSelectedStation(station)}
                               >
                                 <div className="absolute inset-0 bg-gradient-to-br from-primary/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
                                 <CardContent className="p-5 relative">
@@ -838,14 +831,7 @@ export default function Home() {
                           <div className="h-full">
                             <Card 
                               className="cursor-pointer hover:shadow-xl hover:shadow-primary/10 active:scale-[0.98] transition-all duration-300 border border-border/30 bg-card/90 backdrop-blur-sm overflow-hidden group h-full border-dashed"
-                              onClickCapture={(e) => {
-                                if (carouselApi && !carouselApi.clickAllowed()) {
-                                  e.preventDefault();
-                                  e.stopPropagation();
-                                  return;
-                                }
-                                navigate('/saved-stations');
-                              }}
+                              onClick={() => navigate('/saved-stations')}
                             >
                               <div className="absolute inset-0 bg-gradient-to-br from-primary/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
                               <CardContent className="p-5 relative flex flex-col items-center justify-center h-full text-center space-y-4">
