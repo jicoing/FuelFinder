@@ -19,6 +19,22 @@ const AboutPage = () => {
           <p className="text-foreground/80 leading-relaxed">
             <strong className="text-foreground">findmyfuel</strong> is a powerful tool designed to help you save money on gas. Whether you're planning a road trip or just running errands around town, our app provides the tools you need to make informed decisions about your fuel consumption.
           </p>
+
+          <div className="flex justify-center md:justify-start">
+            <a 
+              href="https://www.producthunt.com/products/findmyfuel-2?embed=true&utm_source=badge-featured&utm_medium=badge&utm_campaign=badge-findmyfuel-2" 
+              target="_blank" 
+              rel="noopener noreferrer"
+            >
+              <img 
+                src="https://api.producthunt.com/widgets/embed-image/v1/featured.svg?post_id=1156251&theme=light&t=1779793659056" 
+                alt="findmyfuel - Find the cheapest fuel nearby and track your savings. | Product Hunt" 
+                style={{ width: '250px', height: '54px' }}
+                width="250" 
+                height="54" 
+              />
+            </a>
+          </div>
           
           <div className="space-y-4">
             <div className="p-5 bg-secondary/30 rounded-xl border border-border/30">
