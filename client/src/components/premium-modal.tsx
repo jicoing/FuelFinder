@@ -114,10 +114,10 @@ export function PremiumModal({ isOpen, onOpenChange }: PremiumModalProps) {
 
     // Format for Cashfree customer_phone parameter
     // - Indian number: 10 digits without leading 0 or +91
-    // - International number: country dial code + subscriber number, without the '+' prefix
+    // - International number: must include the '+' prefix (e.g. +12015550123) as required by Cashfree
     const formattedPhone = countryCode === '+91'
       ? cleanNumber
-      : `${countryCode.replace('+', '')}${cleanNumber}`;
+      : `${countryCode}${cleanNumber}`;
 
     setIsLoading(true);
 
