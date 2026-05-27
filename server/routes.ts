@@ -53,9 +53,20 @@ export function registerRoutes(
        return res.status(400).json({ error: 'User already has premium access' });
      }
 
-     const { order_amount = 400, order_currency = 'INR' } = req.body; // ₹400 one-time payment (~$4.99)
+     const { order_amount = 400, order_currency = 'INR', phone } = req.body; // ₹400 one-time payment (~$4.99)
 
      const orderId = `order_${Date.now()}_${user.id}`.replace(/[^a-zA-Z0-9_-]/g, '_');
+
+     if (phone && supabaseAdmin) {
+       try {
+         console.log(`Updating metadata phone for user ${user.id} to ${phone}`);
+         await supabaseAdmin.auth.admin.updateUserById(user.id, {
+           user_metadata: { ...user.user_metadata, phone }
+         });
+       } catch (metaErr: any) {
+         console.error('Error updating user metadata in Supabase:', metaErr.message || metaErr);
+       }
+     }
 
      try {
        // Debug logs for environment variables (safely checked)
@@ -79,7 +90,7 @@ export function registerRoutes(
            customer_id: user.id,
            customer_email: user.email || '',
            customer_name: user.user_metadata?.full_name || user.email || '',
-           customer_phone: user.phone || user.user_metadata?.phone || '9999999999',
+           customer_phone: phone || user.phone || user.user_metadata?.phone || '9999999999',
          },
          order_meta: {
            return_url: `${frontendUrl}/payment-success?order_id=${orderId}`,
