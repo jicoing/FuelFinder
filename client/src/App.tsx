@@ -151,9 +151,9 @@ function HeaderContent() {
                 <Menu className="w-5 h-5 text-primary" />
               </Button>
             </SheetTrigger>
-            <SheetContent className="bg-card/95 backdrop-blur-xl border-border">
+            <SheetContent className="bg-card/95 backdrop-blur-xl border-border overflow-y-auto">
               <nav className="flex flex-col h-full mt-8">
-                <div className="flex-grow space-y-1">
+                <div className="space-y-1">
                   <SheetClose asChild>
                     <Button variant="ghost" className="w-full justify-start gap-3 text-base font-medium h-12 text-foreground/80 hover:text-foreground hover:bg-accent/50 transition-all" onClick={handleNewSearch}>
                       <Search className="w-5 h-5 text-primary" />
@@ -217,7 +217,7 @@ function HeaderContent() {
                       </Link>
                     </SheetClose>
                 </div>
-                 <div className="mt-auto pt-4 border-t border-border/50 space-y-2">
+                 <div className="pt-4 mt-4 border-t border-border/50 space-y-2">
                   {!isLoading && !user && (
                     <Button 
                       variant="outline" 
