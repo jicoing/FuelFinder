@@ -615,7 +615,8 @@ export default function Home() {
                         className="inline-flex items-center gap-2 rounded-full border border-primary/20 bg-primary/10 px-2.5 py-1 text-[11px] font-medium text-primary sm:px-3 sm:text-xs"
                       >
                         <Fuel className="h-3.5 w-3.5" />
-                        Live fuel station finder
+                        <span className="hidden sm:inline">Live fuel station finder</span>
+                        <span className="sm:hidden">findmyfuel</span>
                       </motion.div>
                       <h2 className="text-lg font-bold tracking-tight sm:text-2xl">Find Cheapest Fuel Nearby</h2>
                       <p className="text-xs text-muted-foreground sm:text-sm">Compare stations, save money on every fill-up</p>
