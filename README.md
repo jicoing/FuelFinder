@@ -1,74 +1,79 @@
 # FindMyFuel
 
-FindMyFuel is a comprehensive web and mobile application designed to help travelers and commuters optimize their fuel consumption and manage their vehicle expenses. From finding the nearest service stations to logging every fill-up, FindMyFuel provides the tools you need to stay in control of your journey.
+Find the cheapest fuel stations nearby, calculate trip costs, track mileage and save money on every fill-up. Works in India, US, UK, UAE and 20+ countries.
+
+**Live:** [www.findmyfuel.site](https://www.findmyfuel.site)
 
 ## 🚀 Features
 
-*   **Fuel Station Locator:** Find nearby fuel stations using precise geolocation or ZIP codes, displayed on an interactive map.
-*   **Trip Fuel Cost Calculator:** Plan your budget by estimating fuel costs based on distance, vehicle efficiency, and local prices.
-*   **Saved Stations:** Bookmark your favorite, trusted fuel stations for quick access.
-*   **Fuel Logging:** Record detailed logs for every fill-up, including amount, price, fuel type, and mileage.
-*   **Fuel History & Analysis:** Track your usage trends with comprehensive history logs per station, including calculated fuel rates (cost per liter).
-*   **Multi-Country Support:** Seamless adaptation for different regions with local currency and unit support (KM/Miles).
-*   **Mobile-First Design:** Optimized interaction flow for mobile devices, allowing for quick station selection and logging on the go.
+- **Fuel Station Locator** — Find nearby stations using GPS or ZIP code on an interactive map
+- **Crowdsourced Fuel Prices** — Users report live prices; see latest petrol/diesel rates at each station
+- **Fuel Efficiency Dashboard** — Track km/L, cost/km, monthly spending trends with charts
+- **Trip Fuel Cost Calculator** — Estimate trip costs based on distance, mileage and fuel price
+- **Fuel Logging** — Record every fill-up with amount, price, fuel type, and mileage
+- **Saved Stations** — Bookmark favorite stations for quick access
+- **Multi-Country Support** — Local currency, units (km/miles), and fuel types for 20+ countries
+- **Mobile-First Design** — Optimized for iPhone SE (320px) through large tablets
+- **Premium (₹120 / $1.49 one-time)** — Unlimited stations, export data, sync across devices
 
 ## 🛠 Tech Stack
 
-*   **Frontend:** React (TypeScript), Vite, Tailwind CSS, Framer Motion, shadcn/ui.
-*   **Mapping:** React Leaflet, OpenStreetMap/Overpass API.
-*   **Backend/Storage:** Supabase, Drizzle ORM (PostgreSQL).
-*   **Payments:** Cashfree Integration.
-*   **Mobile:** Capacitor for cross-platform deployment.
+| Layer | Tech |
+|-------|------|
+| Frontend | React 19, TypeScript, Vite, Tailwind CSS 4, Framer Motion, shadcn/ui |
+| Mapping | React Leaflet, OpenStreetMap, Overpass API |
+| Backend | Express, Supabase (Postgres + Auth + RLS) |
+| Payments | Cashfree (India) |
+| Mobile | Capacitor (Android) |
+| Hosting | Vercel |
 
 ## 📦 Getting Started
 
 ### Prerequisites
 
-*   Node.js (v18+)
-*   NPM or Yarn
-*   A Supabase account (for database/auth)
+- Node.js v18+
+- Supabase project (for database & auth)
 
-### Installation
+### Setup
 
-1.  **Clone the repository:**
-    ```bash
-    git clone https://github.com/jicoing/FuelFinder.git
-    cd FuelFinder
-    ```
+```bash
+git clone https://github.com/jicoing/FuelFinder.git
+cd FuelFinder
+npm install
+cp .env.example .env   # Fill in Supabase & Cashfree keys
+npm run dev             # http://localhost:5001
+```
 
-2.  **Install dependencies:**
-    ```bash
-    npm install
-    ```
+### Database
 
-3.  **Configure environment variables:**
-    Copy the example environment file and update it with your Supabase and API credentials:
-    ```bash
-    cp FuelFinder/.env.example FuelFinder/.env
-    ```
+Run these in the Supabase SQL Editor:
+1. `supabase/schema.sql` — Core tables
+2. `migrations/add_fuel_logs.sql` — Fuel logs
+3. `migrations/add_fuel_price_reports.sql` — Crowdsourced prices
 
-4.  **Run the development server:**
-    ```bash
-    npm run dev
-    ```
+## 📜 Scripts
 
-## 📜 Available Scripts
-
-*   `npm run dev`: Starts the development server.
-*   `npm run build`: Compiles the application for production.
-*   `npm run lint`: Runs ESLint to maintain code quality.
-*   `npm run preview`: Serves the production build locally.
+| Command | Description |
+|---------|-------------|
+| `npm run dev` | Start dev server (Vite + Express) |
+| `npm run build` | Production build |
+| `npm run start` | Serve production build |
+| `npm run check` | TypeScript type check |
 
 ## 📈 Roadmap
 
-- [ ] Implement real-time fuel price APIs for specific regions.
-- [ ] Add advanced analytical charts for fuel consumption.
-- [ ] Offline map caching for remote travel.
+- [x] Crowdsourced fuel price reports
+- [x] Fuel efficiency dashboard with charts
+- [ ] Real-time price API integration (BPCL/IOCL)
+- [ ] Price alerts & notifications
+- [ ] Multi-vehicle support
+- [ ] City-specific landing pages for SEO
+- [ ] PWA offline mode
 
-## 👤 Credits
+## 👤 Author
 
-Developed and maintained by [jicoing](https://jicoing.site).
+Built by [jicoing](https://jicoing.site) · [@jicoing](https://twitter.com/jicoing)
 
 ## ⚖️ License
 
-This project is open-source. Please check the repository for license details.
+MIT
