@@ -89,7 +89,7 @@ function HeaderContent() {
 
   return (
     <>
-      <header className="h-14 sm:h-16 border-b border-border/30 bg-card/50 backdrop-blur-2xl flex items-center justify-between px-3 sm:px-6 z-50 shrink-0">
+      <header className="h-12 sm:h-16 border-b border-border/30 bg-card/50 backdrop-blur-2xl flex items-center justify-between px-2 sm:px-6 z-50 shrink-0">
         <Link href="/" className="flex min-w-0 items-center gap-2 sm:gap-3 group" onClick={() => window.dispatchEvent(new Event('findmyfuel:go-home'))}>
           <div className="relative">
             <div className="absolute inset-0 bg-primary/30 rounded-xl blur-md group-hover:bg-primary/50 transition-colors duration-300"></div>

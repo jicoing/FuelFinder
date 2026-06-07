@@ -222,6 +222,32 @@ textarea:focus,
   border-color: rgba(56, 114, 250, 0.5) !important;
 }
 
+/* iPhone SE / small screen optimizations */
+@media (max-width: 374px) {
+  body {
+    background-image: none;
+  }
+
+  /* Tighter spacing */
+  .container {
+    padding-left: 0.5rem;
+    padding-right: 0.5rem;
+  }
+}
+
+/* Reduce GPU-heavy effects on low-power devices */
+@media (max-width: 374px) {
+  .backdrop-blur-xl,
+  .backdrop-blur-2xl {
+    backdrop-filter: blur(6px) !important;
+    -webkit-backdrop-filter: blur(6px) !important;
+  }
+
+  .shadow-2xl {
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3) !important;
+  }
+}
+
 /* Interactive element cursors */
 button,
 [role="button"],
