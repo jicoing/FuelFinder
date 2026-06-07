@@ -33,7 +33,7 @@ export const FREE_TIER: TierConfig = {
 
 export const PREMIUM_TIER: TierConfig = {
   name: 'Premium',
-  price: 4.99,
+  price: 1.49,
   priceId: 'premium_lifetime',
   features: [
     'Everything in Free',

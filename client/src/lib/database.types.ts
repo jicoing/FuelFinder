@@ -182,6 +182,20 @@ export type TripCalculation = Database['public']['Tables']['trip_calculations'][
 export type SavedStation = Database['public']['Tables']['saved_stations']['Row']
 export type FuelLog = Database['public']['Tables']['fuel_logs']['Row']
 
+export interface FuelPriceReport {
+  id: string;
+  user_id: string;
+  station_id: string | null;
+  station_name: string;
+  station_lat: number;
+  station_lon: number;
+  fuel_type: 'petrol' | 'diesel' | 'electric' | 'hybrid';
+  price_per_unit: number;
+  currency: string;
+  reported_at: string;
+  created_at: string;
+}
+
 export interface TripCalculationInput {
   type: 'distanceToCost' | 'budgetToDistance'
   distance?: number

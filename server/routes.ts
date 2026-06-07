@@ -53,7 +53,7 @@ export function registerRoutes(
        return res.status(400).json({ error: 'User already has premium access' });
      }
 
-     const { order_amount = 400, order_currency = 'INR', phone } = req.body; // ₹400 one-time payment (~$4.99)
+     const { order_amount = 120, order_currency = 'INR', phone } = req.body; // ₹120 one-time payment (~$1.49)
 
      const orderId = `order_${Date.now()}_${user.id}`.replace(/[^a-zA-Z0-9_-]/g, '_');
 

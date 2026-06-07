@@ -12,12 +12,13 @@ import AboutPage from "@/pages/about";
 import SavedStationsPage from "@/pages/saved-stations";
 import PaymentSuccessPage from "@/pages/payment-success";
 import ContactPage from "@/pages/contact";
+import DashboardPage from "@/pages/dashboard";
 import AuthCallback from "@/pages/AuthCallback";
 import 'leaflet/dist/leaflet.css';
 import { Button } from "./components/ui/button";
 import { useToast } from "@/hooks/use-toast";
 import { queryClient } from "./lib/queryClient";
- import { Fuel, Calculator, Menu, Search, Info, FileText, Shield, User, LogOut, Crown, Bookmark, Download, MessageCircle } from "lucide-react";
+ import { Fuel, Calculator, Menu, Search, Info, FileText, Shield, User, LogOut, Crown, Bookmark, Download, MessageCircle, Gauge } from "lucide-react";
 import { Sheet, SheetContent, SheetTrigger, SheetClose } from "@/components/ui/sheet";
  import {
      AlertDialog,
@@ -47,6 +48,7 @@ function Router() {
       <Route path="/contact" component={ContactPage} />
       <Route path="/about" component={AboutPage} />
       <Route path="/saved-stations" component={SavedStationsPage} />
+      <Route path="/dashboard" component={DashboardPage} />
       <Route path="/payment-success" component={PaymentSuccessPage} />
       <Route component={NotFound} />
     </Switch>
@@ -87,7 +89,7 @@ function HeaderContent() {
 
   return (
     <>
-      <header className="h-14 sm:h-16 border-b border-border/50 bg-card/60 backdrop-blur-xl flex items-center justify-between px-3 sm:px-6 z-50 shrink-0">
+      <header className="h-14 sm:h-16 border-b border-border/30 bg-card/50 backdrop-blur-2xl flex items-center justify-between px-3 sm:px-6 z-50 shrink-0">
         <Link href="/" className="flex min-w-0 items-center gap-2 sm:gap-3 group" onClick={() => window.dispatchEvent(new Event('findmyfuel:go-home'))}>
           <div className="relative">
             <div className="absolute inset-0 bg-primary/30 rounded-xl blur-md group-hover:bg-primary/50 transition-colors duration-300"></div>
@@ -171,6 +173,14 @@ function HeaderContent() {
                        <Button variant="ghost" className="w-full justify-start gap-3 text-base font-medium h-12 text-foreground/80 hover:text-foreground hover:bg-accent/50 transition-all">
                          <Bookmark className="w-5 h-5 text-primary" />
                          Saved Stations
+                       </Button>
+                     </Link>
+                   </SheetClose>
+                   <SheetClose asChild>
+                     <Link href="/dashboard">
+                       <Button variant="ghost" className="w-full justify-start gap-3 text-base font-medium h-12 text-foreground/80 hover:text-foreground hover:bg-accent/50 transition-all">
+                         <Gauge className="w-5 h-5 text-primary" />
+                         Fuel Dashboard
                        </Button>
                      </Link>
                    </SheetClose>

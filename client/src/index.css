@@ -37,42 +37,42 @@
   --color-chart-6: hsl(var(--chart-6));
   --color-chart-7: hsl(var(--chart-7));
 
-  --font-sans: 'Inter', sans-serif;
+  --font-sans: 'Inter', system-ui, -apple-system, sans-serif;
   --font-mono: 'JetBrains Mono', monospace;
 
-  --radius: 0.75rem;
+  --radius: 0.875rem;
 }
 
 :root {
-  --background: 222 47% 8%;
+  --background: 225 25% 6%;
   --foreground: 210 40% 98%;
 
-  --card: 222 47% 11%;
+  --card: 225 25% 9%;
   --card-foreground: 210 40% 98%;
 
-  --popover: 222 47% 9%;
+  --popover: 225 25% 8%;
   --popover-foreground: 210 40% 98%;
 
-  --primary: 217 91% 60%;
+  --primary: 220 90% 56%;
   --primary-foreground: 0 0% 100%;
 
-  --secondary: 217 33% 17%;
+  --secondary: 220 20% 14%;
   --secondary-foreground: 210 40% 98%;
 
-  --muted: 217 33% 17%;
-  --muted-foreground: 215 25% 80%;
+  --muted: 220 20% 14%;
+  --muted-foreground: 220 15% 65%;
 
-  --accent: 217 33% 17%;
+  --accent: 220 20% 14%;
   --accent-foreground: 210 40% 98%;
 
-  --destructive: 0 62% 30%;
+  --destructive: 0 72% 51%;
   --destructive-foreground: 210 40% 98%;
 
-  --border: 217 33% 20%;
-  --input: 217 33% 17%;
-  --ring: 217 91% 60%;
+  --border: 220 15% 16%;
+  --input: 220 20% 14%;
+  --ring: 220 90% 56%;
 
-  --chart-1: 217 91% 60%;
+  --chart-1: 220 90% 56%;
   --chart-2: 160 60% 45%;
   --chart-3: 30 80% 55%;
   --chart-4: 280 65% 60%;
@@ -82,35 +82,35 @@
 }
 
 .dark {
-  --background: 222 47% 8%;
+  --background: 225 25% 6%;
   --foreground: 210 40% 98%;
 
-  --card: 222 47% 11%;
+  --card: 225 25% 9%;
   --card-foreground: 210 40% 98%;
 
-  --popover: 222 47% 9%;
+  --popover: 225 25% 8%;
   --popover-foreground: 210 40% 98%;
 
-  --primary: 217 91% 60%;
+  --primary: 220 90% 56%;
   --primary-foreground: 0 0% 100%;
 
-  --secondary: 217 33% 17%;
+  --secondary: 220 20% 14%;
   --secondary-foreground: 210 40% 98%;
 
-  --muted: 217 33% 17%;
-  --muted-foreground: 215 25% 80%;
+  --muted: 220 20% 14%;
+  --muted-foreground: 220 15% 65%;
 
-  --accent: 217 33% 17%;
+  --accent: 220 20% 14%;
   --accent-foreground: 210 40% 98%;
 
-  --destructive: 0 62% 30%;
+  --destructive: 0 72% 51%;
   --destructive-foreground: 210 40% 98%;
 
-  --border: 217 33% 20%;
-  --input: 217 33% 17%;
-  --ring: 217 91% 60%;
+  --border: 220 15% 16%;
+  --input: 220 20% 14%;
+  --ring: 220 90% 56%;
 
-  --chart-1: 217 91% 60%;
+  --chart-1: 220 90% 56%;
   --chart-2: 160 60% 45%;
   --chart-3: 30 80% 55%;
   --chart-4: 280 65% 60%;
@@ -124,14 +124,9 @@
 body {
   color: hsl(var(--foreground));
   background-color: hsl(var(--background));
-  background-image: 
-    radial-gradient(ellipse 80% 50% at 50% -20%, rgba(59, 130, 246, 0.15), transparent),
-    linear-gradient(
-      rgba(255, 255, 255, 0.03) 1px,
-      transparent 1px
-    ),
-    linear-gradient(90deg, rgba(255, 255, 255, 0.03) 1px, transparent 1px);
-  background-size: 100% 100%, 40px 40px, 40px 40px;
+  background-image:
+    radial-gradient(ellipse 80% 50% at 50% -20%, rgba(56, 114, 250, 0.12), transparent),
+    radial-gradient(ellipse 60% 40% at 80% 90%, rgba(139, 92, 246, 0.06), transparent);
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
 }
@@ -141,13 +136,13 @@ html {
 }
 
 ::selection {
-  background-color: hsl(217 91% 60% / 0.3);
+  background-color: hsl(220 90% 56% / 0.3);
   color: hsl(210 40% 98%);
 }
 
 ::-webkit-scrollbar {
-  width: 8px;
-  height: 8px;
+  width: 6px;
+  height: 6px;
 }
 
 ::-webkit-scrollbar-track {
@@ -155,12 +150,12 @@ html {
 }
 
 ::-webkit-scrollbar-thumb {
-  background: hsl(217 33% 25%);
-  border-radius: 4px;
+  background: hsl(220 15% 22%);
+  border-radius: 3px;
 }
 
 ::-webkit-scrollbar-thumb:hover {
-  background: hsl(217 33% 35%);
+  background: hsl(220 15% 32%);
 }
 
 input:-webkit-autofill,
@@ -172,39 +167,35 @@ input:-webkit-autofill:focus {
 }
 
 @keyframes shimmer {
-  0% {
-    background-position: -200% 0;
-  }
-  100% {
-    background-position: 200% 0;
-  }
+  0% { background-position: -200% 0; }
+  100% { background-position: 200% 0; }
 }
 
 @keyframes pulse-glow {
-  0%, 100% {
-    box-shadow: 0 0 20px rgba(59, 130, 246, 0.3);
-  }
-  50% {
-    box-shadow: 0 0 40px rgba(59, 130, 246, 0.5);
-  }
+  0%, 100% { box-shadow: 0 0 20px rgba(56, 114, 250, 0.2); }
+  50% { box-shadow: 0 0 40px rgba(56, 114, 250, 0.4); }
+}
+
+@keyframes float {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-4px); }
 }
 
 .animate-shimmer {
   animation: shimmer 2s infinite;
-  background: linear-gradient(
-    90deg,
-    transparent 0%,
-    rgba(255, 255, 255, 0.05) 50%,
-    transparent 100%
-  );
+  background: linear-gradient(90deg, transparent 0%, rgba(255, 255, 255, 0.04) 50%, transparent 100%);
   background-size: 200% 100%;
 }
 
 .animate-pulse-glow {
-  animation: pulse-glow 2s ease-in-out infinite;
+  animation: pulse-glow 3s ease-in-out infinite;
 }
 
-/* Premium shadow & soft glow for all inputs/selects/textboxes */
+.animate-float {
+  animation: float 3s ease-in-out infinite;
+}
+
+/* Modern glass input styles */
 input[type="text"],
 input[type="number"],
 input[type="email"],
@@ -214,8 +205,8 @@ select,
 textarea,
 [role="combobox"],
 .select-trigger {
-  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.5), 0 0 0 1px rgba(255, 255, 255, 0.08) !important;
-  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1) !important;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3), inset 0 1px 0 rgba(255, 255, 255, 0.04) !important;
+  transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1) !important;
 }
 
 input[type="text"]:focus,
@@ -227,16 +218,16 @@ select:focus,
 textarea:focus,
 [role="combobox"]:focus,
 .select-trigger:focus {
-  box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.2), 0 8px 24px rgba(0, 0, 0, 0.6), 0 0 12px rgba(59, 130, 246, 0.3) !important;
-  border-color: rgba(59, 130, 246, 0.5) !important;
+  box-shadow: 0 0 0 2px rgba(56, 114, 250, 0.15), 0 4px 16px rgba(0, 0, 0, 0.4), 0 0 20px rgba(56, 114, 250, 0.1) !important;
+  border-color: rgba(56, 114, 250, 0.5) !important;
 }
 
-/* Ensure cursor changes on all interactive elements */
-button, 
-[role="button"], 
-a, 
-select, 
-[role="tab"], 
+/* Interactive element cursors */
+button,
+[role="button"],
+a,
+select,
+[role="tab"],
 [role="combobox"],
 .cursor-pointer,
 [type="submit"],

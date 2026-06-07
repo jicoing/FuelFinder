@@ -49,8 +49,10 @@ import { useIsMobile } from '@/hooks/use-mobile';
 import { useCountryPreference, countryData } from '@/hooks/use-country-preference';
 import { useSavedStations } from '@/lib/useSavedStations';
 import { useFuelLogs } from '@/lib/useFuelLogs';
+import { useFuelPrices } from '@/lib/useFuelPrices';
 import { useAuth } from '@/lib/auth-context';
 import { AuthModal } from '@/components/auth-modal';
+import { ReportPriceDialog, StationPriceDisplay } from '@/components/price-report';
 import { useToast } from '@/hooks/use-toast';
 
 // @ts-ignore
@@ -110,9 +112,12 @@ export default function Home() {
   const { toast } = useToast();
   const { savedStations, saveStation, removeStation } = useSavedStations();
   const { addLog, logs, loading: logsLoading } = useFuelLogs();
+  const { fetchNearbyPrices, getStationPrices } = useFuelPrices();
   const { country, setCountry } = useCountryPreference();
   const [isAuthOpen, setIsAuthOpen] = useState(false);
   const [isAddLogOpen, setIsAddLogOpen] = useState(false);
+  const [isPriceReportOpen, setIsPriceReportOpen] = useState(false);
+  const [stationForPriceReport, setStationForPriceReport] = useState<{name: string; lat: number; lon: number; id?: string} | null>(null);
   const [stationForLog, setStationForLog] = useState<{id?: string; name: string; brand?: string; lat: number; lon: number} | null>(null);
   const [carouselApi, setCarouselApi] = useState<CarouselApi>();
   const [hasScrolled, setHasScrolled] = useState(false);
@@ -376,6 +381,8 @@ export default function Home() {
 
       setStations(parsed);
       setView('results');
+      // Fetch crowdsourced prices for this area
+      fetchNearbyPrices(searchLat, searchLon, parseInt(radius));
     } catch (e) {
       setError(e.message || 'An error occurred while fetching data.');
     } finally {
@@ -585,7 +592,7 @@ export default function Home() {
               animate={{ opacity: 1, scale: 1 }}
               exit={{ opacity: 0, scale: 0.96 }}
               transition={{ duration: 0.3, ease: [0.16, 1, 0.3, 1] }}
-              className="absolute inset-0 z-10 flex flex-col items-center justify-between gap-3 sm:gap-5 bg-background/45 backdrop-blur-md px-3 py-3 sm:px-4 sm:py-6 overflow-y-auto"
+              className="absolute inset-0 z-10 flex flex-col items-center justify-between gap-3 sm:gap-5 bg-background/50 backdrop-blur-xl px-3 py-3 sm:px-4 sm:py-6 overflow-y-auto"
             >
               <div className="hidden h-4 shrink-0 sm:block" />
 
@@ -595,9 +602,9 @@ export default function Home() {
                 transition={{ delay: 0.08, duration: 0.45, ease: [0.16, 1, 0.3, 1] }}
                 className="w-full max-w-md"
               >
-              <Card className="relative w-full shadow-2xl border border-border/50 bg-card/85 backdrop-blur-xl overflow-hidden">
-                <div className="absolute inset-0 bg-gradient-to-br from-primary/5 via-transparent to-transparent pointer-events-none"></div>
-                <div className="absolute left-0 right-0 top-0 h-1 bg-gradient-to-r from-primary via-amber-500 to-emerald-500" />
+              <Card className="relative w-full shadow-2xl border border-border/40 bg-card/80 backdrop-blur-2xl overflow-hidden rounded-2xl">
+                <div className="absolute inset-0 bg-gradient-to-br from-primary/8 via-transparent to-purple-500/5 pointer-events-none"></div>
+                <div className="absolute left-0 right-0 top-0 h-[2px] bg-gradient-to-r from-primary via-violet-500 to-emerald-400" />
                 <CardContent className="relative space-y-4 p-4 sm:space-y-6 sm:p-8">
                   <div className="flex items-start justify-between gap-3">
                     <div className="space-y-1">
@@ -610,8 +617,8 @@ export default function Home() {
                         <Fuel className="h-3.5 w-3.5" />
                         Live fuel station finder
                       </motion.div>
-                      <h2 className="text-xl font-bold tracking-tight sm:text-2xl">Find Fuel Nearby</h2>
-                      <p className="text-xs text-muted-foreground sm:text-sm">Discover the best fuel stations around you</p>
+                      <h2 className="text-xl font-bold tracking-tight sm:text-2xl">Find Cheapest Fuel Nearby</h2>
+                      <p className="text-xs text-muted-foreground sm:text-sm">Compare stations, save money on every fill-up</p>
                     </div>
                     <Link href="/calculator">
                       <Button variant="ghost" size="icon" className="hover:bg-accent/50 transition-colors">
@@ -707,7 +714,7 @@ export default function Home() {
                   </div>
                  </CardContent>
                  <div className="px-4 pb-4 sm:px-8 sm:pb-6">
-                   <p className="text-xs text-center text-muted-foreground">Made with care for travellers worldwide</p>
+                   <p className="text-xs text-center text-muted-foreground">Trusted by travellers in 20+ countries</p>
                  </div>
               </Card>
               </motion.div>
@@ -730,7 +737,7 @@ export default function Home() {
                       initial={{ y: 14, opacity: 0 }}
                       animate={{ y: 0, opacity: 1 }}
                       transition={{ delay: 0.26 + index * 0.06, duration: 0.35 }}
-                      className="flex h-10 items-center justify-center gap-1.5 rounded-md border border-border/40 bg-card/75 px-2 text-center text-[11px] font-medium text-foreground/80 shadow-sm backdrop-blur sm:h-11 sm:gap-2 sm:px-4 sm:text-sm"
+                      className="flex h-11 items-center justify-center gap-1.5 rounded-xl border border-border/30 bg-card/70 px-2 text-center text-[11px] font-medium text-foreground/80 shadow-lg backdrop-blur-xl sm:h-12 sm:gap-2 sm:px-4 sm:text-sm hover:border-primary/30 hover:bg-card/90 transition-all duration-300"
                     >
                       <Icon className="h-4 w-4 text-primary" />
                       <span>{item.label}</span>
@@ -745,7 +752,7 @@ export default function Home() {
                 transition={{ delay: 0.42, duration: 0.4 }}
                 className="shrink-0 px-2 text-center text-[11px] text-foreground/65 sm:text-xs"
               >
-                <span>Copyright {new Date().getFullYear()} findmyfuel. Created by </span>
+                <span>© {new Date().getFullYear()} FindMyFuel – Find cheapest fuel stations near you. Built by </span>
                 <a
                   href="https://jicoing.site"
                   target="_blank"
@@ -944,10 +951,11 @@ export default function Home() {
                                 )}
                                 <Badge variant="outline" className="bg-secondary/30">{selectedStation.brand}</Badge>
                              </div>
+                             <StationPriceDisplay reports={getStationPrices(selectedStation.lat, selectedStation.lon)} currency={currency} />
                            </div>
                         </div>
                         
-                        <div className="mt-5 grid grid-cols-2 gap-3 sm:mt-8 sm:gap-4">
+                        <div className="mt-5 grid grid-cols-3 gap-3 sm:mt-8 sm:gap-4">
                            <motion.div whileTap={{ scale: 0.95 }} className="w-full">
                              <Button 
                                className="w-full h-12 text-sm font-semibold bg-gradient-to-r from-blue-600 to-blue-500 hover:from-blue-500 hover:to-blue-600 text-white shadow-lg shadow-blue-500/25 transition-all duration-300 sm:h-14 sm:text-base" 
@@ -958,10 +966,24 @@ export default function Home() {
                              </Button>
                            </motion.div>
                            <motion.div whileTap={{ scale: 0.95 }} className="w-full">
+                             <Button 
+                               variant="outline"
+                               className="w-full h-12 text-sm font-semibold border-green-500/30 text-green-400 hover:bg-green-500/10 transition-all duration-300 sm:h-14 sm:text-base" 
+                               onClick={() => {
+                                 if (!user) { setIsAuthOpen(true); return; }
+                                 setStationForPriceReport({ name: selectedStation.name, lat: selectedStation.lat, lon: selectedStation.lon });
+                                 setIsPriceReportOpen(true);
+                               }}
+                             >
+                                <DollarSign className="w-4 h-4 mr-2 sm:h-5 sm:w-5 sm:mr-2.5" />
+                                Report Price
+                             </Button>
+                           </motion.div>
+                           <motion.div whileTap={{ scale: 0.95 }} className="w-full">
                              <Button className="w-full h-12 text-sm font-semibold bg-gradient-to-r from-primary to-primary/90 hover:from-primary/90 hover:to-primary text-primary-foreground shadow-lg shadow-primary/25 transition-all duration-300 sm:h-14 sm:text-base" asChild>
                                 <a href={directionsUrl(selectedStation)} target="_blank" rel="noreferrer">
                                    <Navigation className="w-4 h-4 mr-2 sm:h-5 sm:w-5 sm:mr-2.5" />
-                                   Get Directions
+                                   Directions
                                 </a>
                              </Button>
                            </motion.div>
@@ -1074,6 +1096,12 @@ export default function Home() {
         </Dialog>
 
         <AuthModal isOpen={isAuthOpen} onOpenChange={setIsAuthOpen} />
+        <ReportPriceDialog
+          isOpen={isPriceReportOpen}
+          onOpenChange={setIsPriceReportOpen}
+          station={stationForPriceReport}
+          currency={currency}
+        />
       </main>
     </div>
   );
