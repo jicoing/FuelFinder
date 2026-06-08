@@ -232,7 +232,7 @@ export function PremiumModal({ isOpen, onOpenChange }: PremiumModalProps) {
               <Button
                 onClick={handleGetPremiumClick}
                 disabled={isAuthLoading}
-                className="w-full h-12 text-base font-semibold bg-gradient-to-r from-primary to-primary/90 hover:from-primary/90 hover:to-primary shadow-lg shadow-primary/25 rounded-xl cursor-pointer"
+                className="w-full h-12 text-base font-semibold bg-blue-600 hover:bg-blue-700 text-white shadow-lg shadow-blue-600/25 rounded-xl cursor-pointer dark:bg-gradient-to-r dark:from-primary dark:to-primary/90 dark:hover:from-primary/90 dark:hover:to-primary dark:shadow-primary/25"
               >
                 Get Premium - ${PREMIUM_TIER.price} one-time
               </Button>
@@ -331,7 +331,7 @@ export function PremiumModal({ isOpen, onOpenChange }: PremiumModalProps) {
                 <Button
                   onClick={handleUpgrade}
                   disabled={isLoading || !phoneNumber}
-                  className="flex-1 h-12 text-base font-semibold bg-gradient-to-r from-primary to-primary/90 hover:from-primary/90 hover:to-primary shadow-lg shadow-primary/25 rounded-xl cursor-pointer"
+                  className="flex-1 h-12 text-base font-semibold bg-blue-600 hover:bg-blue-700 text-white shadow-lg shadow-blue-600/25 rounded-xl cursor-pointer dark:bg-gradient-to-r dark:from-primary dark:to-primary/90 dark:hover:from-primary/90 dark:hover:to-primary dark:shadow-primary/25"
                 >
                   {isLoading ? (
                     <>

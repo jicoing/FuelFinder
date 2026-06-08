@@ -120,7 +120,7 @@ function HeaderContent() {
                   variant="outline" 
                   size="sm" 
                   onClick={() => setIsPremiumOpen(true)}
-                  className="hidden sm:flex border-primary/30 text-primary hover:bg-primary/10"
+                  className="hidden sm:flex border-blue-600/30 text-blue-600 hover:bg-blue-600/10 dark:border-primary/30 dark:text-primary dark:hover:bg-primary/10"
                 >
                   <Crown className="w-4 h-4 mr-1" />
                   Upgrade
