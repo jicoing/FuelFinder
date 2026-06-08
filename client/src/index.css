@@ -44,32 +44,32 @@
 }
 
 :root {
-  --background: 225 25% 6%;
-  --foreground: 210 40% 98%;
+  --background: 0 0% 100%;
+  --foreground: 222 47% 11%;
 
-  --card: 225 25% 9%;
-  --card-foreground: 210 40% 98%;
+  --card: 0 0% 100%;
+  --card-foreground: 222 47% 11%;
 
-  --popover: 225 25% 8%;
-  --popover-foreground: 210 40% 98%;
+  --popover: 0 0% 100%;
+  --popover-foreground: 222 47% 11%;
 
   --primary: 220 90% 56%;
   --primary-foreground: 0 0% 100%;
 
-  --secondary: 220 20% 14%;
-  --secondary-foreground: 210 40% 98%;
+  --secondary: 220 14% 96%;
+  --secondary-foreground: 222 47% 11%;
 
-  --muted: 220 20% 14%;
-  --muted-foreground: 220 15% 65%;
+  --muted: 220 14% 96%;
+  --muted-foreground: 220 9% 46%;
 
-  --accent: 220 20% 14%;
-  --accent-foreground: 210 40% 98%;
+  --accent: 220 14% 96%;
+  --accent-foreground: 222 47% 11%;
 
   --destructive: 0 72% 51%;
-  --destructive-foreground: 210 40% 98%;
+  --destructive-foreground: 0 0% 100%;
 
-  --border: 220 15% 16%;
-  --input: 220 20% 14%;
+  --border: 220 13% 87%;
+  --input: 220 13% 87%;
   --ring: 220 90% 56%;
 
   --chart-1: 220 90% 56%;
@@ -106,8 +106,8 @@
   --destructive: 0 72% 51%;
   --destructive-foreground: 210 40% 98%;
 
-  --border: 220 15% 16%;
-  --input: 220 20% 14%;
+  --border: 220 15% 22%;
+  --input: 220 18% 20%;
   --ring: 220 90% 56%;
 
   --chart-1: 220 90% 56%;
@@ -124,11 +124,14 @@
 body {
   color: hsl(var(--foreground));
   background-color: hsl(var(--background));
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+.dark body {
   background-image:
     radial-gradient(ellipse 80% 50% at 50% -20%, rgba(56, 114, 250, 0.12), transparent),
     radial-gradient(ellipse 60% 40% at 80% 90%, rgba(139, 92, 246, 0.06), transparent);
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
 }
 
 html {
@@ -150,12 +153,12 @@ html {
 }
 
 ::-webkit-scrollbar-thumb {
-  background: hsl(220 15% 22%);
+  background: hsl(var(--border));
   border-radius: 3px;
 }
 
 ::-webkit-scrollbar-thumb:hover {
-  background: hsl(220 15% 32%);
+  background: hsl(var(--muted-foreground));
 }
 
 input:-webkit-autofill,

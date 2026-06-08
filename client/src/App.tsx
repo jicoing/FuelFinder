@@ -3,6 +3,7 @@ import { Switch, Route, Link, useLocation } from "wouter";
 import { QueryClientProvider } from "@tanstack/react-query";
 import { Toaster } from "@/components/ui/toaster";
 import { TooltipProvider } from "@/components/ui/tooltip";
+import { ThemeProvider, useTheme } from "next-themes";
 import NotFound from "@/pages/not-found";
 import Home from "@/pages/home";
 import TripCalculatorPage from "@/pages/calculator";
@@ -18,7 +19,7 @@ import 'leaflet/dist/leaflet.css';
 import { Button } from "./components/ui/button";
 import { useToast } from "@/hooks/use-toast";
 import { queryClient } from "./lib/queryClient";
- import { Fuel, Calculator, Menu, Search, Info, FileText, Shield, User, LogOut, Crown, Bookmark, Download, MessageCircle, Gauge } from "lucide-react";
+ import { Fuel, Calculator, Menu, Search, Info, FileText, Shield, User, LogOut, Crown, Bookmark, Download, MessageCircle, Gauge, Sun, Moon } from "lucide-react";
 import { Sheet, SheetContent, SheetTrigger, SheetClose } from "@/components/ui/sheet";
  import {
      AlertDialog,
@@ -60,6 +61,7 @@ function HeaderContent() {
   const { user, isLoading, isPremium, signOut } = useAuth();
   const { toast } = useToast();
   const { exportData } = useDataExport();
+  const { theme, setTheme } = useTheme();
   const [isAuthOpen, setIsAuthOpen] = useState(false);
   const [isPremiumOpen, setIsPremiumOpen] = useState(false);
 
@@ -97,7 +99,7 @@ function HeaderContent() {
               <Fuel className="w-4 h-4 sm:w-5 sm:h-5 text-primary-foreground" />
             </div>
           </div>
-          <span className="truncate font-bold text-lg sm:text-xl tracking-tight bg-gradient-to-r from-foreground to-foreground/70 bg-clip-text text-transparent">
+          <span className="truncate font-bold text-lg sm:text-xl tracking-tight text-foreground">
             findmyfuel
           </span>
           {isPremium && (
@@ -145,6 +147,11 @@ function HeaderContent() {
             </Button>
           )}
           
+          <Button variant="ghost" size="icon" onClick={() => setTheme(theme === 'dark' ? 'light' : 'dark')} className="hover:bg-accent/50 transition-colors">
+            <Sun className="w-5 h-5 text-primary hidden dark:block" />
+            <Moon className="w-5 h-5 text-primary dark:hidden" />
+          </Button>
+
           <Sheet>
             <SheetTrigger asChild>
               <Button variant="ghost" size="icon" className="hover:bg-accent/50 transition-colors">
@@ -265,19 +272,21 @@ function HeaderContent() {
 
 function App() {
   return (
-    <QueryClientProvider client={queryClient}>
-      <AuthProvider>
-        <TooltipProvider>
-          <Toaster />
-          <div className="min-h-[100dvh] h-[100dvh] flex flex-col">
-            <HeaderContent />
-            <main className="flex-1 overflow-y-auto">
-              <Router />
-            </main>
-          </div>
-        </TooltipProvider>
-      </AuthProvider>
-    </QueryClientProvider>
+    <ThemeProvider attribute="class" defaultTheme="dark" enableSystem={false}>
+      <QueryClientProvider client={queryClient}>
+        <AuthProvider>
+          <TooltipProvider>
+            <Toaster />
+            <div className="min-h-[100dvh] h-[100dvh] flex flex-col">
+              <HeaderContent />
+              <main className="flex-1 overflow-y-auto">
+                <Router />
+              </main>
+            </div>
+          </TooltipProvider>
+        </AuthProvider>
+      </QueryClientProvider>
+    </ThemeProvider>
   );
 }
 

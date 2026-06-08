@@ -2,7 +2,7 @@
 import { useState, useEffect, useRef, useMemo } from 'react';
 import { useLocation } from 'wouter';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Fuel, MapPin, Navigation, Search, Loader2, AlertCircle, X, Star, ChevronLeft, ChevronRight, Calculator, Bookmark, Plus, Calendar, DollarSign } from 'lucide-react';
+import { Fuel, MapPin, Navigation, Search, Loader2, AlertCircle, X, Star, ChevronLeft, ChevronRight, Calculator, Bookmark, Plus, Calendar, DollarSign, Info, Gauge } from 'lucide-react';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -727,9 +727,9 @@ export default function Home() {
                 className="grid w-full max-w-2xl grid-cols-3 gap-1.5 sm:gap-2"
               >
                 {[
-                  { icon: MapPin, label: 'Nearby stations' },
-                  { icon: Bookmark, label: 'Save favorites' },
-                  { icon: Navigation, label: 'Quick directions' },
+                  { icon: Info, label: 'About', href: '/about' },
+                  { icon: Bookmark, label: 'Saved Stations', href: '/saved-stations' },
+                  { icon: Gauge, label: 'Dashboard', href: '/dashboard' },
                 ].map((item, index) => {
                   const Icon = item.icon;
                   return (
@@ -738,10 +738,11 @@ export default function Home() {
                       initial={{ y: 14, opacity: 0 }}
                       animate={{ y: 0, opacity: 1 }}
                       transition={{ delay: 0.26 + index * 0.06, duration: 0.35 }}
-                      className="flex h-10 items-center justify-center gap-1 rounded-xl border border-border/30 bg-card/70 px-1.5 text-center text-[10px] font-medium text-foreground/80 shadow-lg backdrop-blur-xl sm:h-12 sm:gap-2 sm:px-4 sm:text-sm hover:border-primary/30 hover:bg-card/90 transition-all duration-300"
                     >
-                      <Icon className="h-4 w-4 text-primary" />
-                      <span>{item.label}</span>
+                      <Link href={item.href} className="flex h-10 items-center justify-center gap-1 rounded-xl border border-border/30 bg-card/70 px-1.5 text-center text-[10px] font-medium text-foreground/80 shadow-lg backdrop-blur-xl sm:h-12 sm:gap-2 sm:px-4 sm:text-sm hover:border-primary/30 hover:bg-card/90 transition-all duration-300 cursor-pointer">
+                        <Icon className="h-4 w-4 text-primary" />
+                        <span>{item.label}</span>
+                      </Link>
                     </motion.div>
                   );
                 })}

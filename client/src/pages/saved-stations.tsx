@@ -77,6 +77,12 @@ export default function SavedStationsPage() {
     notes: '',
   });
 
+  // Get currency symbol based on selected country
+  const currency = useMemo(() => {
+    const countryCode = country || 'IN';
+    return (countryData as any)[countryCode]?.currency || '$';
+  }, [country]);
+
   const metrics = useMemo(() => {
     if (!logs || logs.length === 0) {
       return {
@@ -139,12 +145,6 @@ export default function SavedStationsPage() {
     if (stationLogs.length === 0) return null;
     return stationLogs.sort((a, b) => new Date(b.filled_at).getTime() - new Date(a.filled_at).getTime())[0];
   };
-
-  // Get currency symbol based on selected country
-  const currency = useMemo(() => {
-    const countryCode = country || 'IN';
-    return (countryData as any)[countryCode]?.currency || '$';
-  }, [country]);
 
   const handleOpenAddLog = (stationId: string) => {
     setSelectedStation(stationId);
