@@ -691,7 +691,7 @@ export default function Home() {
                     </div>
 
                     <Button 
-                      className="w-full h-11 text-sm font-semibold bg-gradient-to-r from-primary to-primary/90 hover:from-primary/90 hover:to-primary text-primary-foreground shadow-lg shadow-primary/25 transition-all duration-300 sm:h-12 sm:text-base"
+                      className="w-full h-11 text-sm font-semibold bg-blue-600 hover:bg-blue-700 text-white shadow-lg shadow-blue-600/25 transition-all duration-300 sm:h-12 sm:text-base dark:bg-gradient-to-r dark:from-primary dark:to-primary/90 dark:hover:from-primary/90 dark:hover:to-primary dark:text-primary-foreground dark:shadow-primary/25"
                       onClick={fetchStations}
                       disabled={loading}
                     >
