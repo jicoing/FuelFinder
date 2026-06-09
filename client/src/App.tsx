@@ -37,6 +37,7 @@ import { Sheet, SheetContent, SheetTrigger, SheetClose } from "@/components/ui/s
  import { PremiumModal } from "./components/premium-modal";
  import { Badge } from "./components/ui/badge";
  import { Avatar, AvatarFallback } from "./components/ui/avatar";
+ import { RouteSeo } from "./components/route-seo";
 
 function Router() {
   return (
@@ -272,10 +273,11 @@ function HeaderContent() {
 
 function App() {
   return (
-    <ThemeProvider attribute="class" defaultTheme="dark" enableSystem={false}>
+    <ThemeProvider attribute="class" defaultTheme="light" enableSystem={false}>
       <QueryClientProvider client={queryClient}>
         <AuthProvider>
           <TooltipProvider>
+            <RouteSeo />
             <Toaster />
             <div className="min-h-[100dvh] h-[100dvh] flex flex-col">
               <HeaderContent />

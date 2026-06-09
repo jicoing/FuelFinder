@@ -1,0 +1,10 @@
+User-agent: *
+Allow: /
+
+# Auth-gated and transactional pages — no SEO value
+Disallow: /dashboard
+Disallow: /saved-stations
+Disallow: /payment-success
+Disallow: /auth/
+
+Sitemap: https://www.findmyfuel.site/sitemap.xml
