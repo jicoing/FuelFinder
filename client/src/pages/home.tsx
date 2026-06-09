@@ -594,6 +594,28 @@ export default function Home() {
               transition={{ duration: 0.3, ease: [0.16, 1, 0.3, 1] }}
               className="absolute inset-0 z-10 flex flex-col items-center justify-between gap-2 sm:gap-5 bg-background/50 backdrop-blur-xl px-2 py-2 sm:px-4 sm:py-6 overflow-y-auto"
             >
+              {/* Subtle animated background orbs */}
+              <div className="pointer-events-none absolute inset-0 -z-10 overflow-hidden">
+                <motion.div
+                  aria-hidden="true"
+                  className="absolute -top-24 -left-24 h-72 w-72 rounded-full bg-primary/20 blur-3xl sm:h-96 sm:w-96"
+                  animate={{ x: [0, 40, 0], y: [0, 30, 0], scale: [1, 1.15, 1] }}
+                  transition={{ duration: 18, repeat: Infinity, ease: 'easeInOut' }}
+                />
+                <motion.div
+                  aria-hidden="true"
+                  className="absolute top-1/3 -right-24 h-72 w-72 rounded-full bg-violet-500/20 blur-3xl sm:h-96 sm:w-96"
+                  animate={{ x: [0, -50, 0], y: [0, 40, 0], scale: [1, 1.1, 1] }}
+                  transition={{ duration: 22, repeat: Infinity, ease: 'easeInOut' }}
+                />
+                <motion.div
+                  aria-hidden="true"
+                  className="absolute -bottom-24 left-1/4 h-72 w-72 rounded-full bg-emerald-400/15 blur-3xl sm:h-96 sm:w-96"
+                  animate={{ x: [0, 30, 0], y: [0, -30, 0], scale: [1, 1.2, 1] }}
+                  transition={{ duration: 26, repeat: Infinity, ease: 'easeInOut' }}
+                />
+              </div>
+
               <div className="hidden h-4 shrink-0 sm:block" />
 
               <motion.div
