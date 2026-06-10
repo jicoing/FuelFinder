@@ -238,7 +238,7 @@ function HeaderContent() {
                   )}
                   {!isLoading && !isPremium && user && (
                     <Button 
-                      className="w-full h-12 text-base font-medium bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-600 hover:to-amber-700 text-white shadow-lg shadow-amber-500/25 transition-all duration-300"
+                      className="w-full h-12 text-base font-medium bg-amber-500 bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-600 hover:to-amber-700 text-white shadow-lg shadow-amber-500/25 transition-all duration-300"
                       onClick={() => setIsPremiumOpen(true)}
                     >
                       <Crown className="w-4 h-4 mr-2" />

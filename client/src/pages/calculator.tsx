@@ -551,7 +551,7 @@ const TripCalculatorPage = () => {
                 </AlertDialogHeader>
                 <AlertDialogFooter>
                 <AlertDialogCancel onClick={cancelCountryChange} className="hover:bg-accent/50 transition-colors">Cancel</AlertDialogCancel>
-                <AlertDialogAction onClick={confirmCountryChange} className="bg-gradient-to-r from-primary to-primary/90 hover:from-primary/90 hover:to-primary">Continue</AlertDialogAction>
+                <AlertDialogAction onClick={confirmCountryChange} className="bg-primary bg-gradient-to-r from-primary to-primary/90 hover:from-primary/90 hover:to-primary">Continue</AlertDialogAction>
                 </AlertDialogFooter>
             </AlertDialogContent>
         </AlertDialog>
@@ -746,7 +746,7 @@ const TripCalculatorPage = () => {
                 <Button
                   onClick={handlePlanTrip}
                   disabled={isPlanning}
-                  className="w-full h-12 text-base font-semibold bg-gradient-to-r from-primary to-primary/90 hover:from-primary/90 hover:to-primary text-primary-foreground shadow-lg shadow-primary/25 transition-all duration-300"
+                  className="w-full h-12 text-base font-semibold bg-primary bg-gradient-to-r from-primary to-primary/90 hover:from-primary/90 hover:to-primary text-primary-foreground shadow-lg shadow-primary/25 transition-all duration-300"
                 >
                   {isPlanning ? <Loader2 className="w-5 h-5 mr-2 animate-spin" /> : <Navigation className="w-5 h-5 mr-2" />}
                   Calculate Trip
@@ -778,7 +778,7 @@ const TripCalculatorPage = () => {
                     )}
                     <Button
                       onClick={handleSavePlannedTrip}
-                      className="w-full h-12 mt-4 text-base font-semibold bg-gradient-to-r from-primary to-primary/90 hover:from-primary/90 hover:to-primary text-primary-foreground shadow-lg shadow-primary/25 transition-all duration-300"
+                      className="w-full h-12 mt-4 text-base font-semibold bg-primary bg-gradient-to-r from-primary to-primary/90 hover:from-primary/90 hover:to-primary text-primary-foreground shadow-lg shadow-primary/25 transition-all duration-300"
                     >
                       <Route className="w-5 h-5 mr-2" />
                       Save Trip to History
@@ -818,7 +818,7 @@ const TripCalculatorPage = () => {
                       </div>
                   </div>
                 )}
-                <Button onClick={() => handleSaveCalculation('distanceToCost')} disabled={!distanceToCostResult} className="h-12 text-base font-semibold bg-gradient-to-r from-primary to-primary/90 hover:from-primary/90 hover:to-primary text-primary-foreground shadow-lg shadow-primary/25 transition-all duration-300">
+                <Button onClick={() => handleSaveCalculation('distanceToCost')} disabled={!distanceToCostResult} className="h-12 text-base font-semibold bg-primary bg-gradient-to-r from-primary to-primary/90 hover:from-primary/90 hover:to-primary text-primary-foreground shadow-lg shadow-primary/25 transition-all duration-300">
                   Save Calculation
                 </Button>
               </div>
@@ -854,7 +854,7 @@ const TripCalculatorPage = () => {
                        </div>
                    </div>
                 )}
-                <Button onClick={() => handleSaveCalculation('budgetToDistance')} disabled={!budgetToDistanceResult} className="h-12 text-base font-semibold bg-gradient-to-r from-primary to-primary/90 hover:from-primary/90 hover:to-primary text-primary-foreground shadow-lg shadow-primary/25 transition-all duration-300">
+                <Button onClick={() => handleSaveCalculation('budgetToDistance')} disabled={!budgetToDistanceResult} className="h-12 text-base font-semibold bg-primary bg-gradient-to-r from-primary to-primary/90 hover:from-primary/90 hover:to-primary text-primary-foreground shadow-lg shadow-primary/25 transition-all duration-300">
                   Save Calculation
                 </Button>
               </div>

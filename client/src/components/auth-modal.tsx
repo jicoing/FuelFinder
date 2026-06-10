@@ -206,7 +206,7 @@ export function AuthModal({ isOpen, onOpenChange }: AuthModalProps) {
 
               <Button
                 type="submit"
-                className="w-full h-11 text-sm font-semibold bg-gradient-to-r from-primary to-primary/90 hover:from-primary/90 hover:to-primary sm:h-12 sm:text-base"
+                className="w-full h-11 text-sm font-semibold bg-primary text-primary-foreground bg-gradient-to-r from-primary to-primary/90 hover:from-primary/90 hover:to-primary sm:h-12 sm:text-base"
                 disabled={isLoading}
               >
                 {isLoading ? (

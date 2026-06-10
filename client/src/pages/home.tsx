@@ -630,16 +630,20 @@ export default function Home() {
                 <CardContent className="relative space-y-3 p-3 sm:space-y-6 sm:p-8">
                   <div className="flex items-start justify-between gap-3">
                     <div className="space-y-1">
-                      <motion.div
-                        initial={{ y: -8, opacity: 0 }}
-                        animate={{ y: 0, opacity: 1 }}
-                        transition={{ delay: 0.2, duration: 0.35 }}
+                      <div
                         className="inline-flex items-center gap-2 rounded-full border border-primary/20 bg-primary/10 px-2.5 py-1 text-[11px] font-medium text-primary sm:px-3 sm:text-xs"
                       >
-                        <Fuel className="h-3.5 w-3.5" />
-                        <span className="hidden sm:inline">Live fuel station finder</span>
+                        <span className="live-dot shrink-0" aria-hidden="true" />
+                        <span
+                          className="hidden sm:inline-block rotating-text"
+                          aria-label="Live fuel station finder"
+                        >
+                          <span>Live fuel station finder</span>
+                          <span>Cheapest prices nearby</span>
+                          <span>Real-time fuel data</span>
+                        </span>
                         <span className="sm:hidden">findmyfuel</span>
-                      </motion.div>
+                      </div>
                       <h2 className="text-lg font-bold tracking-tight sm:text-2xl">Find Cheapest Fuel Nearby</h2>
                       <p className="text-xs text-muted-foreground sm:text-sm">Compare stations, save money on every fill-up</p>
                     </div>
@@ -1004,7 +1008,7 @@ export default function Home() {
                              </Button>
                            </motion.div>
                            <motion.div whileTap={{ scale: 0.95 }} className="w-full">
-                             <Button className="w-full h-11 text-xs font-semibold bg-gradient-to-r from-primary to-primary/90 hover:from-primary/90 hover:to-primary text-primary-foreground shadow-lg shadow-primary/25 transition-all duration-300 sm:h-14 sm:text-base" asChild>
+                             <Button className="w-full h-11 text-xs font-semibold bg-primary bg-gradient-to-r from-primary to-primary/90 hover:from-primary/90 hover:to-primary text-primary-foreground shadow-lg shadow-primary/25 transition-all duration-300 sm:h-14 sm:text-base" asChild>
                                 <a href={directionsUrl(selectedStation)} target="_blank" rel="noreferrer">
                                    <Navigation className="w-4 h-4 mr-1 sm:mr-2.5" />
                                    Go

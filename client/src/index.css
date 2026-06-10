@@ -198,6 +198,58 @@ input:-webkit-autofill:focus {
   animation: float 3s ease-in-out infinite;
 }
 
+/* Live status badge: CSS-only rotating text. Does NOT depend on JS/Framer
+   Motion, so it stays visible and animated on older browsers. */
+.rotating-text {
+  position: relative;
+  width: 150px;
+  height: 1.2em;
+  overflow: hidden;
+  vertical-align: middle;
+}
+
+.rotating-text > span {
+  position: absolute;
+  inset: 0;
+  white-space: nowrap;
+  opacity: 0;
+  animation: rotateText 9s ease-in-out infinite;
+}
+
+.rotating-text > span:nth-child(2) { animation-delay: 3s; }
+.rotating-text > span:nth-child(3) { animation-delay: 6s; }
+
+@keyframes rotateText {
+  0%        { opacity: 0; transform: translateY(80%); }
+  6%, 27%   { opacity: 1; transform: translateY(0); }
+  33%, 100% { opacity: 0; transform: translateY(-80%); }
+}
+
+/* Pulsing "live" dot */
+.live-dot {
+  display: inline-block;
+  width: 7px;
+  height: 7px;
+  border-radius: 9999px;
+  background-color: hsl(142 71% 45%);
+  animation: livePulse 1.6s ease-out infinite;
+}
+
+@keyframes livePulse {
+  0%   { box-shadow: 0 0 0 0 hsla(142, 71%, 45%, 0.6); }
+  70%  { box-shadow: 0 0 0 7px hsla(142, 71%, 45%, 0); }
+  100% { box-shadow: 0 0 0 0 hsla(142, 71%, 45%, 0); }
+}
+
+/* Respect reduced-motion: show the first phrase statically */
+@media (prefers-reduced-motion: reduce) {
+  .rotating-text > span { animation: none; }
+  .rotating-text > span:nth-child(1) { opacity: 1; }
+  .rotating-text > span:nth-child(2),
+  .rotating-text > span:nth-child(3) { display: none; }
+  .live-dot { animation: none; }
+}
+
 /* Modern glass input styles */
 input[type="text"],
 input[type="number"],
