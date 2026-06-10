@@ -61,6 +61,8 @@ export interface Database {
           currency: string
           volume_unit: string
           distance_unit: string
+          origin_label: string | null
+          destination_label: string | null
           created_at: string
         }
         Insert: {
@@ -79,6 +81,8 @@ export interface Database {
           currency: string
           volume_unit: string
           distance_unit: string
+          origin_label?: string | null
+          destination_label?: string | null
           created_at?: string
         }
         Update: {
@@ -97,6 +101,8 @@ export interface Database {
           currency?: string
           volume_unit?: string
           distance_unit?: string
+          origin_label?: string | null
+          destination_label?: string | null
           created_at?: string
         }
       }
@@ -206,6 +212,8 @@ export interface TripCalculationInput {
   currency: string
   volumeUnit: string
   distanceUnit: string
+  originLabel?: string
+  destinationLabel?: string
 }
 
 export interface TripCalculationOutput {

@@ -34,6 +34,8 @@ CREATE TABLE IF NOT EXISTS public.trip_calculations (
     currency TEXT NOT NULL,
     volume_unit TEXT NOT NULL,
     distance_unit TEXT NOT NULL,
+    origin_label TEXT,
+    destination_label TEXT,
     created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
 );
 

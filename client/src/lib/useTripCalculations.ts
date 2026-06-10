@@ -64,6 +64,8 @@ export function useTripCalculations() {
         fuelRate: input.fuelRate,
         budget: input.budget,
         country: input.countryCode,
+        originLabel: input.originLabel,
+        destinationLabel: input.destinationLabel,
       },
       outputs: output,
     };
@@ -91,6 +93,8 @@ export function useTripCalculations() {
         currency: input.currency,
         volume_unit: input.volumeUnit,
         distance_unit: input.distanceUnit,
+        origin_label: input.originLabel || null,
+        destination_label: input.destinationLabel || null,
       };
       console.log("Insert payload:", payload);
 
