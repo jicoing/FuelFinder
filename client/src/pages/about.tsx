@@ -1,5 +1,48 @@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Fuel, Twitter, Zap, DollarSign, Gauge, Users } from "lucide-react";
+import { Fuel, Twitter, Zap, DollarSign, Gauge, Users, Crown, MapPin, NotebookPen } from "lucide-react";
+
+/**
+ * FuelBuddy — a friendly cartoon fuel-pump mascot rendered as inline SVG.
+ * No external assets/dependencies; colors inherit the app theme via currentColor
+ * and Tailwind classes. The gentle float is a pure-CSS keyframe animation.
+ */
+const FuelBuddy = () => (
+  <div className="flex justify-center">
+    <div className="fuelbuddy-float" aria-hidden="true">
+      <svg width="140" height="160" viewBox="0 0 140 160" fill="none" xmlns="http://www.w3.org/2000/svg" role="img">
+        <title>FindMyFuel mascot</title>
+        {/* shadow */}
+        <ellipse cx="62" cy="150" rx="40" ry="6" className="fill-foreground/10" />
+        {/* pump body */}
+        <rect x="24" y="34" width="76" height="104" rx="14" className="fill-primary/15 stroke-primary/40" strokeWidth="3" />
+        {/* screen / face */}
+        <rect x="36" y="48" width="52" height="40" rx="9" className="fill-card stroke-primary/40" strokeWidth="2.5" />
+        {/* eyes */}
+        <g className="fb-eye">
+          <circle cx="52" cy="66" r="5" className="fill-primary" />
+          <circle cx="53.5" cy="64.5" r="1.6" className="fill-card" />
+        </g>
+        <g className="fb-eye fb-eye--right">
+          <circle cx="72" cy="66" r="5" className="fill-primary" />
+          <circle cx="73.5" cy="64.5" r="1.6" className="fill-card" />
+        </g>
+        {/* smile */}
+        <path d="M50 76 Q62 84 74 76" className="stroke-primary" strokeWidth="3" strokeLinecap="round" fill="none" />
+        {/* price band */}
+        <rect x="36" y="98" width="52" height="14" rx="5" className="fill-green-500/20" />
+        <rect x="42" y="102" width="26" height="6" rx="3" className="fill-green-500/70" />
+        {/* base */}
+        <rect x="30" y="120" width="64" height="12" rx="5" className="fill-primary/25" />
+        {/* nozzle arm */}
+        <path d="M100 60 q24 0 24 24 v30" className="stroke-primary/50" strokeWidth="5" fill="none" strokeLinecap="round" />
+        {/* nozzle / hand */}
+        <rect x="114" y="112" width="20" height="14" rx="5" className="fill-primary" />
+        {/* droplet */}
+        <path d="M124 132 q-7 9 0 16 q7 -7 0 -16Z" className="fill-green-500 fb-drip" />
+      </svg>
+    </div>
+  </div>
+);
 
 const AboutPage = () => {
   return (
@@ -15,8 +58,10 @@ const AboutPage = () => {
           </div>
         </CardHeader>
         <CardContent className="p-6 md:p-8 space-y-8 relative">
-          <p className="text-foreground/80 leading-relaxed">
-            <strong className="text-foreground">FindMyFuel</strong> helps you find the cheapest fuel stations nearby, track your fuel efficiency, and save money on every fill-up. Whether you're commuting daily or planning a road trip, we provide the tools to make informed decisions about your fuel expenses across 20+ countries.
+          <FuelBuddy />
+
+          <p className="text-foreground/80 leading-relaxed text-center">
+            <strong className="text-foreground">FindMyFuel</strong> is your pocket companion for spending less at the pump. Find the cheapest fuel stations near you, see live community-reported prices, log every fill-up, and watch your mileage and monthly spending come to life in clean, colorful charts. Whether you're on the daily commute or planning a road trip, FindMyFuel helps you make smarter fuel decisions across 20+ countries.
           </p>
 
           <div className="flex justify-center md:justify-start">
@@ -95,12 +140,48 @@ const AboutPage = () => {
                 Works in India, United States, United Kingdom, UAE, Canada, Australia, Singapore, Saudi Arabia, and more. Automatic currency, distance units, and fuel type adaptation.
               </p>
             </div>
+
+            <div className="p-5 bg-secondary/30 rounded-xl border border-border/30">
+              <div className="flex items-center gap-3 mb-3">
+                <div className="p-2 bg-sky-500/10 rounded-lg">
+                  <NotebookPen className="w-5 h-5 text-sky-500" />
+                </div>
+                <h2 className="text-lg font-semibold">Fuel Logging</h2>
+              </div>
+              <p className="text-sm text-muted-foreground leading-relaxed">
+                Record every fill-up in seconds — amount, price, fuel type, and odometer reading. Your history powers your efficiency charts and gives you a clear record of where your fuel budget goes.
+              </p>
+            </div>
+
+            <div className="p-5 bg-secondary/30 rounded-xl border border-border/30">
+              <div className="flex items-center gap-3 mb-3">
+                <div className="p-2 bg-rose-500/10 rounded-lg">
+                  <MapPin className="w-5 h-5 text-rose-500" />
+                </div>
+                <h2 className="text-lg font-semibold">Saved Stations</h2>
+              </div>
+              <p className="text-sm text-muted-foreground leading-relaxed">
+                Bookmark your favorite stations for one-tap access. Keep the spots you visit most always within reach, so you never have to search twice.
+              </p>
+            </div>
+
+            <div className="p-5 bg-secondary/30 rounded-xl border border-border/30">
+              <div className="flex items-center gap-3 mb-3">
+                <div className="p-2 bg-yellow-500/10 rounded-lg">
+                  <Crown className="w-5 h-5 text-yellow-500" />
+                </div>
+                <h2 className="text-lg font-semibold">Premium</h2>
+              </div>
+              <p className="text-sm text-muted-foreground leading-relaxed">
+                Unlock unlimited saved stations, export your fuel history to CSV for tax or business reporting, and sync your data securely across all your devices.
+              </p>
+            </div>
           </div>
 
           <div className="pt-4 border-t border-border/30">
             <h2 className="text-lg font-semibold mb-3">About the Developer</h2>
             <p className="text-foreground/80 mb-4 leading-relaxed">
-              <strong className="text-foreground">FindMyFuel</strong> is built and maintained by a solo developer passionate about helping people save money on fuel. Have questions or feedback?
+              <strong className="text-foreground">FindMyFuel</strong> is built and maintained by a solo developer who got tired of overpaying at the pump and having no idea where that money went. It's crafted to be fast, privacy-focused, and genuinely useful on every drive. Have a feature idea or feedback? I'd love to hear it.
             </p>
             <a 
               href="https://twitter.com/jicoing" 

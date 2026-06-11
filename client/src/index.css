@@ -316,3 +316,50 @@ select,
 [type="reset"] {
   cursor: pointer;
 }
+
+/* FuelBuddy mascot gentle float */
+@keyframes fuelbuddy-float {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-8px); }
+}
+
+.fuelbuddy-float {
+  animation: fuelbuddy-float 3.5s ease-in-out infinite;
+}
+
+/* Blinking eyes */
+.fb-eye {
+  transform-box: fill-box;
+  transform-origin: center;
+  animation: fb-blink 4.2s ease-in-out infinite;
+}
+.fb-eye--right {
+  /* sync both eyes to blink together */
+  animation-delay: 0s;
+}
+
+@keyframes fb-blink {
+  0%, 90%, 100% { transform: scaleY(1); }
+  94%, 96% { transform: scaleY(0.12); }
+}
+
+/* Dripping fuel droplet */
+.fb-drip {
+  transform-box: fill-box;
+  transform-origin: top center;
+  animation: fb-drip 2.8s ease-in infinite;
+}
+
+@keyframes fb-drip {
+  0%, 55% { transform: translateY(0) scale(1); opacity: 1; }
+  85% { transform: translateY(16px) scale(0.7); opacity: 0; }
+  86%, 100% { transform: translateY(0) scale(1); opacity: 0; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .fuelbuddy-float,
+  .fb-eye,
+  .fb-drip {
+    animation: none;
+  }
+}
